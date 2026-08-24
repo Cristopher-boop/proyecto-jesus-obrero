@@ -3,6 +3,7 @@ import {
   LayoutDashboard,
   QrCode,
   Users,
+  UserCheck,
   FileCheck,
   Church,
   Calendar,
@@ -24,13 +25,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const { seasonInfo } = useLiturgicalTheme();
 
   const navigation = [
-    { id: 'dashboard', name: 'Panel Principal', icon: LayoutDashboard },
-    { id: 'asistencia', name: 'Asistencia QR', icon: QrCode, badge: 'En Vivo' },
-    { id: 'catecumenos', name: 'Catecúmenos', icon: Users },
-    { id: 'documentos', name: 'Validar Documentos', icon: FileCheck, badge: '3' },
-    { id: 'capillas', name: 'Capillas y Grupos', icon: Church },
-    { id: 'calendario', name: 'Calendario Litúrgico', icon: Calendar },
-    { id: 'configuracion', name: 'Configuración', icon: Settings },
+    { id: 'dashboard',    name: 'Panel Principal',      icon: LayoutDashboard },
+    { id: 'asistencia',   name: 'Asistencia QR',        icon: QrCode, badge: 'En Vivo' },
+    { id: 'catecumenos',  name: 'Catecúmenos',          icon: Users },
+    { id: 'feligreses',   name: 'Feligreses',           icon: UserCheck },
+    { id: 'documentos',   name: 'Validar Documentos',   icon: FileCheck, badge: '3' },
+    { id: 'capillas',     name: 'Capillas y Grupos',    icon: Church },
+    { id: 'calendario',   name: 'Calendario Litúrgico', icon: Calendar },
+    { id: 'configuracion',name: 'Configuración',        icon: Settings },
   ];
 
   return (

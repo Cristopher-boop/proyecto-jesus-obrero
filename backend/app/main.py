@@ -10,6 +10,8 @@ from app.core.config import settings
 
 from contextlib import asynccontextmanager
 from app.modules.auth.router import router as auth_router
+from app.modules.catecumenos.router import router as catecumenos_router
+from app.modules.feligreses.router import router as feligreses_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -48,7 +50,9 @@ def create_app() -> FastAPI:
     )
 
     # ── Registrar routers ────────────────────────────────────
-    app.include_router(auth_router, prefix="/api/v1/auth", tags=["Auth"])
+    app.include_router(auth_router,        prefix="/api/v1/auth",        tags=["Auth"])
+    app.include_router(catecumenos_router, prefix="/api/v1/catecumenos", tags=["Catecúmenos"])
+    app.include_router(feligreses_router,  prefix="/api/v1/feligreses",  tags=["Feligreses"])
 
     @app.get("/", tags=["Health"])
     async def health_check():
