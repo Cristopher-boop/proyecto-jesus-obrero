@@ -1,0 +1,46 @@
+# ============================================================
+# .gitignore — Backend FastAPI (Parroquia Jesús Obrero)
+# ============================================================
+
+# Entorno Virtual
+venv/
+.venv/
+env/
+
+# Variables de entorno (NUNCA subir al repo)
+.env
+.env.*
+!.env.example
+
+# Caché de Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+
+# Pytest y cobertura
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Archivos subidos localmente
+app/uploads/*
+!app/uploads/.gitkeep
+
+# Linting / Mypy
+.mypy_cache/
+.ruff_cache/
+
+# Editores
+.vscode/
+.idea/
+*.swp
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Build / distribución
+dist/
+build/
+*.egg-info/

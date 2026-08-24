@@ -1,0 +1,94 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* 🌿 Tiempo Ordinario (Por defecto) */
+  :root, [data-theme="ordinario"] {
+    --lit-primary: 153 44% 21%;          /* #1E4D38 */
+    --lit-primary-dark: 153 47% 15%;     /* #143828 */
+    --lit-primary-light: 150 35% 32%;    /* #356F54 */
+    --lit-surface: 144 24% 94%;          /* #EBF3EE */
+    --lit-accent: 40 48% 56%;            /* #C5A059 - Oro Eclesiástico */
+    --lit-accent-dark: 39 46% 42%;       /* #9E7D3B */
+    --lit-accent-light: 42 65% 94%;      /* #FAF4E6 */
+    --lit-border: 150 15% 85%;           /* #D5E0DA */
+    --lit-name: "Tiempo Ordinario";
+    --lit-color-name: "Verde Esperanza";
+  }
+
+  /* 🕯️ Cuaresma y Adviento (Púrpura Penitencial / Nazareno) */
+  [data-theme="cuaresma"] {
+    --lit-primary: 314 40% 21%;          /* #4A2040 */
+    --lit-primary-dark: 312 42% 14%;     /* #32142B */
+    --lit-primary-light: 315 32% 34%;    /* #733B66 */
+    --lit-surface: 317 23% 95%;          /* #F5EEF3 */
+    --lit-accent: 40 48% 56%;            /* #C5A059 - Oro */
+    --lit-accent-dark: 39 46% 42%;       /* #9E7D3B */
+    --lit-accent-light: 42 65% 94%;      /* #FAF4E6 */
+    --lit-border: 315 12% 86%;           /* #DFD5DE */
+    --lit-name: "Cuaresma y Adviento";
+    --lit-color-name: "Morado Penitencial";
+  }
+
+  /* 🍷 Pentecostés, Mártires y Pasión (Rojo Guindo / Carmesí) */
+  [data-theme="pentecostes"] {
+    --lit-primary: 354 61% 28%;          /* #721C24 */
+    --lit-primary-dark: 354 63% 20%;     /* #521218 */
+    --lit-primary-light: 353 48% 40%;    /* #983640 */
+    --lit-surface: 349 48% 95%;          /* #F9ECEE */
+    --lit-accent: 40 48% 56%;            /* #C5A059 - Oro */
+    --lit-accent-dark: 39 46% 42%;       /* #9E7D3B */
+    --lit-accent-light: 42 65% 94%;      /* #FAF4E6 */
+    --lit-border: 350 20% 86%;           /* #E8D5D8 */
+    --lit-name: "Pentecostés y Solemnidades";
+    --lit-color-name: "Rojo Carmesí";
+  }
+
+  /* 🕊️ Pascua, Navidad y Fiestas Solemnes (Oro Viejo / Blanco) */
+  [data-theme="pascua"] {
+    --lit-primary: 39 46% 39%;           /* #916B1E */
+    --lit-primary-dark: 39 52% 28%;      /* #6C4E12 */
+    --lit-primary-light: 40 42% 52%;     /* #B58D38 */
+    --lit-surface: 44 64% 96%;           /* #FDF8EE */
+    --lit-accent: 43 74% 49%;            /* #D4AF37 - Oro Vivo */
+    --lit-accent-dark: 40 68% 38%;       /* #A6811B */
+    --lit-accent-light: 44 80% 95%;      /* #FBF5E6 */
+    --lit-border: 40 25% 88%;            /* #E8E0D0 */
+    --lit-name: "Pascua y Navidad";
+    --lit-color-name: "Blanco y Dorado";
+  }
+
+  /* 🏛️ Semántica Base y Alertas Estables (No cambian con el tiempo litúrgico) */
+  :root {
+    --bg-app: 40 20% 98%;                /* #FAF9F6 - Blanco Marfil Cálido */
+    --bg-card: 0 0% 100%;                /* #FFFFFF */
+    --text-main: 24 10% 10%;             /* #1C1917 - Stone 900 */
+    --text-muted: 25 5% 45%;             /* #78716C - Stone 500 */
+    --border-subtle: 20 6% 90%;          /* #E7E5E4 - Stone 200 */
+
+    /* Alertas Funcionales */
+    --alert-success-bg: 142 60% 95%;
+    --alert-success-border: 142 40% 75%;
+    --alert-success-text: 150 65% 25%;
+
+    --alert-warning-bg: 40 85% 95%;
+    --alert-warning-border: 40 60% 75%;
+    --alert-warning-text: 38 75% 28%;
+
+    --alert-error-bg: 0 70% 96%;
+    --alert-error-border: 0 60% 82%;
+    --alert-error-text: 0 65% 35%;
+
+    --alert-info-bg: 215 60% 96%;
+    --alert-info-border: 215 50% 82%;
+    --alert-info-text: 215 65% 30%;
+  }
+
+  body {
+    background-color: hsl(var(--bg-app));
+    color: hsl(var(--text-main));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+}

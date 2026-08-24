@@ -1,0 +1,37 @@
+# ============================================================
+# requirements.txt — Backend Parroquia Jesús Obrero
+# ============================================================
+
+# --- Framework principal ---
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+
+# --- Base de datos ---
+sqlalchemy[asyncio]==2.0.36       # ORM async
+asyncpg==0.30.0                   # Driver PostgreSQL async
+alembic==1.14.0                   # Migraciones de BD
+
+# --- Validación y settings ---
+pydantic==2.10.2
+pydantic-settings==2.6.1          # Lectura del .env
+email-validator==2.2.0            # Validación de emails en Pydantic
+
+# --- Seguridad / Autenticación ---
+python-jose[cryptography]==3.3.0  # JWT (encode/decode)
+passlib[bcrypt]==1.7.4            # Hashing de contraseñas
+
+# --- Generación de QR ---
+qrcode[pil]==8.0                  # Generación del QR del catecúmeno
+
+# --- Manejo de archivos ---
+python-multipart==0.0.17          # Soporte para upload de archivos en FastAPI
+Pillow==11.0.0                    # Procesamiento de imágenes (thumbnails, QR)
+
+# --- Utilidades ---
+python-dateutil==2.9.0.post0      # Manejo de fechas
+pytz==2024.2                      # Zonas horarias
+
+# --- Testing ---
+pytest==8.3.4
+pytest-asyncio==0.24.0
+httpx==0.28.0                     # Cliente HTTP async para tests con FastAPI

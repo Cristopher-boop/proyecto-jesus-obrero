@@ -1,0 +1,3 @@
+# Carpeta reservada para archivos subidos por tutores (documentos, imágenes, etc.)
+# Este archivo .gitkeep asegura que la carpeta sea rastreada por git
+# pero su contenido (uploads reales) está en .gitignore
