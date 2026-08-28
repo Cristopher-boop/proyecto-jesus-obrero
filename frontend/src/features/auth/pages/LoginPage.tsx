@@ -6,6 +6,7 @@ import { Church, Lock, User, Sparkles, ArrowRight, ShieldCheck, Flame } from 'lu
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Alert from '@/components/ui/Alert';
+import { CrearFeligresModal } from '@/features/feligreses/components/CrearFeligresModal';
 
 const ACTIVE_BG_IMAGE: string | null = '/fondo_login_5.webp';
 
@@ -17,6 +18,7 @@ export const LoginPage: React.FC = () => {
   const [password, setPassword] = useState('admin');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [registroOpen, setRegistroOpen] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -211,6 +213,18 @@ export const LoginPage: React.FC = () => {
             </Button>
           </form>
 
+          {/* Opción de Auto-Registro de Feligrés / Padre de Familia */}
+          <div className="pt-2 border-t border-app-border flex flex-col items-center gap-2">
+            <p className="text-xs text-app-muted">¿Eres padre de familia o tutor?</p>
+            <button
+              type="button"
+              onClick={() => setRegistroOpen(true)}
+              className="text-xs font-bold text-lit-primary hover:underline flex items-center gap-1 transition-all"
+            >
+              ✨ Crear mi cuenta de Feligrés (Padre/Tutor)
+            </button>
+          </div>
+
           {/* Indicador de credenciales de prueba para el Superadmin */}
           <div className="p-3.5 rounded-xl bg-lit-surface border border-lit-border/80 text-center space-y-1">
             <p className="text-[11px] font-bold text-lit-primary">
@@ -220,6 +234,12 @@ export const LoginPage: React.FC = () => {
               Usuario: <code className="font-mono font-bold text-lit-primary">admin</code> · Contraseña: <code className="font-mono font-bold text-lit-primary">admin</code>
             </p>
           </div>
+
+          <CrearFeligresModal
+            isOpen={registroOpen}
+            onClose={() => setRegistroOpen(false)}
+            onSuccess={() => setRegistroOpen(false)}
+          />
 
           {/* Pie de página institucional */}
           <div className="text-center pt-2 border-t border-app-border/70">

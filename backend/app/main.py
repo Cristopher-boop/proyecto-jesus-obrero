@@ -10,6 +10,9 @@ from app.core.config import settings
 
 from contextlib import asynccontextmanager
 from app.modules.auth.router import router as auth_router
+from app.modules.catecumenos.router import router as catecumenos_router
+from app.modules.feligreses.router import router as feligreses_router
+from app.modules.asistencias.router import router as asistencias_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -21,6 +24,17 @@ async def lifespan(app: FastAPI):
     # Crear tablas si no existen
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        
+        # Migraciones seguras para columnas añadidas a tablas existentes
+        from sqlalchemy import text
+        migrations = [
+            'ALTER TABLE inscripciones ADD COLUMN IF NOT EXISTS doc_fe_bautismo BOOLEAN NOT NULL DEFAULT FALSE;',
+            'ALTER TABLE inscripciones ADD COLUMN IF NOT EXISTS doc_cert_nacimiento BOOLEAN NOT NULL DEFAULT FALSE;',
+            'ALTER TABLE inscripciones ADD COLUMN IF NOT EXISTS doc_ci_nino BOOLEAN NOT NULL DEFAULT FALSE;',
+            'ALTER TABLE inscripciones ADD COLUMN IF NOT EXISTS doc_ci_tutor BOOLEAN NOT NULL DEFAULT FALSE;'
+        ]
+        for stmt in migrations:
+            await conn.execute(text(stmt))
         
     # Inicializar datos iniciales (roles y superadmin)
     async with AsyncSessionLocal() as db:
@@ -48,7 +62,10 @@ def create_app() -> FastAPI:
     )
 
     # ── Registrar routers ────────────────────────────────────
-    app.include_router(auth_router, prefix="/api/v1/auth", tags=["Auth"])
+    app.include_router(auth_router,        prefix="/api/v1/auth",        tags=["Auth"])
+    app.include_router(catecumenos_router, prefix="/api/v1/catecumenos", tags=["Catecúmenos"])
+    app.include_router(feligreses_router,  prefix="/api/v1/feligreses",  tags=["Feligreses"])
+    app.include_router(asistencias_router, prefix="/api/v1/asistencias", tags=["Asistencias"])
 
     @app.get("/", tags=["Health"])
     async def health_check():

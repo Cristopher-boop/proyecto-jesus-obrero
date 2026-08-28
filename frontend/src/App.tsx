@@ -3,10 +3,15 @@ import { AuthProvider, useAuth } from './core/context/AuthContext';
 import { LiturgicalThemeProvider } from './core/context/ThemeContext';
 import LoginPage from './features/auth/pages/LoginPage';
 import AdminLayout from './layouts/AdminLayout';
-import DashboardPage from './features/dashboard/pages/DashboardPage';
+import DashboardPage     from './features/dashboard/pages/DashboardPage';
+import CatecumenosPage   from './features/catecumenos/pages/CatecumenosPage';
+import FeligresesPage    from './features/feligreses/pages/FeligresesPage';
+import FeligresPortalPage from './features/feligreses/pages/FeligresPortalPage';
+import AsistenciaPage     from './features/asistencia/pages/AsistenciaPage';
+import CalendarioPage     from './features/calendario/pages/CalendarioPage';
 
 function MainContent() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
 
   if (isLoading) {
@@ -20,21 +25,27 @@ function MainContent() {
     );
   }
 
-  // De momento podemos alternar o ver el Dashboard
   if (!isAuthenticated) {
     return <LoginPage />;
   }
 
+  // Si el usuario tiene rol TUTOR (feligrés), mostrar su portal exclusivo de padre de familia
+  if (user?.rol === 'TUTOR') {
+    return <FeligresPortalPage />;
+  }
+
   return (
     <AdminLayout activeTab={activeTab} onTabChange={setActiveTab}>
-      {activeTab === 'dashboard' && <DashboardPage />}
-      {activeTab !== 'dashboard' && (
+      {activeTab === 'dashboard'   && <DashboardPage />}
+      {activeTab === 'asistencia'  && <AsistenciaPage />}
+      {activeTab === 'catecumenos' && <CatecumenosPage />}
+      {activeTab === 'feligreses'  && <FeligresesPage />}
+      {activeTab === 'calendario'  && <CalendarioPage />}
+      {!['dashboard', 'asistencia', 'catecumenos', 'feligreses', 'calendario'].includes(activeTab) && (
         <div className="bg-white p-12 rounded-2xl border border-app-border text-center shadow-xs">
           <span className="text-4xl">🚧</span>
           <h3 className="text-lg font-bold text-app-text mt-3">Módulo en Desarrollo</h3>
-          <p className="text-xs text-app-muted mt-1">
-            Esta sección ({activeTab}) se conectará en los siguientes pasos con la base de datos.
-          </p>
+          <p className="text-xs text-app-muted mt-1">Esta sección se conectará en los próximos pasos.</p>
         </div>
       )}
     </AdminLayout>
