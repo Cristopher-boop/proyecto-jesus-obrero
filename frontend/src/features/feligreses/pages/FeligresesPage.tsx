@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import {
-  UserCheck, Search, RefreshCw, UserPlus, X, Phone, Baby, QrCode,
+  UserCheck, Search, RefreshCw, UserPlus, X, Phone, Baby,
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
@@ -83,7 +83,7 @@ export const FeligresesPage: React.FC = () => {
             <table className="w-full min-w-[600px]">
               <thead className="bg-stone-50 border-b border-app-border">
                 <tr>
-                  {['Feligrés', 'CI / Teléfono', 'Usuario', 'Hijos vinculados', 'Registro', ''].map(h => (
+                  {['Feligrés', 'CI / Teléfono', 'Usuario', 'Hijos vinculados', 'Registro'].map(h => (
                     <th key={h} className="px-4 py-3 text-left text-[10px] font-bold text-app-muted uppercase tracking-wider">{h}</th>
                   ))}
                 </tr>
@@ -117,12 +117,6 @@ export const FeligresesPage: React.FC = () => {
                           {new Date(item.created_at).toLocaleDateString('es-BO', { day: '2-digit', month: 'short', year: 'numeric' })}
                         </p>
                       </td>
-                      <td className="px-4 py-3">
-                        <button onClick={e => { e.stopPropagation(); setSelectedId(isSelected ? null : item.persona_id); }}
-                          className={`p-1.5 rounded-lg transition-all ${isSelected ? 'bg-lit-primary text-white' : 'bg-lit-surface text-lit-primary hover:bg-lit-border'}`}>
-                          <QrCode className="w-4 h-4" />
-                        </button>
-                      </td>
                     </tr>
                   );
                 })}
@@ -134,7 +128,7 @@ export const FeligresesPage: React.FC = () => {
 
       {/* ── Panel Lateral de Detalle ─────────────────────────────── */}
       {selectedId && (
-        <div className="w-80 flex-shrink-0 flex flex-col gap-4">
+        <div className="w-80 flex-shrink-0 flex flex-col gap-4 animate-slide-in-right">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-bold text-app-text flex items-center gap-2"><UserCheck className="w-4 h-4 text-lit-primary" /> Detalle</h3>
             <button onClick={() => setSelectedId(null)} className="w-7 h-7 rounded-lg hover:bg-stone-100 flex items-center justify-center text-app-muted"><X className="w-3.5 h-3.5" /></button>
@@ -171,7 +165,6 @@ export const FeligresesPage: React.FC = () => {
                       </Badge>
                       <span className="text-[10px] text-app-muted">{SACRAMENTO_LABEL[h.tipo_sacramento]}</span>
                     </div>
-                    <p className="text-[10px] font-mono text-app-muted">QR: {h.token_qr.slice(0, 12)}…</p>
                   </div>
                 ))}
               </div>

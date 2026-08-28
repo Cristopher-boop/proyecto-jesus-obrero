@@ -51,6 +51,10 @@ class InscripcionResponse(BaseModel):
     estado:               EstadoInscripcion
     libro_comprado:       bool
     cuadernillo_comprado: bool
+    doc_fe_bautismo:      bool = False
+    doc_cert_nacimiento:  bool = False
+    doc_ci_nino:          bool = False
+    doc_ci_tutor:         bool = False
     token_qr:             str
     fecha_inscripcion:    date
     observaciones:        Optional[str] = None
@@ -104,6 +108,10 @@ class CatecumenoUpdate(BaseModel):
     # Inscripción
     libro_comprado:       Optional[bool] = None
     cuadernillo_comprado: Optional[bool] = None
+    doc_fe_bautismo:      Optional[bool] = None
+    doc_cert_nacimiento:  Optional[bool] = None
+    doc_ci_nino:          Optional[bool] = None
+    doc_ci_tutor:         Optional[bool] = None
     estado:               Optional[EstadoInscripcion] = None
     observaciones:        Optional[str] = None
 

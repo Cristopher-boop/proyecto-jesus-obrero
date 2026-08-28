@@ -268,7 +268,9 @@ async def update_catecumeno(db: AsyncSession, persona_id: int, data: CatecumenoU
 
     if persona.inscripciones:
         insc = persona.inscripciones[0]
-        for campo in ['libro_comprado', 'cuadernillo_comprado', 'estado', 'observaciones']:
+        for campo in ['libro_comprado', 'cuadernillo_comprado', 'doc_fe_bautismo',
+                      'doc_cert_nacimiento', 'doc_ci_nino', 'doc_ci_tutor',
+                      'estado', 'observaciones']:
             val = getattr(data, campo, None)
             if val is not None:
                 setattr(insc, campo, val)

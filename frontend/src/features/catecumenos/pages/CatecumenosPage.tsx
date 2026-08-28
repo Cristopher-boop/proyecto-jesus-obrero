@@ -211,7 +211,7 @@ export const CatecumenosPage: React.FC = () => {
 
       {/* ── Panel Lateral ────────────────────────────────────────────── */}
       {selectedId && (
-        <div className="w-80 flex-shrink-0 flex flex-col gap-3">
+        <div className="w-80 flex-shrink-0 flex flex-col gap-3 animate-slide-in-right">
           {/* Pestañas del panel */}
           <div className="flex items-center justify-between">
             <div className="flex items-center bg-stone-100 p-0.5 rounded-lg gap-0.5">

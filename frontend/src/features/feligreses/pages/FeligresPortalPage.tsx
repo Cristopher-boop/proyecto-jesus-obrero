@@ -11,7 +11,7 @@ import { useLiturgicalTheme } from '@/core/context/ThemeContext';
 import apiClient from '@/core/api/client';
 import {
   LogOut, Baby, QrCode,
-  ShieldCheck, Phone, User, CheckCircle2,
+  ShieldCheck, Phone, User, CheckCircle2, FileText, AlertCircle,
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
@@ -189,10 +189,47 @@ export const FeligresPortalPage: React.FC = () => {
                         </Badge>
                       </div>
 
+                      {/* Panel Provisional de Estado Documental y Requisitos */}
+                      <div className="p-3.5 rounded-xl bg-stone-50 border border-app-border space-y-2">
+                        <p className="text-[11px] font-bold text-lit-primary uppercase tracking-wide flex items-center gap-1.5">
+                          <FileText className="w-3.5 h-3.5" /> Requisitos y Estado Documental (Provisional)
+                        </p>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
+                          <div className="flex items-center gap-1.5 p-2 rounded-lg bg-white border border-app-border">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-semantic-success flex-shrink-0" />
+                            <div>
+                              <p className="font-semibold text-app-text">Fe de Bautismo</p>
+                              <p className="text-[9px] text-semantic-success font-bold">Presentado ✓</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1.5 p-2 rounded-lg bg-white border border-app-border">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-semantic-success flex-shrink-0" />
+                            <div>
+                              <p className="font-semibold text-app-text">Cert. Nacimiento</p>
+                              <p className="text-[9px] text-semantic-success font-bold">Presentado ✓</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1.5 p-2 rounded-lg bg-white border border-app-border">
+                            <AlertCircle className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
+                            <div>
+                              <p className="font-semibold text-app-text">Fotocopia CI Niño</p>
+                              <p className="text-[9px] text-amber-600 font-bold">Pendiente ⚠️</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1.5 p-2 rounded-lg bg-white border border-app-border">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-semantic-success flex-shrink-0" />
+                            <div>
+                              <p className="font-semibold text-app-text">Fotocopia CI Tutor</p>
+                              <p className="text-[9px] text-semantic-success font-bold">Presentado ✓</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
                       <div className="flex items-center justify-between pt-3 border-t border-app-border text-xs flex-wrap gap-2">
                         <div className="flex items-center gap-3">
                           <span className="flex items-center gap-1 text-lit-primary font-medium">
-                            <QrCode className="w-3.5 h-3.5" /> Pase QR listo
+                            <QrCode className="w-3.5 h-3.5" /> Gafete QR de Asistencia del Niño
                           </span>
                         </div>
                         <Button
@@ -201,7 +238,7 @@ export const FeligresPortalPage: React.FC = () => {
                           leftIcon={<QrCode className="w-3.5 h-3.5" />}
                           onClick={() => handleSelectHijo(hijo.persona_id)}
                         >
-                          Ver / Imprimir Gafete QR
+                          Ver Gafete QR
                         </Button>
                       </div>
                     </Card>

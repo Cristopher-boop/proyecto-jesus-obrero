@@ -9,6 +9,7 @@ export type Parentesco        = 'PAPA' | 'MAMA' | 'TUTOR_LEGAL' | 'OTRO';
 export type Genero            = 'MASCULINO' | 'FEMENINO' | 'OTRO';
 export type TipoSacramento    = 'PRIMERA_COMUNION' | 'CONFIRMACION';
 export type EstadoInscripcion = 'ACTIVO' | 'BAJA' | 'GRADUADO';
+export type EstadoAsistencia  = 'PRESENTE' | 'ATRASO' | 'JUSTIFICADO' | 'FALTA';
 
 // ─── Persona / Usuario ────────────────────────────────────────────────────────
 
@@ -161,3 +162,36 @@ export interface FeligresBusquedaItem {
   telefono?:       string;
   ci_dni:          string;
 }
+
+// ─── Asistencias ──────────────────────────────────────────────────────────────
+
+export interface AsistenciaScanResponse {
+  asistencia_id:   number;
+  persona_id:      number;
+  nombre_completo: string;
+  tipo_sacramento: TipoSacramento;
+  fecha:           string;
+  hora:            string;
+  estado:          EstadoAsistencia;
+  mensaje:         string;
+  ya_registrado:   boolean;
+}
+
+export interface AsistenciaListItem {
+  id:              number;
+  persona_id:      number;
+  nombre_completo: string;
+  tipo_sacramento: TipoSacramento;
+  fecha:           string;
+  hora:            string;
+  estado:          EstadoAsistencia;
+  token_qr:        string;
+  observacion?:    string;
+}
+
+export interface AsistenciaListResponse {
+  total: number;
+  fecha: string;
+  items: AsistenciaListItem[];
+}
+

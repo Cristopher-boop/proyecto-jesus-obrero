@@ -173,6 +173,12 @@ class Inscripcion(Base):
     libro_comprado      = Column(Boolean, default=False, nullable=False)
     cuadernillo_comprado = Column(Boolean, default=False, nullable=False)
 
+    # Estado documental (verificación de requisitos)
+    doc_fe_bautismo      = Column(Boolean, default=False, nullable=False)
+    doc_cert_nacimiento  = Column(Boolean, default=False, nullable=False)
+    doc_ci_nino          = Column(Boolean, default=False, nullable=False)
+    doc_ci_tutor         = Column(Boolean, default=False, nullable=False)
+
     # QR único por catecúmeno (UUID4)
     token_qr            = Column(String(36), unique=True, nullable=False, default=lambda: str(uuid.uuid4()))
 

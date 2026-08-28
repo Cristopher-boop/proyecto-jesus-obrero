@@ -316,8 +316,8 @@ export const QRGafete: React.FC<QRGafeteProps> = ({ catecumeno }) => {
           <div>
             <div style={{ height: '1.5px', background: 'linear-gradient(to right, #C5A059, #E8D5A3, #C5A059)', borderRadius: '1px', marginBottom: '4px' }} />
             <div className="flex items-center justify-between">
-              <p className="font-mono text-gray-300" style={{ fontSize: '5px' }}>
-                {inscripcion.token_qr.toUpperCase().slice(0, 16)}…
+              <p className="font-sans text-gray-400 font-semibold" style={{ fontSize: '6px' }}>
+                Gafete Oficial de Asistencia
               </p>
               <p className="font-sans text-gray-400" style={{ fontSize: '6px' }}>
                 {seasonInfo.icon} {new Date(inscripcion.fecha_inscripcion + 'T12:00:00').getFullYear()}
