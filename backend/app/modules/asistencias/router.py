@@ -29,7 +29,9 @@ async def escanear_qr(
         db,
         token_qr=payload.token_qr,
         estado=payload.estado,
-        observacion=payload.observacion
+        observacion=payload.observacion,
+        capilla_id=payload.capilla_id,
+        hora_simulada=payload.hora_simulada
     )
 
 

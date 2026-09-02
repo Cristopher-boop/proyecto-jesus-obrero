@@ -25,9 +25,15 @@ export const AsistenciaPage: React.FC = () => {
 
   const [lastScanResult, setLastScanResult] = useState<AsistenciaScanResponse | null>(null);
 
-  const handleScan = async (token: string, estado?: string, observacion?: string) => {
+  const handleScan = async (
+    token: string,
+    estado?: string,
+    observacion?: string,
+    capilla_id?: number,
+    hora_simulada?: string
+  ) => {
     clearError();
-    const result = await escanear(token, estado, observacion);
+    const result = await escanear(token, estado, observacion, capilla_id, hora_simulada);
     if (result) {
       setLastScanResult(result);
       refetch(); // Actualizar la lista en tiempo real

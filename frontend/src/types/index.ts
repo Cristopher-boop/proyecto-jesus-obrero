@@ -39,15 +39,26 @@ export interface Usuario {
 // ─── Catecúmenos ──────────────────────────────────────────────────────────────
 
 export interface Inscripcion {
-  id:                   number;
-  tipo_sacramento:      TipoSacramento;
-  estado:               EstadoInscripcion;
-  libro_comprado:       boolean;
-  cuadernillo_comprado: boolean;
-  token_qr:             string;
-  fecha_inscripcion:    string;
-  observaciones?:       string;
-  created_at:           string;
+  id:                          number;
+  tipo_sacramento:             TipoSacramento;
+  estado:                      EstadoInscripcion;
+  // Requisitos de Ingreso
+  cuadernillo_comprado:        boolean;
+  libro_comprado:              boolean;
+  pago_cuota_inicial:          boolean;
+  // Requisitos de Salida (Fotocopias requeridas para el sacramento)
+  doc_formulario_inscripcion:  boolean;
+  doc_fe_bautismo:             boolean;
+  doc_cert_nacimiento:         boolean;
+  doc_cert_matrimonio_padres:  boolean;
+  doc_ci_nino:                 boolean;
+  doc_ci_padre:                boolean;
+  doc_ci_madre:                boolean;
+  doc_ci_tutor:                boolean;
+  token_qr:                    string;
+  fecha_inscripcion:           string;
+  observaciones?:              string;
+  created_at:                  string;
 }
 
 export interface Tutor {
@@ -61,22 +72,31 @@ export interface Tutor {
 }
 
 export interface CatecumenoListItem {
-  persona_id:           number;
-  nombres:              string;
-  primer_apellido:      string;
-  segundo_apellido?:    string;
-  genero?:              Genero;
-  fecha_nacimiento?:    string;
-  es_bautizado:         boolean;
-  inscripcion_id:       number;
-  tipo_sacramento:      TipoSacramento;
-  estado:               EstadoInscripcion;
-  token_qr:             string;
-  libro_comprado:       boolean;
-  cuadernillo_comprado: boolean;
-  fecha_inscripcion:    string;
-  tutor_nombre?:        string;
-  tutor_telefono?:      string;
+  persona_id:                  number;
+  nombres:                     string;
+  primer_apellido:             string;
+  segundo_apellido?:           string;
+  genero?:                     Genero;
+  fecha_nacimiento?:           string;
+  es_bautizado:                boolean;
+  inscripcion_id:              number;
+  tipo_sacramento:             TipoSacramento;
+  estado:                      EstadoInscripcion;
+  token_qr:                    string;
+  cuadernillo_comprado:        boolean;
+  libro_comprado:              boolean;
+  pago_cuota_inicial:          boolean;
+  doc_formulario_inscripcion:  boolean;
+  doc_fe_bautismo:             boolean;
+  doc_cert_nacimiento:         boolean;
+  doc_cert_matrimonio_padres:  boolean;
+  doc_ci_nino:                 boolean;
+  doc_ci_padre:                boolean;
+  doc_ci_madre:                boolean;
+  doc_ci_tutor:                boolean;
+  fecha_inscripcion:           string;
+  tutor_nombre?:               string;
+  tutor_telefono?:             string;
 }
 
 export interface CatecumenoDetalle {
@@ -194,4 +214,95 @@ export interface AsistenciaListResponse {
   fecha: string;
   items: AsistenciaListItem[];
 }
+
+// ─── Capillas y Horarios de Asistencia ───────────────────────────────────────
+
+export type DiaSemana = 'LUNES' | 'MARTES' | 'MIERCOLES' | 'JUEVES' | 'VIERNES' | 'SABADO' | 'DOMINGO';
+
+export interface HorarioAsistencia {
+  id:                     number;
+  capilla_id:             number;
+  dia_semana:             DiaSemana;
+  hora_inicio_puntual:    string;
+  hora_fin_puntual:       string;
+  hora_inicio_misa:       string;
+  hora_fin_misa:          string;
+  hora_inicio_catequesis: string;
+  hora_fin_catequesis:    string;
+  descripcion_misa?:      string;
+  descripcion_catequesis?: string;
+  activo:                 boolean;
+}
+
+export interface HorarioAsistenciaCreate {
+  dia_semana:             DiaSemana;
+  hora_inicio_puntual:    string;
+  hora_fin_puntual:       string;
+  hora_inicio_misa:       string;
+  hora_fin_misa:          string;
+  hora_inicio_catequesis: string;
+  hora_fin_catequesis:    string;
+  descripcion_misa?:      string;
+  descripcion_catequesis?: string;
+  activo?:                boolean;
+}
+
+export interface HorarioAsistenciaUpdate {
+  dia_semana?:             DiaSemana;
+  hora_inicio_puntual?:    string;
+  hora_fin_puntual?:       string;
+  hora_inicio_misa?:       string;
+  hora_fin_misa?:          string;
+  hora_inicio_catequesis?: string;
+  hora_fin_catequesis?:    string;
+  descripcion_misa?:      string;
+  descripcion_catequesis?: string;
+  activo?:                boolean;
+}
+
+export interface CapillaCreate {
+  nombre:            string;
+  codigo:            string;
+  direccion?:        string;
+  es_sede_principal?: boolean;
+  descripcion?:      string;
+  activo?:           boolean;
+}
+
+export interface CapillaUpdate {
+  nombre?:            string;
+  codigo?:            string;
+  direccion?:         string;
+  es_sede_principal?: boolean;
+  descripcion?:       string;
+  activo?:            boolean;
+}
+
+export interface CapillaListItem {
+  id:                number;
+  nombre:            string;
+  codigo:            string;
+  direccion?:        string;
+  es_sede_principal: boolean;
+  activo:            boolean;
+  descripcion?:      string;
+  total_horarios:    number;
+  horarios:          HorarioAsistencia[];
+}
+
+export interface CapillaListResponse {
+  total: number;
+  items: CapillaListItem[];
+}
+
+export interface FaseHorarioActual {
+  fase:        'PUNTUAL' | 'MISA' | 'CATEQUESIS' | 'CERRADO';
+  estado:      EstadoAsistencia;
+  mensaje:     string;
+  hora_actual: string;
+  dia_actual:  string;
+  horario?:    HorarioAsistencia;
+}
+
+
 

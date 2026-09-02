@@ -1,7 +1,7 @@
 /**
- * InscripcionModal v2 — Multi-tutor + búsqueda de feligrés existente.
+ * InscripcionModal v2 — Multi-tutor + búsqueda de feligrés existente + requisitos de ingreso/salida.
  * 
- * Paso 1: Datos del niño/niña
+ * Paso 1: Datos del niño/niña y requisitos de ingreso
  * Paso 2: Tutores (0-3, cada uno puede ser nuevo o feligrés existente)
  * Paso 3: Resumen y confirmación
  */
@@ -34,15 +34,37 @@ interface TutorEntry {
 }
 
 interface FormNino {
-  ci_dni: string; nombres: string; primer_apellido: string; segundo_apellido: string;
-  fecha_nacimiento: string; genero: string; direccion: string;
-  es_bautizado: boolean; libro_comprado: boolean; cuadernillo_comprado: boolean;
-  observaciones: string;
+  ci_dni:                     string;
+  nombres:                    string;
+  primer_apellido:            string;
+  segundo_apellido:           string;
+  fecha_nacimiento:           string;
+  genero:                     string;
+  direccion:                  string;
+  es_bautizado:               boolean;
+  // Requisitos de Ingreso
+  cuadernillo_comprado:       boolean;
+  libro_comprado:             boolean;
+  pago_cuota_inicial:         boolean;
+  // Documentos de Salida (Fotocopias)
+  doc_formulario_inscripcion: boolean;
+  doc_fe_bautismo:            boolean;
+  doc_cert_nacimiento:        boolean;
+  doc_cert_matrimonio_padres: boolean;
+  doc_ci_nino:                boolean;
+  doc_ci_padre:               boolean;
+  doc_ci_madre:               boolean;
+  doc_ci_tutor:               boolean;
+  observaciones:              string;
 }
 
 const INIT_NINO: FormNino = {
   ci_dni: '', nombres: '', primer_apellido: '', segundo_apellido: '', fecha_nacimiento: '',
-  genero: '', direccion: '', es_bautizado: false, libro_comprado: false, cuadernillo_comprado: false,
+  genero: '', direccion: '', es_bautizado: false,
+  cuadernillo_comprado: false, libro_comprado: false, pago_cuota_inicial: false,
+  doc_formulario_inscripcion: false, doc_fe_bautismo: false, doc_cert_nacimiento: false,
+  doc_cert_matrimonio_padres: false, doc_ci_nino: false, doc_ci_padre: false,
+  doc_ci_madre: false, doc_ci_tutor: false,
   observaciones: '',
 };
 
@@ -135,18 +157,29 @@ export const InscripcionModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }
 
   const handleSubmit = async () => {
     const payload: CreateCatecumenoPayload = {
-      ci_dni:           nino.ci_dni     || undefined,
-      nombres:          nino.nombres,
-      primer_apellido:  nino.primer_apellido,
-      segundo_apellido: nino.segundo_apellido || undefined,
-      fecha_nacimiento: nino.fecha_nacimiento || undefined,
-      genero:           nino.genero || undefined,
-      direccion:        nino.direccion || undefined,
-      es_bautizado:     nino.es_bautizado,
-      tipo_sacramento:  'PRIMERA_COMUNION',
-      libro_comprado:       nino.libro_comprado,
-      cuadernillo_comprado: nino.cuadernillo_comprado,
-      observaciones:    nino.observaciones || undefined,
+      ci_dni:                     nino.ci_dni     || undefined,
+      nombres:                    nino.nombres,
+      primer_apellido:            nino.primer_apellido,
+      segundo_apellido:           nino.segundo_apellido || undefined,
+      fecha_nacimiento:           nino.fecha_nacimiento || undefined,
+      genero:                     nino.genero || undefined,
+      direccion:                  nino.direccion || undefined,
+      es_bautizado:               nino.es_bautizado,
+      tipo_sacramento:            'PRIMERA_COMUNION',
+      // Requisitos de Ingreso
+      cuadernillo_comprado:       nino.cuadernillo_comprado,
+      libro_comprado:             nino.libro_comprado,
+      pago_cuota_inicial:         nino.pago_cuota_inicial,
+      // Documentos de Salida (Fotocopias)
+      doc_formulario_inscripcion: nino.doc_formulario_inscripcion,
+      doc_fe_bautismo:            nino.doc_fe_bautismo,
+      doc_cert_nacimiento:        nino.doc_cert_nacimiento,
+      doc_cert_matrimonio_padres: nino.doc_cert_matrimonio_padres,
+      doc_ci_nino:                nino.doc_ci_nino,
+      doc_ci_padre:               nino.doc_ci_padre,
+      doc_ci_madre:               nino.doc_ci_madre,
+      doc_ci_tutor:               nino.doc_ci_tutor,
+      observaciones:              nino.observaciones || undefined,
       tutores_nuevos: tutores.filter(t => t.tipo === 'nuevo').map(t => ({
         nombres:              t.datos!.nombres!,
         primer_apellido:      t.datos!.primer_apellido!,
@@ -244,19 +277,41 @@ export const InscripcionModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }
                 </div>
               </div>
               <Input label="Dirección" value={nino.direccion} onChange={e => nF('direccion', e.target.value)} placeholder="Ej: Zona Rosas Pampa, Calle X N° 123" />
-              <div className="p-3 rounded-xl bg-lit-surface border border-lit-border space-y-2">
-                <p className="text-[11px] font-bold text-lit-primary uppercase tracking-wide">Estado sacramental y materiales</p>
-                {([
-                  { key: 'es_bautizado',        label: '¿Está bautizado/a?' },
-                  { key: 'libro_comprado',       label: 'Libro de catequesis comprado' },
-                  { key: 'cuadernillo_comprado', label: 'Cuadernillo de asistencia comprado' },
-                ] as Array<{ key: keyof FormNino; label: string }>).map(({ key, label }) => (
-                  <label key={key} className="flex items-center gap-2.5 cursor-pointer group">
-                    <input type="checkbox" checked={nino[key] as boolean} onChange={e => nF(key, e.target.checked)} className="w-4 h-4 rounded accent-lit-primary" />
-                    <span className="text-xs text-app-text group-hover:text-lit-primary transition-colors">{label}</span>
+
+              {/* Requisitos de Ingreso (Entrada) */}
+              <div className="p-3.5 rounded-xl bg-lit-surface border border-lit-border space-y-2.5">
+                <p className="text-[11px] font-bold text-lit-primary uppercase tracking-wide flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5" /> Requisitos de Ingreso (Entrada)
+                </p>
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2.5 cursor-pointer group">
+                    <input type="checkbox" checked={nino.cuadernillo_comprado} onChange={e => nF('cuadernillo_comprado', e.target.checked)} className="w-4 h-4 rounded accent-lit-primary" />
+                    <span className="text-xs text-app-text font-medium group-hover:text-lit-primary transition-colors">Cuadernillo de asistencia comprado</span>
                   </label>
-                ))}
+                  <label className="flex items-center gap-2.5 cursor-pointer group">
+                    <input type="checkbox" checked={nino.libro_comprado} onChange={e => nF('libro_comprado', e.target.checked)} className="w-4 h-4 rounded accent-lit-primary" />
+                    <span className="text-xs text-app-text font-medium group-hover:text-lit-primary transition-colors">Libro oficial de catequesis comprado</span>
+                  </label>
+                  <label className="flex items-center gap-2.5 cursor-pointer group">
+                    <input type="checkbox" checked={nino.pago_cuota_inicial} onChange={e => nF('pago_cuota_inicial', e.target.checked)} className="w-4 h-4 rounded accent-lit-primary" />
+                    <span className="text-xs text-app-text font-medium group-hover:text-lit-primary transition-colors">Cuota inicial de ingreso (20 Bs) pagada</span>
+                  </label>
+                </div>
               </div>
+
+              {/* Estado Sacramental */}
+              <div className="p-3 rounded-xl bg-stone-50 border border-app-border space-y-2">
+                <label className="flex items-center gap-2.5 cursor-pointer group">
+                  <input type="checkbox" checked={nino.es_bautizado} onChange={e => nF('es_bautizado', e.target.checked)} className="w-4 h-4 rounded accent-lit-primary" />
+                  <span className="text-xs text-app-text font-medium group-hover:text-lit-primary transition-colors">¿Está bautizado/a en la Iglesia Católica?</span>
+                </label>
+                {!nino.es_bautizado && (
+                  <p className="text-[10px] text-amber-700 bg-amber-50 p-2 rounded-lg border border-amber-200">
+                    ℹ️ Si aún no está bautizado/a, deberá realizar el sacramento del Bautismo antes de segundo año en la Vigilia Pascual.
+                  </p>
+                )}
+              </div>
+
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-app-text">Observaciones</label>
                 <textarea value={nino.observaciones} onChange={e => nF('observaciones', e.target.value)} rows={2} placeholder="Alergias, necesidades especiales..." className="w-full px-3 py-2 text-sm rounded-lg border border-app-border bg-white resize-none outline-none focus:ring-2 focus:ring-lit-primary/30" />
@@ -389,10 +444,18 @@ export const InscripcionModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }
                 <p className="text-sm font-bold text-app-text">{[nino.nombres, nino.primer_apellido, nino.segundo_apellido].filter(Boolean).join(' ')}</p>
                 {nino.fecha_nacimiento && <p className="text-xs text-app-muted">Nació: {new Date(nino.fecha_nacimiento + 'T12:00:00').toLocaleDateString('es-BO', { day: '2-digit', month: 'long', year: 'numeric' })}</p>}
                 {nino.ci_dni && <p className="text-xs text-app-muted">CI: {nino.ci_dni}</p>}
+                
+                <div className="pt-2 border-t border-app-border space-y-1">
+                  <p className="text-[10px] font-bold text-app-muted uppercase">Requisitos de Ingreso:</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {nino.cuadernillo_comprado ? <span className="px-2 py-0.5 bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] rounded-full font-semibold">✓ Cuadernillo</span> : <span className="px-2 py-0.5 bg-stone-100 text-stone-500 text-[10px] rounded-full">Cuadernillo pendiente</span>}
+                    {nino.libro_comprado ? <span className="px-2 py-0.5 bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] rounded-full font-semibold">✓ Libro</span> : <span className="px-2 py-0.5 bg-stone-100 text-stone-500 text-[10px] rounded-full">Libro pendiente</span>}
+                    {nino.pago_cuota_inicial ? <span className="px-2 py-0.5 bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] rounded-full font-semibold">✓ Cuota 20 Bs</span> : <span className="px-2 py-0.5 bg-stone-100 text-stone-500 text-[10px] rounded-full">Cuota 20 Bs pendiente</span>}
+                  </div>
+                </div>
+
                 <div className="flex flex-wrap gap-1.5 pt-1">
-                  {nino.es_bautizado    && <span className="px-2 py-0.5 bg-lit-surface border border-lit-border text-lit-primary text-[10px] rounded-full font-semibold">✓ Bautizado/a</span>}
-                  {nino.libro_comprado       && <span className="px-2 py-0.5 bg-stone-100 border border-stone-200 text-stone-600 text-[10px] rounded-full">📚 Libro</span>}
-                  {nino.cuadernillo_comprado && <span className="px-2 py-0.5 bg-stone-100 border border-stone-200 text-stone-600 text-[10px] rounded-full">📓 Cuadernillo</span>}
+                  {nino.es_bautizado && <span className="px-2 py-0.5 bg-lit-surface border border-lit-border text-lit-primary text-[10px] rounded-full font-semibold">✓ Bautizado/a</span>}
                 </div>
               </div>
 

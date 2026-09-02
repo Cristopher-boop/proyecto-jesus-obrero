@@ -71,8 +71,17 @@ async def create_catecumeno(db: AsyncSession, data: CatecumenoCreate) -> Inscrip
         persona_id=catecumeno.id,
         tipo_sacramento=data.tipo_sacramento,
         estado=EstadoInscripcion.ACTIVO,
-        libro_comprado=data.libro_comprado,
         cuadernillo_comprado=data.cuadernillo_comprado,
+        libro_comprado=data.libro_comprado,
+        pago_cuota_inicial=data.pago_cuota_inicial,
+        doc_formulario_inscripcion=data.doc_formulario_inscripcion,
+        doc_fe_bautismo=data.doc_fe_bautismo,
+        doc_cert_nacimiento=data.doc_cert_nacimiento,
+        doc_cert_matrimonio_padres=data.doc_cert_matrimonio_padres,
+        doc_ci_nino=data.doc_ci_nino,
+        doc_ci_padre=data.doc_ci_padre,
+        doc_ci_madre=data.doc_ci_madre,
+        doc_ci_tutor=data.doc_ci_tutor,
         token_qr=str(uuid.uuid4()),
         fecha_inscripcion=date.today(),
         observaciones=data.observaciones,
@@ -189,8 +198,17 @@ async def list_catecumenos(
             tipo_sacramento=insc.tipo_sacramento,
             estado=insc.estado,
             token_qr=insc.token_qr,
-            libro_comprado=insc.libro_comprado,
             cuadernillo_comprado=insc.cuadernillo_comprado,
+            libro_comprado=insc.libro_comprado,
+            pago_cuota_inicial=insc.pago_cuota_inicial,
+            doc_formulario_inscripcion=insc.doc_formulario_inscripcion,
+            doc_fe_bautismo=insc.doc_fe_bautismo,
+            doc_cert_nacimiento=insc.doc_cert_nacimiento,
+            doc_cert_matrimonio_padres=insc.doc_cert_matrimonio_padres,
+            doc_ci_nino=insc.doc_ci_nino,
+            doc_ci_padre=insc.doc_ci_padre,
+            doc_ci_madre=insc.doc_ci_madre,
+            doc_ci_tutor=insc.doc_ci_tutor,
             fecha_inscripcion=insc.fecha_inscripcion,
             tutor_nombre=tutor_nombre,
             tutor_telefono=tutor_tel,
@@ -248,9 +266,13 @@ async def get_catecumeno_detalle(db: AsyncSession, persona_id: int) -> Catecumen
     )
 
 
-# ─── Actualización ────────────────────────────────────────────────────────────
+# ─── Edición ──────────────────────────────────────────────────────────────────
 
-async def update_catecumeno(db: AsyncSession, persona_id: int, data: CatecumenoUpdate) -> CatecumenoDetalle:
+async def update_catecumeno(
+    db: AsyncSession,
+    persona_id: int,
+    data: CatecumenoUpdate,
+) -> CatecumenoDetalle:
     result = await db.execute(
         select(Persona)
         .where(Persona.id == persona_id)
@@ -268,9 +290,12 @@ async def update_catecumeno(db: AsyncSession, persona_id: int, data: CatecumenoU
 
     if persona.inscripciones:
         insc = persona.inscripciones[0]
-        for campo in ['libro_comprado', 'cuadernillo_comprado', 'doc_fe_bautismo',
-                      'doc_cert_nacimiento', 'doc_ci_nino', 'doc_ci_tutor',
-                      'estado', 'observaciones']:
+        for campo in [
+            'cuadernillo_comprado', 'libro_comprado', 'pago_cuota_inicial',
+            'doc_formulario_inscripcion', 'doc_fe_bautismo', 'doc_cert_nacimiento',
+            'doc_cert_matrimonio_padres', 'doc_ci_nino', 'doc_ci_padre',
+            'doc_ci_madre', 'doc_ci_tutor', 'estado', 'observaciones'
+        ]:
             val = getattr(data, campo, None)
             if val is not None:
                 setattr(insc, campo, val)

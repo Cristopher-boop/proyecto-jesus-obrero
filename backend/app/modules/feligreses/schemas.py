@@ -32,7 +32,7 @@ class FeligresResponse(BaseModel):
     nombres:          str
     primer_apellido:  str
     segundo_apellido: Optional[str] = None
-    ci_dni:           str
+    ci_dni:           Optional[str] = None
     telefono:         Optional[str] = None
     email:            Optional[str] = None
     username:         str
@@ -49,7 +49,7 @@ class FeligresListItem(BaseModel):
     nombres:          str
     primer_apellido:  str
     segundo_apellido: Optional[str] = None
-    ci_dni:           str
+    ci_dni:           Optional[str] = None
     telefono:         Optional[str] = None
     email:            Optional[str] = None
     username:         str
@@ -79,7 +79,7 @@ class FeligresDetalle(BaseModel):
     nombres:          str
     primer_apellido:  str
     segundo_apellido: Optional[str] = None
-    ci_dni:           str
+    ci_dni:           Optional[str] = None
     telefono:         Optional[str] = None
     email:            Optional[str] = None
     username:         str
@@ -103,7 +103,7 @@ class FeligresBusquedaItem(BaseModel):
     nombres:      str
     primer_apellido: str
     telefono:     Optional[str] = None
-    ci_dni:       str
+    ci_dni:       Optional[str] = None
 
     class Config:
         from_attributes = True

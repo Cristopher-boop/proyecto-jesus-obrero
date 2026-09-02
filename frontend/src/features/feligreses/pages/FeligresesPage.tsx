@@ -23,6 +23,8 @@ export const FeligresesPage: React.FC = () => {
   const [searchDebounce, setDebouncedSearch] = useState('');
   const [modalOpen,    setModalOpen]    = useState(false);
   const [selectedId,   setSelectedId]   = useState<number | null>(null);
+  const [isClosing,    setIsClosing]    = useState(false);
+  const closeTimerRef = React.useRef<NodeJS.Timeout | null>(null);
 
   const { data, loading, error, refetch } = useFeligreses(searchDebounce || undefined);
   const { data: detalle, loading: detalleLoading } = useFeligresDetalle(selectedId);
@@ -32,6 +34,25 @@ export const FeligresesPage: React.FC = () => {
     const t = setTimeout(() => setDebouncedSearch(val), 400);
     return () => clearTimeout(t);
   }, []);
+
+  const handleClosePanel = () => {
+    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    setIsClosing(true);
+    closeTimerRef.current = setTimeout(() => {
+      setSelectedId(null);
+      setIsClosing(false);
+    }, 190);
+  };
+
+  const handleSelectRow = (personaId: number) => {
+    if (selectedId === personaId) {
+      handleClosePanel();
+      return;
+    }
+    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    setIsClosing(false);
+    setSelectedId(personaId);
+  };
 
   const nombreCompleto = (item: FeligresListItem) =>
     [item.nombres, item.primer_apellido, item.segundo_apellido].filter(Boolean).join(' ');
@@ -92,7 +113,7 @@ export const FeligresesPage: React.FC = () => {
                 {data?.items.map(item => {
                   const isSelected = selectedId === item.persona_id;
                   return (
-                    <tr key={item.persona_id} onClick={() => setSelectedId(isSelected ? null : item.persona_id)}
+                    <tr key={item.persona_id} onClick={() => handleSelectRow(item.persona_id)}
                       className={`cursor-pointer transition-colors hover:bg-lit-surface/50 ${isSelected ? 'bg-lit-surface border-l-4 border-lit-primary' : ''}`}>
                       <td className="px-4 py-3">
                         <p className="text-sm font-semibold text-app-text">{nombreCompleto(item)}</p>
@@ -128,10 +149,10 @@ export const FeligresesPage: React.FC = () => {
 
       {/* ── Panel Lateral de Detalle ─────────────────────────────── */}
       {selectedId && (
-        <div className="w-80 flex-shrink-0 flex flex-col gap-4 animate-slide-in-right">
+        <div className={`w-80 flex-shrink-0 flex flex-col gap-4 ${isClosing ? 'animate-slide-out-right' : 'animate-slide-in-right'}`}>
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-bold text-app-text flex items-center gap-2"><UserCheck className="w-4 h-4 text-lit-primary" /> Detalle</h3>
-            <button onClick={() => setSelectedId(null)} className="w-7 h-7 rounded-lg hover:bg-stone-100 flex items-center justify-center text-app-muted"><X className="w-3.5 h-3.5" /></button>
+            <button onClick={handleClosePanel} className="w-7 h-7 rounded-lg hover:bg-stone-100 flex items-center justify-center text-app-muted"><X className="w-3.5 h-3.5" /></button>
           </div>
 
           {detalleLoading ? (

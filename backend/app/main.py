@@ -13,6 +13,7 @@ from app.modules.auth.router import router as auth_router
 from app.modules.catecumenos.router import router as catecumenos_router
 from app.modules.feligreses.router import router as feligreses_router
 from app.modules.asistencias.router import router as asistencias_router
+from app.modules.capillas_grupos.router import router as capillas_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -28,9 +29,14 @@ async def lifespan(app: FastAPI):
         # Migraciones seguras para columnas añadidas a tablas existentes
         from sqlalchemy import text
         migrations = [
+            'ALTER TABLE inscripciones ADD COLUMN IF NOT EXISTS pago_cuota_inicial BOOLEAN NOT NULL DEFAULT FALSE;',
+            'ALTER TABLE inscripciones ADD COLUMN IF NOT EXISTS doc_formulario_inscripcion BOOLEAN NOT NULL DEFAULT FALSE;',
             'ALTER TABLE inscripciones ADD COLUMN IF NOT EXISTS doc_fe_bautismo BOOLEAN NOT NULL DEFAULT FALSE;',
             'ALTER TABLE inscripciones ADD COLUMN IF NOT EXISTS doc_cert_nacimiento BOOLEAN NOT NULL DEFAULT FALSE;',
+            'ALTER TABLE inscripciones ADD COLUMN IF NOT EXISTS doc_cert_matrimonio_padres BOOLEAN NOT NULL DEFAULT FALSE;',
             'ALTER TABLE inscripciones ADD COLUMN IF NOT EXISTS doc_ci_nino BOOLEAN NOT NULL DEFAULT FALSE;',
+            'ALTER TABLE inscripciones ADD COLUMN IF NOT EXISTS doc_ci_padre BOOLEAN NOT NULL DEFAULT FALSE;',
+            'ALTER TABLE inscripciones ADD COLUMN IF NOT EXISTS doc_ci_madre BOOLEAN NOT NULL DEFAULT FALSE;',
             'ALTER TABLE inscripciones ADD COLUMN IF NOT EXISTS doc_ci_tutor BOOLEAN NOT NULL DEFAULT FALSE;'
         ]
         for stmt in migrations:
@@ -66,6 +72,7 @@ def create_app() -> FastAPI:
     app.include_router(catecumenos_router, prefix="/api/v1/catecumenos", tags=["Catecúmenos"])
     app.include_router(feligreses_router,  prefix="/api/v1/feligreses",  tags=["Feligreses"])
     app.include_router(asistencias_router, prefix="/api/v1/asistencias", tags=["Asistencias"])
+    app.include_router(capillas_router,    prefix="/api/v1/capillas",    tags=["Capillas y Horarios"])
 
     @app.get("/", tags=["Health"])
     async def health_check():

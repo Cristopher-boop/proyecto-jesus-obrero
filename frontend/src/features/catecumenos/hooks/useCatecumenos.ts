@@ -38,36 +38,58 @@ export interface TutorVinculoPayload {
 }
 
 export interface CreateCatecumenoPayload {
-  ci_dni?:          string;
-  complemento?:     string;
-  nombres:          string;
-  primer_apellido:  string;
-  segundo_apellido?: string;
-  fecha_nacimiento?: string;
-  genero?:          string;
-  direccion?:       string;
-  es_bautizado:     boolean;
-  tipo_sacramento:  string;
-  libro_comprado:   boolean;
-  cuadernillo_comprado: boolean;
-  observaciones?:   string;
-  tutores_nuevos:   TutorNuevoPayload[];
-  tutores_vinculo:  TutorVinculoPayload[];
+  ci_dni?:                     string;
+  complemento?:                string;
+  nombres:                     string;
+  primer_apellido:             string;
+  segundo_apellido?:           string;
+  fecha_nacimiento?:           string;
+  genero?:                     string;
+  direccion?:                  string;
+  es_bautizado:                boolean;
+  tipo_sacramento:             string;
+  // Requisitos de Ingreso
+  cuadernillo_comprado:        boolean;
+  libro_comprado:              boolean;
+  pago_cuota_inicial:          boolean;
+  // Documentos de Salida (Fotocopias)
+  doc_formulario_inscripcion?: boolean;
+  doc_fe_bautismo?:            boolean;
+  doc_cert_nacimiento?:        boolean;
+  doc_cert_matrimonio_padres?: boolean;
+  doc_ci_nino?:                boolean;
+  doc_ci_padre?:               boolean;
+  doc_ci_madre?:               boolean;
+  doc_ci_tutor?:               boolean;
+  observaciones?:              string;
+  tutores_nuevos:              TutorNuevoPayload[];
+  tutores_vinculo:             TutorVinculoPayload[];
 }
 
 export interface UpdateCatecumenoPayload {
-  ci_dni?:              string;
-  nombres?:             string;
-  primer_apellido?:     string;
-  segundo_apellido?:    string;
-  fecha_nacimiento?:    string;
-  genero?:              string;
-  direccion?:           string;
-  es_bautizado?:        boolean;
-  libro_comprado?:      boolean;
-  cuadernillo_comprado?: boolean;
-  estado?:              EstadoInscripcion;
-  observaciones?:       string;
+  ci_dni?:                     string;
+  nombres?:                    string;
+  primer_apellido?:            string;
+  segundo_apellido?:           string;
+  fecha_nacimiento?:           string;
+  genero?:                     string;
+  direccion?:                  string;
+  es_bautizado?:               boolean;
+  // Requisitos de Ingreso
+  cuadernillo_comprado?:       boolean;
+  libro_comprado?:             boolean;
+  pago_cuota_inicial?:         boolean;
+  // Documentos de Salida (Fotocopias)
+  doc_formulario_inscripcion?: boolean;
+  doc_fe_bautismo?:            boolean;
+  doc_cert_nacimiento?:        boolean;
+  doc_cert_matrimonio_padres?: boolean;
+  doc_ci_nino?:                boolean;
+  doc_ci_padre?:               boolean;
+  doc_ci_madre?:               boolean;
+  doc_ci_tutor?:               boolean;
+  estado?:                     EstadoInscripcion;
+  observaciones?:              string;
 }
 
 // ─── Hook: Listado ────────────────────────────────────────────────────────────

@@ -169,15 +169,20 @@ class Inscripcion(Base):
     capilla_id          = Column(Integer, nullable=True)   # FK a capillas cuando exista el módulo
     grupo_id            = Column(Integer, nullable=True)   # FK a grupos cuando se asigne
 
-    # Seguimiento de materiales comprados
-    libro_comprado      = Column(Boolean, default=False, nullable=False)
-    cuadernillo_comprado = Column(Boolean, default=False, nullable=False)
+    # Requisitos de Ingreso (Entrada)
+    cuadernillo_comprado        = Column(Boolean, default=False, nullable=False)
+    libro_comprado              = Column(Boolean, default=False, nullable=False)
+    pago_cuota_inicial          = Column(Boolean, default=False, nullable=False)
 
-    # Estado documental (verificación de requisitos)
-    doc_fe_bautismo      = Column(Boolean, default=False, nullable=False)
-    doc_cert_nacimiento  = Column(Boolean, default=False, nullable=False)
-    doc_ci_nino          = Column(Boolean, default=False, nullable=False)
-    doc_ci_tutor         = Column(Boolean, default=False, nullable=False)
+    # Requisitos de Salida / Graduación (Fotocopias requeridas para el sacramento)
+    doc_formulario_inscripcion  = Column(Boolean, default=False, nullable=False)
+    doc_fe_bautismo             = Column(Boolean, default=False, nullable=False)
+    doc_cert_nacimiento         = Column(Boolean, default=False, nullable=False)
+    doc_cert_matrimonio_padres  = Column(Boolean, default=False, nullable=False)
+    doc_ci_nino                 = Column(Boolean, default=False, nullable=False)
+    doc_ci_padre                = Column(Boolean, default=False, nullable=False)
+    doc_ci_madre                = Column(Boolean, default=False, nullable=False)
+    doc_ci_tutor                = Column(Boolean, default=False, nullable=False)
 
     # QR único por catecúmeno (UUID4)
     token_qr            = Column(String(36), unique=True, nullable=False, default=lambda: str(uuid.uuid4()))

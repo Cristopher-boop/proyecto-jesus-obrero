@@ -46,19 +46,26 @@ class TutorResponse(BaseModel):
 # ─── Inscripción ──────────────────────────────────────────────────────────────
 
 class InscripcionResponse(BaseModel):
-    id:                   int
-    tipo_sacramento:      TipoSacramento
-    estado:               EstadoInscripcion
-    libro_comprado:       bool
-    cuadernillo_comprado: bool
-    doc_fe_bautismo:      bool = False
-    doc_cert_nacimiento:  bool = False
-    doc_ci_nino:          bool = False
-    doc_ci_tutor:         bool = False
-    token_qr:             str
-    fecha_inscripcion:    date
-    observaciones:        Optional[str] = None
-    created_at:           datetime
+    id:                          int
+    tipo_sacramento:             TipoSacramento
+    estado:                      EstadoInscripcion
+    # Requisitos de Ingreso
+    cuadernillo_comprado:        bool
+    libro_comprado:              bool
+    pago_cuota_inicial:          bool = False
+    # Requisitos de Salida (Fotocopias)
+    doc_formulario_inscripcion:  bool = False
+    doc_fe_bautismo:             bool = False
+    doc_cert_nacimiento:         bool = False
+    doc_cert_matrimonio_padres:  bool = False
+    doc_ci_nino:                 bool = False
+    doc_ci_padre:                bool = False
+    doc_ci_madre:                bool = False
+    doc_ci_tutor:                bool = False
+    token_qr:                    str
+    fecha_inscripcion:           date
+    observaciones:               Optional[str] = None
+    created_at:                  datetime
 
     class Config:
         from_attributes = True
@@ -84,11 +91,21 @@ class CatecumenoCreate(BaseModel):
     direccion:        Optional[str] = None
     es_bautizado:     bool = False
 
-    # Inscripción
-    tipo_sacramento:      TipoSacramento = TipoSacramento.PRIMERA_COMUNION
-    libro_comprado:       bool = False
-    cuadernillo_comprado: bool = False
-    observaciones:        Optional[str] = None
+    # Inscripción & Requisitos de Ingreso
+    tipo_sacramento:             TipoSacramento = TipoSacramento.PRIMERA_COMUNION
+    cuadernillo_comprado:        bool = False
+    libro_comprado:              bool = False
+    pago_cuota_inicial:          bool = False
+    # Documentos de salida opcionales al inscribir
+    doc_formulario_inscripcion:  bool = False
+    doc_fe_bautismo:             bool = False
+    doc_cert_nacimiento:         bool = False
+    doc_cert_matrimonio_padres:  bool = False
+    doc_ci_nino:                 bool = False
+    doc_ci_padre:                bool = False
+    doc_ci_madre:                bool = False
+    doc_ci_tutor:                bool = False
+    observaciones:               Optional[str] = None
 
     # Tutores (0 a 3, cada uno puede ser nuevo o vinculado)
     tutores_nuevos:  List[TutorCreate]      = Field(default_factory=list, max_length=3)
@@ -106,33 +123,47 @@ class CatecumenoUpdate(BaseModel):
     direccion:        Optional[str] = None
     es_bautizado:     Optional[bool] = None
     # Inscripción
-    libro_comprado:       Optional[bool] = None
-    cuadernillo_comprado: Optional[bool] = None
-    doc_fe_bautismo:      Optional[bool] = None
-    doc_cert_nacimiento:  Optional[bool] = None
-    doc_ci_nino:          Optional[bool] = None
-    doc_ci_tutor:         Optional[bool] = None
-    estado:               Optional[EstadoInscripcion] = None
-    observaciones:        Optional[str] = None
+    cuadernillo_comprado:        Optional[bool] = None
+    libro_comprado:              Optional[bool] = None
+    pago_cuota_inicial:          Optional[bool] = None
+    doc_formulario_inscripcion:  Optional[bool] = None
+    doc_fe_bautismo:             Optional[bool] = None
+    doc_cert_nacimiento:         Optional[bool] = None
+    doc_cert_matrimonio_padres:  Optional[bool] = None
+    doc_ci_nino:                 Optional[bool] = None
+    doc_ci_padre:                Optional[bool] = None
+    doc_ci_madre:                Optional[bool] = None
+    doc_ci_tutor:                Optional[bool] = None
+    estado:                      Optional[EstadoInscripcion] = None
+    observaciones:               Optional[str] = None
 
 
 class CatecumenoListItem(BaseModel):
-    persona_id:           int
-    nombres:              str
-    primer_apellido:      str
-    segundo_apellido:     Optional[str] = None
-    genero:               Optional[Genero] = None
-    fecha_nacimiento:     Optional[date] = None
-    es_bautizado:         bool
-    inscripcion_id:       int
-    tipo_sacramento:      TipoSacramento
-    estado:               EstadoInscripcion
-    token_qr:             str
-    libro_comprado:       bool
-    cuadernillo_comprado: bool
-    fecha_inscripcion:    date
-    tutor_nombre:         Optional[str] = None
-    tutor_telefono:       Optional[str] = None
+    persona_id:                  int
+    nombres:                     str
+    primer_apellido:             str
+    segundo_apellido:            Optional[str] = None
+    genero:                      Optional[Genero] = None
+    fecha_nacimiento:            Optional[date] = None
+    es_bautizado:                bool
+    inscripcion_id:              int
+    tipo_sacramento:             TipoSacramento
+    estado:                      EstadoInscripcion
+    token_qr:                    str
+    cuadernillo_comprado:        bool
+    libro_comprado:              bool
+    pago_cuota_inicial:          bool = False
+    doc_formulario_inscripcion:  bool = False
+    doc_fe_bautismo:             bool = False
+    doc_cert_nacimiento:         bool = False
+    doc_cert_matrimonio_padres:  bool = False
+    doc_ci_nino:                 bool = False
+    doc_ci_padre:                bool = False
+    doc_ci_madre:                bool = False
+    doc_ci_tutor:                bool = False
+    fecha_inscripcion:           date
+    tutor_nombre:                Optional[str] = None
+    tutor_telefono:              Optional[str] = None
 
     class Config:
         from_attributes = True
