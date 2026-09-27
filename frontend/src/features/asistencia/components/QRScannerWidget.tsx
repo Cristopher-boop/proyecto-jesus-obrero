@@ -13,6 +13,7 @@ import { Html5QrcodeScanner } from 'html5-qrcode';
 import { Camera, Zap, QrCode, Sparkles, Clock, BookOpen, Church, AlertCircle } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
+import Select from '@/components/ui/Select';
 import { useCatecumenos } from '@/features/catecumenos/hooks/useCatecumenos';
 import { useCapillas, useFaseActual } from '@/features/capillas/hooks/useCapillas';
 import type { CatecumenoListItem } from '@/types';
@@ -155,17 +156,18 @@ export const QRScannerWidget: React.FC<Props> = ({ onScan, loading }) => {
                 Capilla de Control:
               </label>
             </div>
-            <select
-              value={selectedCapillaId ?? ''}
-              onChange={e => setSelectedCapillaId(Number(e.target.value))}
-              className="bg-stone-800 border border-stone-700 text-white text-xs font-bold rounded-lg px-2.5 py-1 outline-none focus:ring-1 focus:ring-lit-accent mt-0.5"
-            >
-              {capillasData?.items.map(c => (
-                <option key={c.id} value={c.id}>
-                  {c.nombre} {c.es_sede_principal ? '★ (Sede Central)' : ''}
-                </option>
-              ))}
-            </select>
+            <div className="w-56 mt-1">
+              <Select<number>
+                variant="dark"
+                size="sm"
+                value={selectedCapillaId ?? undefined}
+                onChange={val => setSelectedCapillaId(val)}
+                options={capillasData?.items.map(c => ({
+                  value: c.id,
+                  label: `${c.nombre} ${c.es_sede_principal ? '★ (Sede Central)' : ''}`,
+                })) ?? []}
+              />
+            </div>
           </div>
         </div>
 
@@ -225,23 +227,21 @@ export const QRScannerWidget: React.FC<Props> = ({ onScan, loading }) => {
             </div>
 
             {/* 1. Selector de Catecúmeno */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-app-text">1. Seleccionar Catecúmeno</label>
-              <select
-                value={selectedChild?.persona_id ?? ''}
-                onChange={e => {
-                  const found = catecumenosData?.items.find(c => c.persona_id === Number(e.target.value));
+            <div>
+              <Select<number>
+                label="1. Seleccionar Catecúmeno"
+                value={selectedChild?.persona_id ?? undefined}
+                onChange={val => {
+                  const found = catecumenosData?.items.find(c => c.persona_id === val);
                   setSelectedChild(found || null);
                 }}
-                className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-app-border bg-white outline-none focus:ring-2 focus:ring-lit-primary/30"
-              >
-                <option value="">-- Elige un catecúmeno para marcar --</option>
-                {catecumenosData?.items.map(c => (
-                  <option key={c.persona_id} value={c.persona_id}>
-                    {c.nombres} {c.primer_apellido} {c.segundo_apellido ?? ''} ({c.tipo_sacramento === 'PRIMERA_COMUNION' ? '1ª Comunión' : 'Confirmación'})
-                  </option>
-                ))}
-              </select>
+                placeholder="-- Elige un catecúmeno para marcar --"
+                options={catecumenosData?.items.map(c => ({
+                  value: c.persona_id,
+                  label: `${c.nombres} ${c.primer_apellido} ${c.segundo_apellido ?? ''}`,
+                  description: `${c.tipo_sacramento === 'PRIMERA_COMUNION' ? '1ª Comunión' : 'Confirmación'}${c.grupo_nombre ? ` · ${c.grupo_nombre}` : ''}`,
+                })) ?? []}
+              />
             </div>
 
             {/* 2. Selector de Franja Horaria de Prueba */}

@@ -10,13 +10,13 @@
 import React, { useState } from 'react';
 import {
   MapPin, RefreshCw, Sparkles, ShieldCheck, Plus,
-  Edit2, Trash2, Calendar
+  Edit2, Trash2, Calendar, Shuffle
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import Alert from '@/components/ui/Alert';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
-import { useCapillas } from '../hooks/useCapillas';
+import { useCapillas, useGruposCapilla } from '../hooks/useCapillas';
 import { CapillaModal } from '../components/CapillaModal';
 import { HorarioModal } from '../components/HorarioModal';
 import type {
@@ -61,6 +61,67 @@ export const CapillasPage: React.FC = () => {
   });
 
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  // Subgrupos de la Sede Central (Jesús Obrero, id=1)
+  const {
+    data: gruposJO,
+    asignarSanto,
+    autoAgruparPorEdad,
+  } = useGruposCapilla(1, 2026, 'SEGUNDO_ANO');
+
+  const [asignarSantoModal, setAsignarSantoModal] = useState<{
+    isOpen: boolean;
+    grupoId: number;
+    nombreActual: string;
+  }>({ isOpen: false, grupoId: 0, nombreActual: '' });
+
+  const [nuevoNombreSanto, setNuevoNombreSanto] = useState('');
+  const [isAutoAgrupando, setIsAutoAgrupando] = useState(false);
+
+  const handleOpenAsignarSanto = (grupoId: number, nombreActual: string) => {
+    setAsignarSantoModal({ isOpen: true, grupoId, nombreActual });
+    setNuevoNombreSanto(nombreActual || '');
+  };
+
+  const handleConfirmAsignarSanto = async () => {
+    if (!asignarSantoModal.grupoId || !nuevoNombreSanto.trim()) return;
+    const res = await asignarSanto(asignarSantoModal.grupoId, nuevoNombreSanto.trim());
+    if (res.success) {
+      setFeedback({
+        type: 'success',
+        message: `Nombre patronal "${nuevoNombreSanto.trim()}" asignado al subgrupo.`,
+      });
+      setAsignarSantoModal({ isOpen: false, grupoId: 0, nombreActual: '' });
+      setTimeout(() => setFeedback(null), 4000);
+    } else {
+      setFeedback({ type: 'error', message: res.error || 'Error al asignar nombre patronal.' });
+    }
+  };
+
+  const handleAutoAgrupar = async () => {
+    setIsAutoAgrupando(true);
+    const res = await autoAgruparPorEdad({
+      gestion: 2026,
+      etapa: 'SEGUNDO_ANO',
+      cantidad_grupos: 4,
+      nombres_santos: [
+        'Juan Don Bosco',
+        'San Nicolás',
+        'San Pablo',
+        'San Francisco de Asís',
+      ],
+    });
+    setIsAutoAgrupando(false);
+    if (res.success) {
+      setFeedback({
+        type: 'success',
+        message: 'Catecúmenos organizados y balanceados por edad en los 4 grupos patronales.',
+      });
+      setTimeout(() => setFeedback(null), 4500);
+    } else {
+      setFeedback({ type: 'error', message: res.error || 'Error al conformar subgrupos.' });
+    }
+  };
 
   // ─── Handlers de Capilla ──────────────────────────────────────────────────
 
@@ -445,6 +506,68 @@ export const CapillasPage: React.FC = () => {
                     </div>
                   ))
                 )}
+
+                {/* Subgrupos de Catequesis (Exclusivo Sede Central Jesús Obrero) */}
+                {capilla.es_sede_principal && (
+                  <div className="mt-4 pt-4 border-t border-app-border/80 space-y-3">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                      <div>
+                        <span className="text-xs font-bold text-app-text flex items-center gap-1.5 font-serif">
+                          <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                          Subgrupos de Catequesis · Gestión 2026 (2do Año)
+                        </span>
+                        <p className="text-[10px] text-app-muted mt-0.5 leading-tight">
+                          Nivelados por edad/fecha de nacimiento con nombres patronales de Santos.
+                        </p>
+                      </div>
+
+                      <button
+                        onClick={handleAutoAgrupar}
+                        disabled={isAutoAgrupando}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold text-amber-900 bg-amber-100 hover:bg-amber-200 border border-amber-300 transition-colors shadow-2xs disabled:opacity-50"
+                        title="Re-balancear catecúmenos por fecha de nacimiento"
+                      >
+                        <Shuffle className={`w-3 h-3 ${isAutoAgrupando ? 'animate-spin' : ''}`} />
+                        {isAutoAgrupando ? 'Agrupando...' : '⚡ Balancear por Edad'}
+                      </button>
+                    </div>
+
+                    {/* Lista de los 4 Santos */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      {gruposJO?.items.map((g) => (
+                        <div
+                          key={g.id}
+                          className="p-3 rounded-xl border border-amber-200/80 bg-amber-50/40 hover:bg-amber-50/70 transition-colors flex items-center justify-between"
+                        >
+                          <div className="space-y-0.5">
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-xs font-bold text-amber-950 font-serif">
+                                {g.nombre_santo || g.nombre}
+                              </span>
+                              <span className="text-[9px] font-mono text-stone-500 bg-white/80 px-1 rounded border border-amber-200">
+                                {g.codigo}
+                              </span>
+                            </div>
+                            <p className="text-[10px] text-stone-600">
+                              <strong className="text-amber-900">{g.total_catecumenos}</strong> catecúmenos
+                              {g.edad_minima !== undefined && g.edad_maxima !== undefined && (
+                                <span> · {g.edad_minima === g.edad_maxima ? `${g.edad_minima} años` : `${g.edad_minima}-${g.edad_maxima} años`}</span>
+                              )}
+                            </p>
+                          </div>
+
+                          <button
+                            onClick={() => handleOpenAsignarSanto(g.id, g.nombre_santo || g.nombre)}
+                            className="p-1.5 rounded-lg text-amber-800 hover:bg-white border border-transparent hover:border-amber-200 transition-all text-[10px] font-semibold"
+                            title="Renombrar o asignar Santo"
+                          >
+                            <Edit2 className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Pie de la Tarjeta */}
@@ -494,6 +617,53 @@ export const CapillasPage: React.FC = () => {
         onConfirm={handleConfirmDelete}
         onClose={() => setConfirmDelete(prev => ({ ...prev, isOpen: false }))}
       />
+
+      {/* Modal para Asignar Nombre Patronal de Santo */}
+      {asignarSantoModal.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-fade-in">
+          <div className="bg-white rounded-2xl shadow-xl border border-app-border p-6 max-w-sm w-full space-y-4 animate-scale-in">
+            <div className="flex items-center gap-2.5">
+              <span className="p-2 rounded-xl bg-amber-100 text-amber-900 text-lg">✨</span>
+              <div>
+                <h3 className="text-sm font-bold text-app-text font-serif">Asignar Nombre de Santo</h3>
+                <p className="text-xs text-app-muted">Subgrupo Parroquia Jesús Obrero</p>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-stone-700 mb-1.5">
+                Nombre Patronal de Santo:
+              </label>
+              <input
+                type="text"
+                value={nuevoNombreSanto}
+                onChange={e => setNuevoNombreSanto(e.target.value)}
+                placeholder="Ej: Juan Don Bosco, San Nicolás..."
+                className="w-full text-xs px-3 py-2 rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-lit-primary"
+                autoFocus
+              />
+            </div>
+
+            <div className="flex gap-2 justify-end pt-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setAsignarSantoModal(prev => ({ ...prev, isOpen: false }))}
+              >
+                Cancelar
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={handleConfirmAsignarSanto}
+                disabled={!nuevoNombreSanto.trim()}
+              >
+                Guardar Nombre
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

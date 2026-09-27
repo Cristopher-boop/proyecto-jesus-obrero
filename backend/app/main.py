@@ -67,6 +67,13 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
+    # ── Archivos Estáticos / Uploads ──────────────────────────
+    import os
+    from fastapi.staticfiles import StaticFiles
+    uploads_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "uploads")
+    os.makedirs(uploads_dir, exist_ok=True)
+    app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
+
     # ── Registrar routers ────────────────────────────────────
     app.include_router(auth_router,        prefix="/api/v1/auth",        tags=["Auth"])
     app.include_router(catecumenos_router, prefix="/api/v1/catecumenos", tags=["Catecúmenos"])

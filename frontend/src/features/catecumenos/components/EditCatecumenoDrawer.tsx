@@ -8,6 +8,7 @@ import { X, Save, AlertCircle, CheckCircle2 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Alert from '@/components/ui/Alert';
+import Select from '@/components/ui/Select';
 import { useUpdateCatecumeno, type UpdateCatecumenoPayload } from '../hooks/useCatecumenos';
 import type { CatecumenoDetalle, EstadoInscripcion } from '@/types';
 
@@ -108,15 +109,18 @@ export const EditCatecumenoDrawer: React.FC<Props> = ({ catecumeno, onClose, onS
           <p className="text-[10px] font-bold text-lit-primary uppercase tracking-wide">1. Datos personales</p>
           <div className="grid grid-cols-2 gap-2">
             <Input label="CI" value={form.ci_dni as string} onChange={e => fld('ci_dni', e.target.value)} placeholder="1234567" />
-            <div className="space-y-1">
-              <label className="text-xs font-semibold text-app-text">Género</label>
-              <select value={form.genero as string} onChange={e => fld('genero', e.target.value)} className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-app-border bg-white outline-none focus:ring-2 focus:ring-lit-primary/30">
-                <option value="">—</option>
-                <option value="MASCULINO">Masculino</option>
-                <option value="FEMENINO">Femenino</option>
-                <option value="OTRO">Otro</option>
-              </select>
-            </div>
+            <Select
+              label="Género"
+              size="sm"
+              value={form.genero as string}
+              onChange={val => fld('genero', val)}
+              options={[
+                { value: '', label: '—' },
+                { value: 'MASCULINO', label: '♂ Masculino' },
+                { value: 'FEMENINO', label: '♀ Femenino' },
+                { value: 'OTRO', label: '⚬ Otro' },
+              ]}
+            />
           </div>
 
           <Input label="Nombre(s)" value={form.nombres as string} onChange={e => fld('nombres', e.target.value)} />
@@ -219,14 +223,17 @@ export const EditCatecumenoDrawer: React.FC<Props> = ({ catecumeno, onClose, onS
         {/* 4. Estado sacramental general y observaciones */}
         <div className="space-y-2">
           <p className="text-[10px] font-bold text-app-muted uppercase tracking-wide">4. Estado general</p>
-          <div className="space-y-1">
-            <label className="text-xs font-semibold text-app-text">Estado de Inscripción</label>
-            <select value={form.estado as string} onChange={e => fld('estado', e.target.value as EstadoInscripcion)} className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-app-border bg-white outline-none focus:ring-2 focus:ring-lit-primary/30">
-              <option value="ACTIVO">Activo</option>
-              <option value="BAJA">Baja</option>
-              <option value="GRADUADO">Graduado</option>
-            </select>
-          </div>
+          <Select
+            label="Estado de Inscripción"
+            size="sm"
+            value={form.estado as string}
+            onChange={val => fld('estado', val as EstadoInscripcion)}
+            options={[
+              { value: 'ACTIVO', label: 'Activo' },
+              { value: 'BAJA', label: 'Baja' },
+              { value: 'GRADUADO', label: 'Graduado' },
+            ]}
+          />
 
           <label className="flex items-center gap-2 cursor-pointer pt-1">
             <input type="checkbox" checked={form.es_bautizado as boolean} onChange={e => fld('es_bautizado', e.target.checked)} className="w-3.5 h-3.5 accent-lit-primary rounded" />

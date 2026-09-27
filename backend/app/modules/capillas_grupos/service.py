@@ -11,13 +11,15 @@ from sqlalchemy.orm import selectinload
 from sqlalchemy import update
 from fastapi import HTTPException, status
 
-from app.modules.personas.models import Persona, Inscripcion
-from app.modules.capillas_grupos.models import Capilla, HorarioAsistencia, DiaSemana
+from app.modules.personas.models import Persona, Inscripcion, EtapaFormacion, TipoSacramento
+from app.modules.capillas_grupos.models import Capilla, HorarioAsistencia, Grupo, DiaSemana
 from app.modules.asistencias.models import EstadoAsistencia
 from app.modules.capillas_grupos.schemas import (
     CapillaCreate, CapillaUpdate, CapillaResponse, CapillaListItem,
     CapillaListResponse, FaseHorarioActual, HorarioAsistenciaResponse,
-    HorarioAsistenciaCreate, HorarioAsistenciaUpdate
+    HorarioAsistenciaCreate, HorarioAsistenciaUpdate,
+    GrupoCreate, GrupoUpdate, GrupoResponse, GrupoListResponse,
+    GrupoCatecumenoSimple, AsignarSantoPayload, AutoAgruparPayload
 )
 
 DIAS_MAP = {
@@ -411,3 +413,376 @@ async def get_fase_actual_capilla(
         dia_actual=dia_actual.value,
         horario=HorarioAsistenciaResponse.model_validate(horario)
     )
+
+
+# ─── CRUD de Grupos de Catequesis ─────────────────────────────────────────────
+
+def _calcular_edad_date(fecha_nac: Optional[date]) -> Optional[int]:
+    if not fecha_nac:
+        return None
+    hoy = date.today()
+    edad = hoy.year - fecha_nac.year
+    if (hoy.month, hoy.day) < (fecha_nac.month, fecha_nac.day):
+        edad -= 1
+    return edad
+
+
+async def list_grupos(
+    db: AsyncSession,
+    capilla_id: int,
+    gestion: Optional[int] = None,
+    etapa: Optional[EtapaFormacion] = None,
+    tipo_sacramento: Optional[TipoSacramento] = None,
+) -> GrupoListResponse:
+    """Lista los subgrupos de una capilla con sus catecúmenos asignados."""
+    query = (
+        select(Grupo)
+        .where(Grupo.capilla_id == capilla_id)
+        .options(
+            selectinload(Grupo.inscripciones).selectinload(Inscripcion.persona)
+        )
+        .order_by(Grupo.etapa.desc(), Grupo.codigo.asc(), Grupo.nombre.asc())
+    )
+
+    if gestion is not None:
+        query = query.where(Grupo.gestion == gestion)
+    if etapa is not None:
+        query = query.where(Grupo.etapa == etapa)
+    if tipo_sacramento is not None:
+        query = query.where(Grupo.tipo_sacramento == tipo_sacramento)
+
+    result = await db.execute(query)
+    grupos = result.scalars().all()
+
+    items = []
+    for g in grupos:
+        catecumenos_list = []
+        for ins in g.inscripciones:
+            if ins.estado.value == 'ACTIVO':
+                p = ins.persona
+                nombre_comp = f"{p.nombres} {p.primer_apellido} {p.segundo_apellido or ''}".strip()
+                edad = _calcular_edad_date(p.fecha_nacimiento)
+                catecumenos_list.append(
+                    GrupoCatecumenoSimple(
+                        inscripcion_id=ins.id,
+                        persona_id=p.id,
+                        nombre_completo=nombre_comp,
+                        fecha_nacimiento=p.fecha_nacimiento,
+                        edad=edad,
+                        genero=p.genero.value if p.genero else None,
+                    )
+                )
+
+        # Ordenar catecúmenos por fecha de nacimiento (cronológico)
+        catecumenos_list.sort(key=lambda c: c.fecha_nacimiento or date.min)
+
+        items.append(
+            GrupoResponse(
+                id=g.id,
+                capilla_id=g.capilla_id,
+                nombre=g.nombre,
+                nombre_santo=g.nombre_santo,
+                codigo=g.codigo,
+                gestion=g.gestion,
+                etapa=g.etapa,
+                tipo_sacramento=g.tipo_sacramento,
+                edad_minima=g.edad_minima,
+                edad_maxima=g.edad_maxima,
+                descripcion=g.descripcion,
+                activo=g.activo,
+                total_catecumenos=len(catecumenos_list),
+                catecumenos=catecumenos_list,
+                created_at=g.created_at,
+            )
+        )
+
+    return GrupoListResponse(total=len(items), items=items)
+
+
+async def create_grupo(db: AsyncSession, capilla_id: int, data: GrupoCreate) -> GrupoResponse:
+    """Crea un nuevo subgrupo para una capilla."""
+    result_cap = await db.execute(select(Capilla).where(Capilla.id == capilla_id))
+    if not result_cap.scalar_one_or_none():
+        raise HTTPException(status_code=404, detail="Capilla no encontrada.")
+
+    # Verificar código único para la gestión
+    dup = await db.execute(
+        select(Grupo).where(
+            Grupo.capilla_id == capilla_id,
+            Grupo.codigo == data.codigo.strip().upper(),
+            Grupo.gestion == data.gestion,
+        )
+    )
+    if dup.scalar_one_or_none():
+        raise HTTPException(status_code=409, detail=f"Ya existe un grupo con el código '{data.codigo}' en la gestión {data.gestion}.")
+
+    grupo = Grupo(
+        capilla_id=capilla_id,
+        nombre=data.nombre.strip(),
+        nombre_santo=data.nombre_santo.strip() if data.nombre_santo else None,
+        codigo=data.codigo.strip().upper(),
+        gestion=data.gestion,
+        etapa=data.etapa,
+        tipo_sacramento=data.tipo_sacramento,
+        edad_minima=data.edad_minima,
+        edad_maxima=data.edad_maxima,
+        descripcion=data.descripcion.strip() if data.descripcion else None,
+        activo=data.activo,
+    )
+    db.add(grupo)
+    await db.commit()
+    await db.refresh(grupo)
+
+    return GrupoResponse(
+        id=grupo.id,
+        capilla_id=grupo.capilla_id,
+        nombre=grupo.nombre,
+        nombre_santo=grupo.nombre_santo,
+        codigo=grupo.codigo,
+        gestion=grupo.gestion,
+        etapa=grupo.etapa,
+        tipo_sacramento=grupo.tipo_sacramento,
+        edad_minima=grupo.edad_minima,
+        edad_maxima=grupo.edad_maxima,
+        descripcion=grupo.descripcion,
+        activo=grupo.activo,
+        total_catecumenos=0,
+        catecumenos=[],
+        created_at=grupo.created_at,
+    )
+
+
+async def update_grupo(db: AsyncSession, capilla_id: int, grupo_id: int, data: GrupoUpdate) -> GrupoResponse:
+    """Actualiza datos de un subgrupo."""
+    result = await db.execute(
+        select(Grupo)
+        .where(Grupo.id == grupo_id, Grupo.capilla_id == capilla_id)
+        .options(selectinload(Grupo.inscripciones).selectinload(Inscripcion.persona))
+    )
+    grupo = result.scalar_one_or_none()
+    if not grupo:
+        raise HTTPException(status_code=404, detail="Grupo no encontrado en esta capilla.")
+
+    if data.nombre is not None:
+        grupo.nombre = data.nombre.strip()
+    if data.nombre_santo is not None:
+        grupo.nombre_santo = data.nombre_santo.strip() if data.nombre_santo else None
+    if data.codigo is not None:
+        grupo.codigo = data.codigo.strip().upper()
+    if data.gestion is not None:
+        grupo.gestion = data.gestion
+    if data.etapa is not None:
+        grupo.etapa = data.etapa
+    if data.tipo_sacramento is not None:
+        grupo.tipo_sacramento = data.tipo_sacramento
+    if data.edad_minima is not None:
+        grupo.edad_minima = data.edad_minima
+    if data.edad_maxima is not None:
+        grupo.edad_maxima = data.edad_maxima
+    if data.descripcion is not None:
+        grupo.descripcion = data.descripcion.strip() if data.descripcion else None
+    if data.activo is not None:
+        grupo.activo = data.activo
+
+    await db.commit()
+    await db.refresh(grupo)
+
+    catecumenos_list = []
+    for ins in grupo.inscripciones:
+        if ins.estado.value == 'ACTIVO':
+            p = ins.persona
+            catecumenos_list.append(
+                GrupoCatecumenoSimple(
+                    inscripcion_id=ins.id,
+                    persona_id=p.id,
+                    nombre_completo=f"{p.nombres} {p.primer_apellido} {p.segundo_apellido or ''}".strip(),
+                    fecha_nacimiento=p.fecha_nacimiento,
+                    edad=_calcular_edad_date(p.fecha_nacimiento),
+                    genero=p.genero.value if p.genero else None,
+                )
+            )
+
+    return GrupoResponse(
+        id=grupo.id,
+        capilla_id=grupo.capilla_id,
+        nombre=grupo.nombre,
+        nombre_santo=grupo.nombre_santo,
+        codigo=grupo.codigo,
+        gestion=grupo.gestion,
+        etapa=grupo.etapa,
+        tipo_sacramento=grupo.tipo_sacramento,
+        edad_minima=grupo.edad_minima,
+        edad_maxima=grupo.edad_maxima,
+        descripcion=grupo.descripcion,
+        activo=grupo.activo,
+        total_catecumenos=len(catecumenos_list),
+        catecumenos=catecumenos_list,
+        created_at=grupo.created_at,
+    )
+
+
+async def delete_grupo(db: AsyncSession, capilla_id: int, grupo_id: int) -> dict:
+    """Elimina un grupo (desasigna catecúmenos de forma segura)."""
+    result = await db.execute(
+        select(Grupo).where(Grupo.id == grupo_id, Grupo.capilla_id == capilla_id)
+    )
+    grupo = result.scalar_one_or_none()
+    if not grupo:
+        raise HTTPException(status_code=404, detail="Grupo no encontrado.")
+
+    # Desasociar catecúmenos antes de eliminar
+    await db.execute(
+        update(Inscripcion).where(Inscripcion.grupo_id == grupo_id).values(grupo_id=None)
+    )
+    await db.delete(grupo)
+    await db.commit()
+    return {"message": f"Grupo '{grupo.nombre}' eliminado con éxito."}
+
+
+async def asignar_santo_grupo(db: AsyncSession, capilla_id: int, grupo_id: int, nombre_santo: str) -> GrupoResponse:
+    """Asigna el nombre patronal de Santo a un subgrupo que ya fue conformado previamente."""
+    result = await db.execute(
+        select(Grupo).where(Grupo.id == grupo_id, Grupo.capilla_id == capilla_id)
+    )
+    grupo = result.scalar_one_or_none()
+    if not grupo:
+        raise HTTPException(status_code=404, detail="Grupo no encontrado.")
+
+    santo_limpio = nombre_santo.strip()
+    grupo.nombre_santo = santo_limpio
+    # Si su nombre era genérico o temporal (ej. "Grupo 1"), se actualiza también el nombre principal
+    if grupo.nombre.startswith("Grupo ") or grupo.nombre == "":
+        grupo.nombre = santo_limpio
+
+    await db.commit()
+    return await update_grupo(db, capilla_id, grupo_id, GrupoUpdate())
+
+
+async def auto_agrupar_por_edad(
+    db: AsyncSession,
+    capilla_id: int,
+    payload: AutoAgruparPayload
+) -> GrupoListResponse:
+    """
+    Algoritmo pastoral de conformación de subgrupos por edad / fecha de nacimiento:
+    1. Obtiene a todos los catecúmenos activos de la capilla, gestión, etapa y sacramento.
+    2. Los ordena cronológicamente por su fecha de nacimiento (de mayor a menor edad) para minimizar la disparidad.
+    3. Asegura la existencia de `cantidad_grupos` (por defecto 4). Si se proveen nombres de santos, los asigna:
+       (ej. Juan Don Bosco, San Nicolás, San Pablo, San Francisco de Asís).
+    4. Distribuye a los niños en bloques continuos por edad entre los subgrupos.
+    5. Actualiza min/max edad y reasigna `Inscripcion.grupo_id`.
+    """
+    # 1. Obtener catecúmenos activos de este ciclo
+    res_insc = await db.execute(
+        select(Inscripcion)
+        .where(
+            Inscripcion.capilla_id == capilla_id,
+            Inscripcion.gestion == payload.gestion,
+            Inscripcion.etapa == payload.etapa,
+            Inscripcion.tipo_sacramento == payload.tipo_sacramento,
+            Inscripcion.estado == 'ACTIVO',
+        )
+        .options(selectinload(Inscripcion.persona))
+    )
+    inscripciones = res_insc.scalars().all()
+
+    if not inscripciones:
+        # Fallback: si no tienen capilla_id asignada explícitamente y es la sede central, buscar inscripciones sin capilla
+        res_fall = await db.execute(
+            select(Inscripcion)
+            .where(
+                (Inscripcion.capilla_id == None) | (Inscripcion.capilla_id == capilla_id),
+                Inscripcion.gestion == payload.gestion,
+                Inscripcion.estado == 'ACTIVO',
+            )
+            .options(selectinload(Inscripcion.persona))
+        )
+        inscripciones = res_fall.scalars().all()
+
+    if not inscripciones:
+        raise HTTPException(
+            status_code=400,
+            detail=f"No hay catecúmenos activos registrados para la gestión {payload.gestion}, {payload.etapa.value} y {payload.tipo_sacramento.value}."
+        )
+
+    # 2. Ordenar por fecha de nacimiento
+    # Para ordenar por edad (los de más edad primero): fecha de nacimiento menor a mayor
+    inscripciones_ordenadas = sorted(
+        inscripciones,
+        key=lambda ins: ins.persona.fecha_nacimiento or date(2000, 1, 1)
+    )
+
+    # 3. Buscar grupos existentes o crearlos
+    res_grupos = await db.execute(
+        select(Grupo).where(
+            Grupo.capilla_id == capilla_id,
+            Grupo.gestion == payload.gestion,
+            Grupo.etapa == payload.etapa,
+            Grupo.tipo_sacramento == payload.tipo_sacramento,
+        ).order_by(Grupo.id.asc())
+    )
+    grupos_existentes = res_grupos.scalars().all()
+
+    grupos_trabajo: List[Grupo] = list(grupos_existentes)
+    santos_defaults = payload.nombres_santos or [
+        "Juan Don Bosco", "San Nicolás", "San Pablo", "San Francisco de Asís"
+    ]
+
+    # Crear los que falten hasta alcanzar cantidad_grupos
+    while len(grupos_trabajo) < payload.cantidad_grupos:
+        idx = len(grupos_trabajo)
+        santo_nom = santos_defaults[idx] if idx < len(santos_defaults) else f"Grupo {idx + 1}"
+        cod_santo = "".join([w[0] for w in santo_nom.split()]).upper()
+        nuevo_g = Grupo(
+            capilla_id=capilla_id,
+            nombre=santo_nom,
+            nombre_santo=santo_nom,
+            codigo=f"GRP-{cod_santo}-{idx+1}",
+            gestion=payload.gestion,
+            etapa=payload.etapa,
+            tipo_sacramento=payload.tipo_sacramento,
+            activo=True,
+        )
+        db.add(nuevo_g)
+        await db.flush()
+        grupos_trabajo.append(nuevo_g)
+
+    # Si hay grupos existentes y se pasaron santos, sincronizar nombres
+    for i, g in enumerate(grupos_trabajo[:payload.cantidad_grupos]):
+        if i < len(santos_defaults) and (not g.nombre_santo or g.nombre.startswith("Grupo ")):
+            g.nombre_santo = santos_defaults[i]
+            g.nombre = santos_defaults[i]
+
+    # 4. Distribuir a los niños ordenados por edad
+    total_ninos = len(inscripciones_ordenadas)
+    k = payload.cantidad_grupos
+    # Chunk split
+    chunk_size = total_ninos // k
+    remainder = total_ninos % k
+
+    start_idx = 0
+    for i in range(k):
+        current_chunk_len = chunk_size + (1 if i < remainder else 0)
+        chunk = inscripciones_ordenadas[start_idx:start_idx + current_chunk_len]
+        start_idx += current_chunk_len
+
+        target_grupo = grupos_trabajo[i]
+
+        edades = []
+        for ins in chunk:
+            ins.grupo_id = target_grupo.id
+            ins.capilla_id = capilla_id
+            ins.etapa = payload.etapa
+            ins.gestion = payload.gestion
+            e = _calcular_edad_date(ins.persona.fecha_nacimiento)
+            if e is not None:
+                edades.append(e)
+
+        if edades:
+            target_grupo.edad_minima = min(edades)
+            target_grupo.edad_maxima = max(edades)
+            target_grupo.descripcion = f"Rango de edad: {target_grupo.edad_minima} - {target_grupo.edad_maxima} años."
+
+    await db.commit()
+    return await list_grupos(db, capilla_id, payload.gestion, payload.etapa, payload.tipo_sacramento)
+

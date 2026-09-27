@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
+import Select from '@/components/ui/Select';
 
 export const MonthlyCalendarGrid: React.FC = () => {
   const today = new Date();
@@ -95,17 +96,21 @@ export const MonthlyCalendarGrid: React.FC = () => {
           </div>
 
           {/* Filtro de tipos de eventos */}
-          <select
-            value={filterType}
-            onChange={(e) => setFilterType(e.target.value)}
-            className="text-xs font-semibold bg-stone-50 border border-app-border rounded-xl px-3 py-2 text-app-text focus:outline-none focus:ring-2 focus:ring-lit-primary/20"
-          >
-            <option value="TODOS">Todos los Eventos</option>
-            <option value="solemnidad">Solemnidades Mayores</option>
-            <option value="fiesta">Fiestas Litúrgicas</option>
-            <option value="parroquia">Fiestas Parroquiales</option>
-            <option value="sacramento">Primeras Comuniones / Sacramentos</option>
-          </select>
+          <div className="w-52">
+            <Select
+              size="sm"
+              variant="filter"
+              value={filterType}
+              onChange={(val) => setFilterType(val)}
+              options={[
+                { value: 'TODOS', label: 'Todos los Eventos' },
+                { value: 'solemnidad', label: 'Solemnidades Mayores' },
+                { value: 'fiesta', label: 'Fiestas Litúrgicas' },
+                { value: 'parroquia', label: 'Fiestas Parroquiales' },
+                { value: 'sacramento', label: 'Primeras Comuniones / Sacramentos' },
+              ]}
+            />
+          </div>
         </div>
       </div>
 

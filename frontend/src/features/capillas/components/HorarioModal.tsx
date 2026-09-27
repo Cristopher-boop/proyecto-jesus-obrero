@@ -11,6 +11,7 @@ import { X, Clock, Church, BookOpen, CheckCircle2, AlertTriangle, Sparkles, Cale
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import Alert from '@/components/ui/Alert';
+import Select from '@/components/ui/Select';
 import type { HorarioAsistencia, HorarioAsistenciaCreate, HorarioAsistenciaUpdate, DiaSemana } from '@/types';
 
 interface HorarioModalProps {
@@ -225,18 +226,13 @@ export const HorarioModal: React.FC<HorarioModalProps> = ({
         <form onSubmit={handleSubmit} className="space-y-4 mt-5">
           {/* Día de la Semana */}
           <div>
-            <label className="block text-xs font-bold text-app-text mb-1 flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5 text-lit-primary" /> Día de la Semana
-            </label>
-            <select
+            <Select<DiaSemana>
+              label="Día de la Semana"
+              leftIcon={<Calendar className="w-3.5 h-3.5 text-lit-primary" />}
               value={diaSemana}
-              onChange={(e) => setDiaSemana(e.target.value as DiaSemana)}
-              className="w-full text-xs rounded-xl border border-app-border px-3.5 py-2.5 bg-white outline-none focus:ring-2 focus:ring-lit-primary/30 font-medium"
-            >
-              {DIAS_SEMANA.map(d => (
-                <option key={d.value} value={d.value}>{d.label}</option>
-              ))}
-            </select>
+              onChange={(val) => setDiaSemana(val)}
+              options={DIAS_SEMANA}
+            />
           </div>
 
           {/* Franja 1: Puntual */}

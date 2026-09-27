@@ -10,6 +10,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship
 from app.core.database import Base
+from app.modules.personas.models import EtapaFormacion, TipoSacramento
 
 
 class DiaSemana(str, enum.Enum):
@@ -40,6 +41,7 @@ class Capilla(Base):
 
     # Relaciones
     horarios = relationship('HorarioAsistencia', back_populates='capilla', cascade='all, delete-orphan')
+    grupos   = relationship('Grupo', back_populates='capilla', cascade='all, delete-orphan')
 
     def __repr__(self):
         return f'<Capilla {self.nombre} [{self.codigo}]>'
@@ -78,3 +80,35 @@ class HorarioAsistencia(Base):
 
     def __repr__(self):
         return f'<HorarioAsistencia Capilla={self.capilla_id} {self.dia_semana.value} [{self.hora_inicio_puntual}-{self.hora_fin_catequesis}]>'
+
+
+class Grupo(Base):
+    """
+    Subgrupo de catequesis.
+    En Jesús Obrero se conforman inicialmente según edades/fechas de nacimiento
+    y posteriormente se les asigna su nombre patronal de Santo
+    (ej: Juan Don Bosco, San Nicolás, San Pablo, San Francisco de Asís).
+    """
+    __tablename__ = 'grupos'
+
+    id              = Column(Integer, primary_key=True, index=True)
+    capilla_id      = Column(Integer, ForeignKey('capillas.id', ondelete='CASCADE'), nullable=False)
+    nombre          = Column(String(100), nullable=False)        # Ej: "Grupo 1" o "Juan Don Bosco"
+    nombre_santo    = Column(String(100), nullable=True)         # Ej: "Juan Don Bosco", "San Nicolás"
+    codigo          = Column(String(30), nullable=False)         # Ej: "GRP-JDB", "GRP-1"
+    gestion         = Column(Integer, nullable=False, default=2026, index=True)
+    etapa           = Column(Enum(EtapaFormacion), nullable=False, default=EtapaFormacion.SEGUNDO_ANO, index=True)
+    tipo_sacramento = Column(Enum(TipoSacramento), nullable=False, default=TipoSacramento.PRIMERA_COMUNION)
+    edad_minima     = Column(Integer, nullable=True)
+    edad_maxima     = Column(Integer, nullable=True)
+    descripcion     = Column(Text, nullable=True)
+    activo          = Column(Boolean, default=True, nullable=False)
+    created_at      = Column(DateTime(timezone=True), default=datetime.utcnow)
+    updated_at      = Column(DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    capilla       = relationship('Capilla', back_populates='grupos')
+    inscripciones = relationship('Inscripcion', back_populates='grupo')
+
+    def __repr__(self):
+        santo_str = f" ({self.nombre_santo})" if self.nombre_santo else ""
+        return f'<Grupo {self.nombre}{santo_str} - {self.gestion} [{self.etapa}]>'

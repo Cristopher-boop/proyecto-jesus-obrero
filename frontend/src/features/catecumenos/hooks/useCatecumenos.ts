@@ -10,16 +10,24 @@ import type {
   CatecumenoDetalle,
   TipoSacramento,
   EstadoInscripcion,
+  EtapaFormacion,
+  TipoDocumento,
+  EstadoDocumento,
+  DocumentoListResponse,
 } from '@/types';
 
 // ─── Tipos locales ────────────────────────────────────────────────────────────
 
 export interface CatecumenoFilters {
-  tipo?:   TipoSacramento;
-  estado?: EstadoInscripcion;
-  search?: string;
-  skip?:   number;
-  limit?:  number;
+  tipo?:       TipoSacramento;
+  etapa?:      EtapaFormacion;
+  gestion?:    number;
+  grupo_id?:   number;
+  capilla_id?: number;
+  estado?:     EstadoInscripcion;
+  search?:     string;
+  skip?:       number;
+  limit?:      number;
 }
 
 export interface TutorNuevoPayload {
@@ -104,9 +112,13 @@ export function useCatecumenos(filters: CatecumenoFilters = {}) {
     setError(null);
     try {
       const params = new URLSearchParams();
-      if (filters.tipo)   params.append('tipo',   filters.tipo);
-      if (filters.estado) params.append('estado', filters.estado);
-      if (filters.search) params.append('search', filters.search);
+      if (filters.tipo)       params.append('tipo',       filters.tipo);
+      if (filters.etapa)      params.append('etapa',      filters.etapa);
+      if (filters.gestion)    params.append('gestion',    String(filters.gestion));
+      if (filters.grupo_id)   params.append('grupo_id',   String(filters.grupo_id));
+      if (filters.capilla_id) params.append('capilla_id', String(filters.capilla_id));
+      if (filters.estado)     params.append('estado',     filters.estado);
+      if (filters.search)     params.append('search',     filters.search);
       if (filters.skip  !== undefined) params.append('skip',  String(filters.skip));
       if (filters.limit !== undefined) params.append('limit', String(filters.limit));
 
@@ -117,7 +129,17 @@ export function useCatecumenos(filters: CatecumenoFilters = {}) {
     } finally {
       setLoading(false);
     }
-  }, [filters.tipo, filters.estado, filters.search, filters.skip, filters.limit]);
+  }, [
+    filters.tipo,
+    filters.etapa,
+    filters.gestion,
+    filters.grupo_id,
+    filters.capilla_id,
+    filters.estado,
+    filters.search,
+    filters.skip,
+    filters.limit,
+  ]);
 
   useEffect(() => { fetch(); }, [fetch]);
 
@@ -231,4 +253,116 @@ export function useBajaCatecumeno() {
   }, []);
 
   return { darBaja, reactivar, loading, error };
+}
+
+// ─── Hook: Documentos del Catecúmeno ──────────────────────────────────────────
+
+export function useDocumentosCatecumeno(personaId: number | null) {
+  const [data,    setData]    = useState<DocumentoListResponse | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [error,   setError]   = useState<string | null>(null);
+
+  const fetchDocumentos = useCallback(async () => {
+    if (!personaId) {
+      setData(null);
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await apiClient.get<DocumentoListResponse>(`/catecumenos/${personaId}/documentos`);
+      setData(res.data);
+    } catch (err: any) {
+      setError(err?.response?.data?.detail ?? 'Error al cargar documentos.');
+    } finally {
+      setLoading(false);
+    }
+  }, [personaId]);
+
+  useEffect(() => {
+    fetchDocumentos();
+  }, [fetchDocumentos]);
+
+  const subirDocumento = useCallback(async (
+    tipoDocumento: TipoDocumento,
+    archivo: File,
+    observaciones?: string
+  ): Promise<{ success: boolean; error?: string }> => {
+    if (!personaId) return { success: false, error: 'Catecúmeno no seleccionado.' };
+    setActionLoading(true);
+    setError(null);
+    try {
+      const formData = new FormData();
+      formData.append('tipo_documento', tipoDocumento);
+      formData.append('archivo', archivo);
+      if (observaciones) {
+        formData.append('observaciones', observaciones);
+      }
+
+      await apiClient.post(`/catecumenos/${personaId}/documentos`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      await fetchDocumentos();
+      return { success: true };
+    } catch (err: any) {
+      const msg = err?.response?.data?.detail ?? 'Error al subir documento.';
+      setError(msg);
+      return { success: false, error: msg };
+    } finally {
+      setActionLoading(false);
+    }
+  }, [personaId, fetchDocumentos]);
+
+  const verificarDocumento = useCallback(async (
+    docId: number,
+    estado: EstadoDocumento,
+    observaciones?: string
+  ): Promise<{ success: boolean; error?: string }> => {
+    if (!personaId) return { success: false, error: 'Catecúmeno no seleccionado.' };
+    setActionLoading(true);
+    try {
+      await apiClient.put(`/catecumenos/${personaId}/documentos/${docId}/verificar`, {
+        estado,
+        observaciones,
+      });
+      await fetchDocumentos();
+      return { success: true };
+    } catch (err: any) {
+      return {
+        success: false,
+        error: err?.response?.data?.detail ?? 'Error al verificar documento.',
+      };
+    } finally {
+      setActionLoading(false);
+    }
+  }, [personaId, fetchDocumentos]);
+
+  const eliminarDocumento = useCallback(async (docId: number): Promise<{ success: boolean; error?: string }> => {
+    if (!personaId) return { success: false, error: 'Catecúmeno no seleccionado.' };
+    setActionLoading(true);
+    try {
+      await apiClient.delete(`/catecumenos/${personaId}/documentos/${docId}`);
+      await fetchDocumentos();
+      return { success: true };
+    } catch (err: any) {
+      return {
+        success: false,
+        error: err?.response?.data?.detail ?? 'Error al eliminar documento.',
+      };
+    } finally {
+      setActionLoading(false);
+    }
+  }, [personaId, fetchDocumentos]);
+
+  return {
+    data,
+    loading,
+    actionLoading,
+    error,
+    refetch: fetchDocumentos,
+    subirDocumento,
+    verificarDocumento,
+    eliminarDocumento,
+  };
 }

@@ -8,8 +8,20 @@ export type NombreRol         = 'ADMIN' | 'DIACONO' | 'SECRETARIA' | 'CATEQUISTA
 export type Parentesco        = 'PAPA' | 'MAMA' | 'TUTOR_LEGAL' | 'OTRO';
 export type Genero            = 'MASCULINO' | 'FEMENINO' | 'OTRO';
 export type TipoSacramento    = 'PRIMERA_COMUNION' | 'CONFIRMACION';
+export type EtapaFormacion    = 'PRIMER_ANO' | 'SEGUNDO_ANO';
 export type EstadoInscripcion = 'ACTIVO' | 'BAJA' | 'GRADUADO';
 export type EstadoAsistencia  = 'PRESENTE' | 'ATRASO' | 'JUSTIFICADO' | 'FALTA';
+export type TipoDocumento     =
+  | 'FORMULARIO_INSCRIPCION'
+  | 'FE_BAUTISMO'
+  | 'CERT_NACIMIENTO'
+  | 'CERT_MATRIMONIO_PADRES'
+  | 'CI_NINO'
+  | 'CI_PADRE'
+  | 'CI_MADRE'
+  | 'CI_TUTOR'
+  | 'OTRO';
+export type EstadoDocumento   = 'PENDIENTE' | 'ENTREGADO' | 'VERIFICADO' | 'RECHAZADO';
 
 // ─── Persona / Usuario ────────────────────────────────────────────────────────
 
@@ -41,6 +53,10 @@ export interface Usuario {
 export interface Inscripcion {
   id:                          number;
   tipo_sacramento:             TipoSacramento;
+  etapa?:                      EtapaFormacion;
+  gestion?:                    number;
+  grupo_id?:                   number;
+  grupo_nombre?:               string;
   estado:                      EstadoInscripcion;
   // Requisitos de Ingreso
   cuadernillo_comprado:        boolean;
@@ -81,6 +97,10 @@ export interface CatecumenoListItem {
   es_bautizado:                boolean;
   inscripcion_id:              number;
   tipo_sacramento:             TipoSacramento;
+  etapa?:                      EtapaFormacion;
+  gestion?:                    number;
+  grupo_id?:                   number;
+  grupo_nombre?:               string;
   estado:                      EstadoInscripcion;
   token_qr:                    string;
   cuadernillo_comprado:        boolean;
@@ -94,6 +114,7 @@ export interface CatecumenoListItem {
   doc_ci_padre:                boolean;
   doc_ci_madre:                boolean;
   doc_ci_tutor:                boolean;
+  total_documentos_subidos?:   number;
   fecha_inscripcion:           string;
   tutor_nombre?:               string;
   tutor_telefono?:             string;
@@ -119,6 +140,35 @@ export interface CatecumenoListResponse {
   skip:  number;
   limit: number;
   items: CatecumenoListItem[];
+}
+
+// ─── Documentos de Catecúmenos ───────────────────────────────────────────────
+
+export interface DocumentoItem {
+  id:             number;
+  inscripcion_id: number;
+  tipo_documento: TipoDocumento;
+  nombre_archivo: string;
+  ruta_archivo:   string;
+  mime_type?:     string;
+  tamano_bytes?:  number;
+  estado:         EstadoDocumento;
+  observaciones?: string;
+  created_at:     string;
+}
+
+export interface DocumentoListResponse {
+  persona_id:       number;
+  nombre_completo:  string;
+  inscripcion_id:   number;
+  total_subidos:    number;
+  documentos:       DocumentoItem[];
+  checklist_estado: Record<string, boolean>;
+}
+
+export interface VerificarDocumentoPayload {
+  estado:        EstadoDocumento;
+  observaciones?: string;
 }
 
 // ─── Feligreses ───────────────────────────────────────────────────────────────
@@ -302,6 +352,74 @@ export interface FaseHorarioActual {
   hora_actual: string;
   dia_actual:  string;
   horario?:    HorarioAsistencia;
+}
+
+// ─── Subgrupos de Catequesis (Jesús Obrero) ──────────────────────────────────
+
+export interface GrupoCatecumenoSimple {
+  persona_id:       number;
+  nombre_completo:  string;
+  fecha_nacimiento?: string;
+  edad?:            number;
+}
+
+export interface GrupoResponse {
+  id:                 number;
+  capilla_id:         number;
+  nombre:             string;
+  nombre_santo?:      string;
+  codigo:             string;
+  gestion:            number;
+  etapa:              EtapaFormacion;
+  tipo_sacramento:    TipoSacramento;
+  edad_minima?:       number;
+  edad_maxima?:       number;
+  color_identificador?: string;
+  activo:             boolean;
+  total_catecumenos:  number;
+  catecumenos:        GrupoCatecumenoSimple[];
+}
+
+export interface GrupoListResponse {
+  total: number;
+  items: GrupoResponse[];
+}
+
+export interface GrupoCreate {
+  nombre:              string;
+  nombre_santo?:       string;
+  codigo:              string;
+  gestion:             number;
+  etapa?:              EtapaFormacion;
+  tipo_sacramento?:    TipoSacramento;
+  edad_minima?:        number;
+  edad_maxima?:        number;
+  color_identificador?: string;
+}
+
+export interface GrupoUpdate {
+  nombre?:              string;
+  nombre_santo?:       string;
+  codigo?:             string;
+  gestion?:            number;
+  etapa?:              EtapaFormacion;
+  tipo_sacramento?:    TipoSacramento;
+  edad_minima?:        number;
+  edad_maxima?:        number;
+  color_identificador?: string;
+  activo?:             boolean;
+}
+
+export interface AsignarSantoPayload {
+  nombre_santo: string;
+}
+
+export interface AutoAgruparPayload {
+  gestion?:         number;
+  etapa?:           EtapaFormacion;
+  tipo_sacramento?: TipoSacramento;
+  cantidad_grupos?: number;
+  nombres_santos?:  string[];
 }
 
 

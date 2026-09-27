@@ -1,12 +1,15 @@
 """
-Esquemas Pydantic para el módulo de Capillas y Horarios de Asistencia.
+Esquemas Pydantic para el módulo de Capillas, Horarios de Asistencia y Grupos.
 """
 
 from pydantic import BaseModel, Field, model_validator
-from datetime import time, datetime
+from datetime import time, datetime, date
 from typing import Optional, List
 from app.modules.capillas_grupos.models import DiaSemana
+from app.modules.personas.models import EtapaFormacion, TipoSacramento
 
+
+# ─── Horarios de Asistencia ───────────────────────────────────────────────────
 
 class HorarioAsistenciaBase(BaseModel):
     dia_semana:             DiaSemana
@@ -62,6 +65,82 @@ class HorarioAsistenciaResponse(HorarioAsistenciaBase):
         from_attributes = True
 
 
+# ─── Grupos de Catequesis ─────────────────────────────────────────────────────
+
+class GrupoBase(BaseModel):
+    nombre:          str = Field(..., min_length=2, max_length=100)
+    nombre_santo:    Optional[str] = Field(None, max_length=100)
+    codigo:          str = Field(..., min_length=2, max_length=30)
+    gestion:         int = Field(default=2026, ge=2000, le=2100)
+    etapa:           EtapaFormacion = EtapaFormacion.SEGUNDO_ANO
+    tipo_sacramento: TipoSacramento = TipoSacramento.PRIMERA_COMUNION
+    edad_minima:     Optional[int] = None
+    edad_maxima:     Optional[int] = None
+    descripcion:     Optional[str] = None
+    activo:          bool = True
+
+
+class GrupoCreate(GrupoBase):
+    pass
+
+
+class GrupoUpdate(BaseModel):
+    nombre:          Optional[str] = None
+    nombre_santo:    Optional[str] = None
+    codigo:          Optional[str] = None
+    gestion:         Optional[int] = None
+    etapa:           Optional[EtapaFormacion] = None
+    tipo_sacramento: Optional[TipoSacramento] = None
+    edad_minima:     Optional[int] = None
+    edad_maxima:     Optional[int] = None
+    descripcion:     Optional[str] = None
+    activo:          Optional[bool] = None
+
+
+class AsignarSantoPayload(BaseModel):
+    nombre_santo: str = Field(..., min_length=3, max_length=100)
+
+
+class AutoAgruparPayload(BaseModel):
+    gestion:         int = 2026
+    etapa:           EtapaFormacion = EtapaFormacion.SEGUNDO_ANO
+    tipo_sacramento: TipoSacramento = TipoSacramento.PRIMERA_COMUNION
+    cantidad_grupos: int = Field(default=4, ge=2, le=10)
+    nombres_santos:  Optional[List[str]] = [
+        "Juan Don Bosco",
+        "San Nicolás",
+        "San Pablo",
+        "San Francisco de Asís"
+    ]
+
+
+class GrupoCatecumenoSimple(BaseModel):
+    inscripcion_id:   int
+    persona_id:       int
+    nombre_completo:  str
+    fecha_nacimiento: Optional[date] = None
+    edad:             Optional[int] = None
+    genero:           Optional[str] = None
+
+
+class GrupoResponse(GrupoBase):
+    id:                int
+    capilla_id:        int
+    total_catecumenos: int = 0
+    catecumenos:       List[GrupoCatecumenoSimple] = []
+    created_at:        datetime
+
+    class Config:
+        from_attributes = True
+
+
+class GrupoListResponse(BaseModel):
+    total: int
+    items: List[GrupoResponse]
+
+
+# ─── Capillas ─────────────────────────────────────────────────────────────────
+
 class CapillaBase(BaseModel):
     nombre:            str = Field(..., min_length=3, max_length=150)
     codigo:            str = Field(..., min_length=2, max_length=30)
@@ -87,6 +166,7 @@ class CapillaUpdate(BaseModel):
 class CapillaResponse(CapillaBase):
     id:         int
     horarios:   List[HorarioAsistenciaResponse] = []
+    grupos:     List[GrupoResponse] = []
     created_at: datetime
 
     class Config:
@@ -102,6 +182,7 @@ class CapillaListItem(BaseModel):
     activo:            bool
     descripcion:       Optional[str] = None
     total_horarios:    int = 0
+    total_grupos:      int = 0
     horarios:          List[HorarioAsistenciaResponse] = []
 
     class Config:

@@ -7,7 +7,12 @@ import type {
   HorarioAsistenciaCreate,
   HorarioAsistenciaUpdate,
   HorarioAsistencia,
-  FaseHorarioActual
+  FaseHorarioActual,
+  GrupoListResponse,
+  GrupoResponse,
+  EtapaFormacion,
+  TipoSacramento,
+  AutoAgruparPayload,
 } from '@/types';
 
 export function useCapillas() {
@@ -133,4 +138,83 @@ export function useFaseActual(capillaId?: number, horaCustom?: string) {
   }, [fetchFase]);
 
   return { fase, loading, refetch: fetchFase };
+}
+
+export function useGruposCapilla(
+  capillaId?: number,
+  gestion?: number,
+  etapa?: EtapaFormacion,
+  tipoSacramento?: TipoSacramento
+) {
+  const [data,    setData]    = useState<GrupoListResponse | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error,   setError]   = useState<string | null>(null);
+
+  const fetchGrupos = useCallback(async () => {
+    if (!capillaId) {
+      setData(null);
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      const params: Record<string, any> = {};
+      if (gestion) params.gestion = gestion;
+      if (etapa) params.etapa = etapa;
+      if (tipoSacramento) params.tipo_sacramento = tipoSacramento;
+
+      const res = await apiClient.get<GrupoListResponse>(`/capillas/${capillaId}/grupos`, { params });
+      setData(res.data);
+    } catch (err: any) {
+      setError(err?.response?.data?.detail ?? 'Error al cargar subgrupos.');
+    } finally {
+      setLoading(false);
+    }
+  }, [capillaId, gestion, etapa, tipoSacramento]);
+
+  useEffect(() => {
+    fetchGrupos();
+  }, [fetchGrupos]);
+
+  const asignarSanto = useCallback(async (
+    grupoId: number,
+    nombreSanto: string
+  ): Promise<{ success: boolean; data?: GrupoResponse; error?: string }> => {
+    if (!capillaId) return { success: false, error: 'Capilla no definida' };
+    try {
+      const res = await apiClient.post<GrupoResponse>(
+        `/capillas/${capillaId}/grupos/${grupoId}/asignar-santo`,
+        { nombre_santo: nombreSanto }
+      );
+      await fetchGrupos();
+      return { success: true, data: res.data };
+    } catch (err: any) {
+      return { success: false, error: err?.response?.data?.detail ?? 'Error al asignar santo' };
+    }
+  }, [capillaId, fetchGrupos]);
+
+  const autoAgruparPorEdad = useCallback(async (
+    payload: AutoAgruparPayload
+  ): Promise<{ success: boolean; data?: GrupoListResponse; error?: string }> => {
+    if (!capillaId) return { success: false, error: 'Capilla no definida' };
+    try {
+      const res = await apiClient.post<GrupoListResponse>(
+        `/capillas/${capillaId}/grupos/auto-agrupar-por-edad`,
+        payload
+      );
+      await fetchGrupos();
+      return { success: true, data: res.data };
+    } catch (err: any) {
+      return { success: false, error: err?.response?.data?.detail ?? 'Error al auto-agrupar' };
+    }
+  }, [capillaId, fetchGrupos]);
+
+  return {
+    data,
+    loading,
+    error,
+    refetch: fetchGrupos,
+    asignarSanto,
+    autoAgruparPorEdad,
+  };
 }

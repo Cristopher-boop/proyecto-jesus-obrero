@@ -14,6 +14,7 @@ import {
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Alert from '@/components/ui/Alert';
+import Select from '@/components/ui/Select';
 import apiClient from '@/core/api/client';
 import { useCreateCatecumeno, type CreateCatecumenoPayload, type TutorNuevoPayload } from '../hooks/useCatecumenos';
 import type { FeligresBusquedaItem, Parentesco } from '@/types';
@@ -266,15 +267,18 @@ export const InscripcionModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }
                     className={`w-full px-3 py-2 text-sm rounded-lg border bg-white outline-none focus:ring-2 focus:ring-lit-primary/30 ${errors.fecha_nacimiento ? 'border-semantic-error' : 'border-app-border'}`} />
                   {errors.fecha_nacimiento && <p className="text-[11px] text-semantic-error">{errors.fecha_nacimiento}</p>}
                 </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-app-text">Género</label>
-                  <select value={nino.genero} onChange={e => nF('genero', e.target.value)} className="w-full px-3 py-2 text-sm rounded-lg border border-app-border bg-white outline-none focus:ring-2 focus:ring-lit-primary/30">
-                    <option value="">No especificado</option>
-                    <option value="MASCULINO">Masculino</option>
-                    <option value="FEMENINO">Femenino</option>
-                    <option value="OTRO">Otro</option>
-                  </select>
-                </div>
+                <Select
+                  label="Género"
+                  value={nino.genero}
+                  onChange={val => nF('genero', val)}
+                  placeholder="No especificado"
+                  options={[
+                    { value: '', label: 'No especificado' },
+                    { value: 'MASCULINO', label: '♂ Masculino' },
+                    { value: 'FEMENINO', label: '♀ Femenino' },
+                    { value: 'OTRO', label: '⚬ Otro' },
+                  ]}
+                />
               </div>
               <Input label="Dirección" value={nino.direccion} onChange={e => nF('direccion', e.target.value)} placeholder="Ej: Zona Rosas Pampa, Calle X N° 123" />
 

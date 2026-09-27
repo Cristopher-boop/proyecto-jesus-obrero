@@ -1,35 +1,50 @@
 """
-Lógica de negocio del módulo Catecúmenos — v2.
-- Creación con multi-tutor (lista)
+Lógica de negocio del módulo Catecúmenos — v3.
+- Creación con multi-tutor (lista), etapa, gestión y subgrupos
 - Baja lógica / Reactivación
-- Listado, detalle, actualización, vinculación de tutor adicional
+- Listado con filtros avanzados (gestión, etapa, sacramento, subgrupo)
+- Gestión y verificación de documentos adjuntos
 """
 
+import os
 import uuid
 from datetime import date
-from typing import Optional
+from typing import Optional, List, Dict
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy import func, or_
+from fastapi import HTTPException, status
 
 from app.modules.personas.models import (
-    Persona, Inscripcion, RelacionFamiliar,
-    TipoSacramento, EstadoInscripcion
+    Persona, Inscripcion, RelacionFamiliar, DocumentoCatecumeno,
+    TipoSacramento, EstadoInscripcion, EtapaFormacion, TipoDocumento, EstadoDocumento
 )
+from app.modules.capillas_grupos.models import Grupo
 from app.modules.catecumenos.schemas import (
     CatecumenoCreate, CatecumenoUpdate,
     CatecumenoListItem, CatecumenoDetalle, TutorResponse, InscripcionResponse,
-    CatecumenoListResponse, TutorVinculacion
+    CatecumenoListResponse, TutorVinculacion, DocumentoItem, DocumentoListResponse,
+    VerificarDocumentoPayload
 )
-from fastapi import HTTPException, status
 
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 
 def _title(s: Optional[str]) -> Optional[str]:
     return s.strip().title() if s else None
+
+DOC_CHECKLIST_MAP = {
+    TipoDocumento.FORMULARIO_INSCRIPCION: "doc_formulario_inscripcion",
+    TipoDocumento.FE_BAUTISMO:            "doc_fe_bautismo",
+    TipoDocumento.CERT_NACIMIENTO:        "doc_cert_nacimiento",
+    TipoDocumento.CERT_MATRIMONIO_PADRES: "doc_cert_matrimonio_padres",
+    TipoDocumento.CI_NINO:                "doc_ci_nino",
+    TipoDocumento.CI_PADRE:               "doc_ci_padre",
+    TipoDocumento.CI_MADRE:               "doc_ci_madre",
+    TipoDocumento.CI_TUTOR:               "doc_ci_tutor",
+}
 
 
 # ─── Creación ─────────────────────────────────────────────────────────────────
@@ -38,7 +53,7 @@ async def create_catecumeno(db: AsyncSession, data: CatecumenoCreate) -> Inscrip
     """
     Transacción atómica:
       1. Persona del catecúmeno
-      2. Inscripción con QR UUID4
+      2. Inscripción con QR UUID4, gestión y etapa
       3. Iterar tutores_nuevos → crear Persona + RelacionFamiliar
       4. Iterar tutores_vinculo → verificar que existan + RelacionFamiliar
     Máx. 3 tutores en total.
@@ -70,6 +85,10 @@ async def create_catecumeno(db: AsyncSession, data: CatecumenoCreate) -> Inscrip
     inscripcion = Inscripcion(
         persona_id=catecumeno.id,
         tipo_sacramento=data.tipo_sacramento,
+        etapa=data.etapa,
+        gestion=data.gestion,
+        capilla_id=data.capilla_id,
+        grupo_id=data.grupo_id,
         estado=EstadoInscripcion.ACTIVO,
         cuadernillo_comprado=data.cuadernillo_comprado,
         libro_comprado=data.libro_comprado,
@@ -83,21 +102,18 @@ async def create_catecumeno(db: AsyncSession, data: CatecumenoCreate) -> Inscrip
         doc_ci_madre=data.doc_ci_madre,
         doc_ci_tutor=data.doc_ci_tutor,
         token_qr=str(uuid.uuid4()),
-        fecha_inscripcion=date.today(),
         observaciones=data.observaciones,
-        capilla_id=None,
-        grupo_id=None,
     )
     db.add(inscripcion)
     await db.flush()
 
-    # 3 — Tutores nuevos (crear Persona + RelacionFamiliar)
-    for t in data.tutores_nuevos:
+    # 3 — Tutores nuevos
+    for t_data in data.tutores_nuevos:
         tutor = Persona(
-            nombres=_title(t.nombres),
-            primer_apellido=_title(t.primer_apellido),
-            segundo_apellido=_title(t.segundo_apellido),
-            telefono_principal=t.telefono_principal,
+            nombres=_title(t_data.nombres),
+            primer_apellido=_title(t_data.primer_apellido),
+            segundo_apellido=_title(t_data.segundo_apellido),
+            telefono_principal=t_data.telefono_principal,
         )
         db.add(tutor)
         await db.flush()
@@ -105,15 +121,15 @@ async def create_catecumeno(db: AsyncSession, data: CatecumenoCreate) -> Inscrip
         relacion = RelacionFamiliar(
             catecumeno_persona_id=catecumeno.id,
             tutor_persona_id=tutor.id,
-            parentesco=t.parentesco,
-            es_contacto_emergencia=t.es_contacto_emergencia,
+            parentesco=t_data.parentesco,
+            es_contacto_emergencia=t_data.es_contacto_emergencia,
         )
         db.add(relacion)
 
-    # 4 — Tutores vinculados (feligreses ya existentes)
+    # 4 — Tutores vinculados
     for v in data.tutores_vinculo:
-        result = await db.execute(select(Persona).where(Persona.id == v.tutor_persona_id))
-        tutor = result.scalar_one_or_none()
+        res = await db.execute(select(Persona).where(Persona.id == v.tutor_persona_id))
+        tutor = res.scalar_one_or_none()
         if not tutor:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -132,11 +148,15 @@ async def create_catecumeno(db: AsyncSession, data: CatecumenoCreate) -> Inscrip
     return inscripcion
 
 
-# ─── Listado paginado ─────────────────────────────────────────────────────────
+# ─── Listado paginado con Filtros ─────────────────────────────────────────────
 
 async def list_catecumenos(
     db: AsyncSession,
     tipo: Optional[TipoSacramento] = None,
+    etapa: Optional[EtapaFormacion] = None,
+    gestion: Optional[int] = None,
+    grupo_id: Optional[int] = None,
+    capilla_id: Optional[int] = None,
     estado: Optional[EstadoInscripcion] = None,
     search: Optional[str] = None,
     skip: int = 0,
@@ -148,13 +168,23 @@ async def list_catecumenos(
         .options(
             selectinload(Inscripcion.persona)
             .selectinload(Persona.como_catecumeno)
-            .selectinload(RelacionFamiliar.tutor)
+            .selectinload(RelacionFamiliar.tutor),
+            selectinload(Inscripcion.grupo),
+            selectinload(Inscripcion.documentos),
         )
         .join(Persona, Inscripcion.persona_id == Persona.id)
     )
 
     if tipo:
         query = query.where(Inscripcion.tipo_sacramento == tipo)
+    if etapa:
+        query = query.where(Inscripcion.etapa == etapa)
+    if gestion:
+        query = query.where(Inscripcion.gestion == gestion)
+    if grupo_id:
+        query = query.where(Inscripcion.grupo_id == grupo_id)
+    if capilla_id:
+        query = query.where(Inscripcion.capilla_id == capilla_id)
     if estado:
         query = query.where(Inscripcion.estado == estado)
     if search:
@@ -196,6 +226,10 @@ async def list_catecumenos(
             es_bautizado=p.es_bautizado,
             inscripcion_id=insc.id,
             tipo_sacramento=insc.tipo_sacramento,
+            etapa=insc.etapa,
+            gestion=insc.gestion,
+            grupo_id=insc.grupo_id,
+            grupo_nombre=insc.grupo.nombre if insc.grupo else None,
             estado=insc.estado,
             token_qr=insc.token_qr,
             cuadernillo_comprado=insc.cuadernillo_comprado,
@@ -209,6 +243,7 @@ async def list_catecumenos(
             doc_ci_padre=insc.doc_ci_padre,
             doc_ci_madre=insc.doc_ci_madre,
             doc_ci_tutor=insc.doc_ci_tutor,
+            total_documentos_subidos=len(insc.documentos) if insc.documentos else 0,
             fecha_inscripcion=insc.fecha_inscripcion,
             tutor_nombre=tutor_nombre,
             tutor_telefono=tutor_tel,
@@ -224,7 +259,7 @@ async def get_catecumeno_detalle(db: AsyncSession, persona_id: int) -> Catecumen
         select(Persona)
         .where(Persona.id == persona_id)
         .options(
-            selectinload(Persona.inscripciones),
+            selectinload(Persona.inscripciones).selectinload(Inscripcion.grupo),
             selectinload(Persona.como_catecumeno).selectinload(RelacionFamiliar.tutor),
         )
     )
@@ -250,6 +285,31 @@ async def get_catecumeno_detalle(db: AsyncSession, persona_id: int) -> Catecumen
         for rel in persona.como_catecumeno
     ]
 
+    insc_resp = InscripcionResponse(
+        id=insc.id,
+        tipo_sacramento=insc.tipo_sacramento,
+        estado=insc.estado,
+        etapa=insc.etapa,
+        gestion=insc.gestion,
+        grupo_id=insc.grupo_id,
+        grupo_nombre=insc.grupo.nombre if insc.grupo else None,
+        cuadernillo_comprado=insc.cuadernillo_comprado,
+        libro_comprado=insc.libro_comprado,
+        pago_cuota_inicial=insc.pago_cuota_inicial,
+        doc_formulario_inscripcion=insc.doc_formulario_inscripcion,
+        doc_fe_bautismo=insc.doc_fe_bautismo,
+        doc_cert_nacimiento=insc.doc_cert_nacimiento,
+        doc_cert_matrimonio_padres=insc.doc_cert_matrimonio_padres,
+        doc_ci_nino=insc.doc_ci_nino,
+        doc_ci_padre=insc.doc_ci_padre,
+        doc_ci_madre=insc.doc_ci_madre,
+        doc_ci_tutor=insc.doc_ci_tutor,
+        token_qr=insc.token_qr,
+        fecha_inscripcion=insc.fecha_inscripcion,
+        observaciones=insc.observaciones,
+        created_at=insc.created_at,
+    )
+
     return CatecumenoDetalle(
         persona_id=persona.id,
         ci_dni=persona.ci_dni,
@@ -261,7 +321,7 @@ async def get_catecumeno_detalle(db: AsyncSession, persona_id: int) -> Catecumen
         genero=persona.genero,
         direccion=persona.direccion,
         es_bautizado=persona.es_bautizado,
-        inscripcion=InscripcionResponse.model_validate(insc),
+        inscripcion=insc_resp,
         tutores=tutores,
     )
 
@@ -291,6 +351,7 @@ async def update_catecumeno(
     if persona.inscripciones:
         insc = persona.inscripciones[0]
         for campo in [
+            'tipo_sacramento', 'etapa', 'gestion', 'capilla_id', 'grupo_id',
             'cuadernillo_comprado', 'libro_comprado', 'pago_cuota_inicial',
             'doc_formulario_inscripcion', 'doc_fe_bautismo', 'doc_cert_nacimiento',
             'doc_cert_matrimonio_padres', 'doc_ci_nino', 'doc_ci_padre',
@@ -304,10 +365,9 @@ async def update_catecumeno(
     return await get_catecumeno_detalle(db, persona_id)
 
 
-# ─── Baja Lógica ──────────────────────────────────────────────────────────────
+# ─── Baja Lógica y Reactivación ───────────────────────────────────────────────
 
 async def dar_baja(db: AsyncSession, persona_id: int) -> CatecumenoDetalle:
-    """Marca la inscripción como BAJA (no elimina ningún registro)."""
     result = await db.execute(
         select(Persona).where(Persona.id == persona_id)
         .options(selectinload(Persona.inscripciones))
@@ -326,7 +386,6 @@ async def dar_baja(db: AsyncSession, persona_id: int) -> CatecumenoDetalle:
 
 
 async def reactivar(db: AsyncSession, persona_id: int) -> CatecumenoDetalle:
-    """Reactiva una inscripción en estado BAJA o GRADUADO."""
     result = await db.execute(
         select(Persona).where(Persona.id == persona_id)
         .options(selectinload(Persona.inscripciones))
@@ -343,8 +402,6 @@ async def reactivar(db: AsyncSession, persona_id: int) -> CatecumenoDetalle:
     await db.commit()
     return await get_catecumeno_detalle(db, persona_id)
 
-
-# ─── Vincular tutor adicional ─────────────────────────────────────────────────
 
 async def vincular_tutor(db: AsyncSession, catecumeno_persona_id: int, data: TutorVinculacion) -> dict:
     result = await db.execute(select(Persona).where(Persona.id == catecumeno_persona_id))
@@ -373,3 +430,158 @@ async def vincular_tutor(db: AsyncSession, catecumeno_persona_id: int, data: Tut
     db.add(relacion)
     await db.commit()
     return {"detail": "Tutor vinculado correctamente."}
+
+
+# ─── Gestión de Documentos de Catecúmenos ─────────────────────────────────────
+
+async def get_documentos_catecumeno(db: AsyncSession, persona_id: int) -> DocumentoListResponse:
+    """Retorna la lista de archivos subidos y el estado del checklist para un catecúmeno."""
+    result = await db.execute(
+        select(Persona)
+        .where(Persona.id == persona_id)
+        .options(
+            selectinload(Persona.inscripciones).selectinload(Inscripcion.documentos)
+        )
+    )
+    persona = result.scalar_one_or_none()
+    if not persona or not persona.inscripciones:
+        raise HTTPException(status_code=404, detail="Catecúmeno o inscripción no encontrada.")
+
+    insc = persona.inscripciones[0]
+    nombre_completo = f"{persona.nombres} {persona.primer_apellido} {persona.segundo_apellido or ''}".strip()
+
+    docs_items = [DocumentoItem.model_validate(d) for d in insc.documentos]
+
+    checklist = {
+        "doc_formulario_inscripcion": insc.doc_formulario_inscripcion,
+        "doc_fe_bautismo":            insc.doc_fe_bautismo,
+        "doc_cert_nacimiento":        insc.doc_cert_nacimiento,
+        "doc_cert_matrimonio_padres": insc.doc_cert_matrimonio_padres,
+        "doc_ci_nino":                insc.doc_ci_nino,
+        "doc_ci_padre":               insc.doc_ci_padre,
+        "doc_ci_madre":               insc.doc_ci_madre,
+        "doc_ci_tutor":               insc.doc_ci_tutor,
+    }
+
+    return DocumentoListResponse(
+        persona_id=persona.id,
+        nombre_completo=nombre_completo,
+        inscripcion_id=insc.id,
+        total_subidos=len(docs_items),
+        documentos=docs_items,
+        checklist_estado=checklist,
+    )
+
+
+async def subir_documento_catecumeno(
+    db: AsyncSession,
+    persona_id: int,
+    tipo_documento: TipoDocumento,
+    nombre_archivo: str,
+    ruta_archivo: str,
+    mime_type: Optional[str] = None,
+    tamano_bytes: Optional[int] = None,
+    observaciones: Optional[str] = None
+) -> DocumentoItem:
+    """Registra un archivo de documento y marca automáticamente el requisito en la inscripción."""
+    result = await db.execute(
+        select(Persona)
+        .where(Persona.id == persona_id)
+        .options(selectinload(Persona.inscripciones))
+    )
+    persona = result.scalar_one_or_none()
+    if not persona or not persona.inscripciones:
+        raise HTTPException(status_code=404, detail="Catecúmeno o inscripción no encontrada.")
+
+    insc = persona.inscripciones[0]
+
+    doc = DocumentoCatecumeno(
+        inscripcion_id=insc.id,
+        tipo_documento=tipo_documento,
+        nombre_archivo=nombre_archivo,
+        ruta_archivo=ruta_archivo,
+        mime_type=mime_type,
+        tamano_bytes=tamano_bytes,
+        estado=EstadoDocumento.ENTREGADO,
+        observaciones=observaciones,
+    )
+    db.add(doc)
+
+    # Actualizar checklist booleano en la inscripción
+    col_name = DOC_CHECKLIST_MAP.get(tipo_documento)
+    if col_name and hasattr(insc, col_name):
+        setattr(insc, col_name, True)
+
+    await db.commit()
+    await db.refresh(doc)
+    return DocumentoItem.model_validate(doc)
+
+
+async def verificar_documento(
+    db: AsyncSession,
+    persona_id: int,
+    doc_id: int,
+    payload: VerificarDocumentoPayload
+) -> DocumentoItem:
+    """Actualiza el estado de verificación de un documento."""
+    result = await db.execute(
+        select(DocumentoCatecumeno)
+        .join(Inscripcion, DocumentoCatecumeno.inscripcion_id == Inscripcion.id)
+        .where(
+            DocumentoCatecumeno.id == doc_id,
+            Inscripcion.persona_id == persona_id
+        )
+    )
+    doc = result.scalar_one_or_none()
+    if not doc:
+        raise HTTPException(status_code=404, detail="Documento no encontrado.")
+
+    doc.estado = payload.estado
+    if payload.observaciones is not None:
+        doc.observaciones = payload.observaciones
+
+    await db.commit()
+    await db.refresh(doc)
+    return DocumentoItem.model_validate(doc)
+
+
+async def eliminar_documento(
+    db: AsyncSession,
+    persona_id: int,
+    doc_id: int
+) -> dict:
+    """Elimina un documento y recalcula si el requisito sigue cumplido."""
+    result = await db.execute(
+        select(DocumentoCatecumeno)
+        .join(Inscripcion, DocumentoCatecumeno.inscripcion_id == Inscripcion.id)
+        .where(
+            DocumentoCatecumeno.id == doc_id,
+            Inscripcion.persona_id == persona_id
+        )
+        .options(selectinload(DocumentoCatecumeno.inscripcion))
+    )
+    doc = result.scalar_one_or_none()
+    if not doc:
+        raise HTTPException(status_code=404, detail="Documento no encontrado.")
+
+    insc = doc.inscripcion
+    tipo_doc = doc.tipo_documento
+
+    await db.delete(doc)
+    await db.flush()
+
+    # Verificar si quedan otros documentos del mismo tipo
+    restantes = await db.execute(
+        select(DocumentoCatecumeno)
+        .where(
+            DocumentoCatecumeno.inscripcion_id == insc.id,
+            DocumentoCatecumeno.tipo_documento == tipo_doc
+        )
+    )
+    if not restantes.scalars().first():
+        col_name = DOC_CHECKLIST_MAP.get(tipo_doc)
+        if col_name and hasattr(insc, col_name):
+            setattr(insc, col_name, False)
+
+    await db.commit()
+    return {"message": "Documento eliminado con éxito."}

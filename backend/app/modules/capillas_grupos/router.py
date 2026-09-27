@@ -94,3 +94,90 @@ async def delete_horario(
     db: AsyncSession = Depends(get_db)
 ):
     return await service.delete_horario(db, capilla_id, horario_id)
+
+
+# ─── Subgrupos de Catequesis (Jesús Obrero) ───────────────────────────────────
+
+@router.get(
+    "/{capilla_id}/grupos",
+    response_model=service.GrupoListResponse,
+    summary="Listar subgrupos de catequesis de una capilla"
+)
+async def get_grupos(
+    capilla_id: int,
+    gestion: Optional[int] = Query(None, description="Filtrar por año de gestión"),
+    etapa: Optional[str] = Query(None, description="Filtrar por etapa (PRIMER_ANO, SEGUNDO_ANO)"),
+    tipo_sacramento: Optional[str] = Query(None, description="Filtrar por sacramento"),
+    db: AsyncSession = Depends(get_db)
+):
+    etapa_enum = service.EtapaFormacion(etapa) if etapa else None
+    sacramento_enum = service.TipoSacramento(tipo_sacramento) if tipo_sacramento else None
+    return await service.list_grupos(db, capilla_id, gestion, etapa_enum, sacramento_enum)
+
+
+@router.post(
+    "/{capilla_id}/grupos",
+    response_model=service.GrupoResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Crear un nuevo subgrupo en una capilla"
+)
+async def create_grupo(
+    capilla_id: int,
+    data: service.GrupoCreate,
+    db: AsyncSession = Depends(get_db)
+):
+    return await service.create_grupo(db, capilla_id, data)
+
+
+@router.put(
+    "/{capilla_id}/grupos/{grupo_id}",
+    response_model=service.GrupoResponse,
+    summary="Actualizar un subgrupo"
+)
+async def update_grupo(
+    capilla_id: int,
+    grupo_id: int,
+    data: service.GrupoUpdate,
+    db: AsyncSession = Depends(get_db)
+):
+    return await service.update_grupo(db, capilla_id, grupo_id, data)
+
+
+@router.delete(
+    "/{capilla_id}/grupos/{grupo_id}",
+    summary="Eliminar un subgrupo"
+)
+async def delete_grupo(
+    capilla_id: int,
+    grupo_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    return await service.delete_grupo(db, capilla_id, grupo_id)
+
+
+@router.post(
+    "/{capilla_id}/grupos/{grupo_id}/asignar-santo",
+    response_model=service.GrupoResponse,
+    summary="Asignar o actualizar el nombre patronal de Santo al subgrupo"
+)
+async def asignar_santo(
+    capilla_id: int,
+    grupo_id: int,
+    payload: service.AsignarSantoPayload,
+    db: AsyncSession = Depends(get_db)
+):
+    return await service.asignar_santo_grupo(db, capilla_id, grupo_id, payload.nombre_santo)
+
+
+@router.post(
+    "/{capilla_id}/grupos/auto-agrupar-por-edad",
+    response_model=service.GrupoListResponse,
+    summary="Conformar automáticamente subgrupos balanceados por edad / fecha de nacimiento"
+)
+async def auto_agrupar_por_edad(
+    capilla_id: int,
+    payload: service.AutoAgruparPayload,
+    db: AsyncSession = Depends(get_db)
+):
+    return await service.auto_agrupar_por_edad(db, capilla_id, payload)
+

@@ -49,6 +49,30 @@ class EstadoInscripcion(str, enum.Enum):
     GRADUADO = 'GRADUADO'
 
 
+class EtapaFormacion(str, enum.Enum):
+    PRIMER_ANO  = 'PRIMER_ANO'
+    SEGUNDO_ANO = 'SEGUNDO_ANO'
+
+
+class TipoDocumento(str, enum.Enum):
+    FORMULARIO_INSCRIPCION     = 'FORMULARIO_INSCRIPCION'
+    FE_BAUTISMO                = 'FE_BAUTISMO'
+    CERT_NACIMIENTO            = 'CERT_NACIMIENTO'
+    CERT_MATRIMONIO_PADRES     = 'CERT_MATRIMONIO_PADRES'
+    CI_NINO                    = 'CI_NINO'
+    CI_PADRE                   = 'CI_PADRE'
+    CI_MADRE                   = 'CI_MADRE'
+    CI_TUTOR                   = 'CI_TUTOR'
+    OTRO                       = 'OTRO'
+
+
+class EstadoDocumento(str, enum.Enum):
+    PENDIENTE  = 'PENDIENTE'
+    ENTREGADO  = 'ENTREGADO'
+    VERIFICADO = 'VERIFICADO'
+    RECHAZADO  = 'RECHAZADO'
+
+
 # ─── Tabla asociativa Usuarios ↔ Roles ────────────────────────────────────────
 
 usuarios_roles = Table(
@@ -165,9 +189,12 @@ class Inscripcion(Base):
     tipo_sacramento     = Column(Enum(TipoSacramento),    nullable=False, default=TipoSacramento.PRIMERA_COMUNION)
     estado              = Column(Enum(EstadoInscripcion), nullable=False, default=EstadoInscripcion.ACTIVO)
 
-    # Sede: todos los catecúmenos actuales van a Jesús Obrero (sin grupo por ahora)
-    capilla_id          = Column(Integer, nullable=True)   # FK a capillas cuando exista el módulo
-    grupo_id            = Column(Integer, nullable=True)   # FK a grupos cuando se asigne
+    etapa               = Column(Enum(EtapaFormacion), nullable=False, default=EtapaFormacion.PRIMER_ANO, index=True)
+    gestion             = Column(Integer, nullable=False, default=2026, index=True)
+
+    # Sede: Capilla Jesús Obrero u otras, y grupo asignado
+    capilla_id          = Column(Integer, ForeignKey('capillas.id', ondelete='SET NULL'), nullable=True)
+    grupo_id            = Column(Integer, ForeignKey('grupos.id', ondelete='SET NULL'), nullable=True)
 
     # Requisitos de Ingreso (Entrada)
     cuadernillo_comprado        = Column(Boolean, default=False, nullable=False)
@@ -193,12 +220,40 @@ class Inscripcion(Base):
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
     updated_at = Column(DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    persona = relationship('Persona', back_populates='inscripciones')
+    persona    = relationship('Persona', back_populates='inscripciones')
+    capilla    = relationship('Capilla', backref='inscripciones')
+    grupo      = relationship('Grupo', back_populates='inscripciones')
+    documentos = relationship('DocumentoCatecumeno', back_populates='inscripcion', cascade='all, delete-orphan')
 
     __table_args__ = (
-        # Un catecúmeno sólo puede tener una inscripción activa por tipo de sacramento
-        UniqueConstraint('persona_id', 'tipo_sacramento', name='uq_inscripcion_persona_sacramento'),
+        # Un catecúmeno sólo puede tener una inscripción activa por tipo de sacramento y gestión
+        UniqueConstraint('persona_id', 'tipo_sacramento', 'gestion', name='uq_inscripcion_persona_sacramento_gestion'),
     )
 
     def __repr__(self):
-        return f'<Inscripcion {self.persona_id} - {self.tipo_sacramento}>'
+        return f'<Inscripcion {self.persona_id} - {self.tipo_sacramento} {self.etapa} ({self.gestion})>'
+
+
+class DocumentoCatecumeno(Base):
+    """
+    Archivos físicos o comprobantes digitales subidos para los requisitos de salida del catecúmeno.
+    """
+    __tablename__ = 'documentos_catecumenos'
+
+    id                  = Column(Integer, primary_key=True, index=True)
+    inscripcion_id      = Column(Integer, ForeignKey('inscripciones.id', ondelete='CASCADE'), nullable=False, index=True)
+    tipo_documento      = Column(Enum(TipoDocumento), nullable=False)
+    nombre_archivo      = Column(String(255), nullable=False)
+    ruta_archivo        = Column(String(500), nullable=False)
+    mime_type           = Column(String(100), nullable=True)
+    tamano_bytes        = Column(Integer, nullable=True)
+    estado              = Column(Enum(EstadoDocumento), nullable=False, default=EstadoDocumento.ENTREGADO)
+    observaciones       = Column(Text, nullable=True)
+    created_at          = Column(DateTime(timezone=True), default=datetime.utcnow)
+    updated_at          = Column(DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    inscripcion = relationship('Inscripcion', back_populates='documentos')
+
+    def __repr__(self):
+        return f'<DocumentoCatecumeno {self.tipo_documento} - {self.nombre_archivo} [{self.estado}]>'
+
