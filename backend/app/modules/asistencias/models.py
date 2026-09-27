@@ -8,6 +8,7 @@ from sqlalchemy import Column, Integer, String, Date, Time, DateTime, Enum, Fore
 from sqlalchemy.orm import relationship
 
 from app.core.database import Base
+from app.modules.personas.models import Persona, Inscripcion, Usuario
 
 
 class EstadoAsistencia(str, enum.Enum):

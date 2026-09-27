@@ -10,9 +10,11 @@ from app.modules.asistencias.models import EstadoAsistencia
 
 class ScanQRPayload(BaseModel):
     """Payload enviado al escanear un código QR."""
-    token_qr:    str = Field(..., min_length=5, description="Token UUID del catecúmeno o cadena completa PARROQUIA-JO:<uuid>")
-    estado:      Optional[EstadoAsistencia] = None
-    observacion: Optional[str] = None
+    token_qr:       str = Field(..., min_length=5, description="Token UUID del catecúmeno o cadena completa PARROQUIA-JO:<uuid>")
+    estado:         Optional[EstadoAsistencia] = None
+    observacion:    Optional[str] = None
+    capilla_id:     Optional[int] = None
+    hora_simulada:  Optional[str] = None  # Formato 'HH:MM' para pruebas o reloj en vivo
 
 
 class AsistenciaScanResponse(BaseModel):

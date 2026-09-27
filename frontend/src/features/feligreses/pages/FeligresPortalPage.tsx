@@ -2,7 +2,8 @@
  * FeligresPortalPage — Portal exclusivo para el Padre de Familia / Tutor.
  *
  * Muestra el perfil del feligrés autenticado, sus credenciales y el listado
- * de sus hijos catecúmenos vinculados con su respectivo Gafete QR de Asistencia.
+ * de sus hijos catecúmenos vinculados con su estado de requisitos de ingreso,
+ * documentos para la celebración del sacramento y su respectivo Gafete QR.
  */
 
 import React, { useState, useEffect } from 'react';
@@ -12,6 +13,7 @@ import apiClient from '@/core/api/client';
 import {
   LogOut, Baby, QrCode,
   ShieldCheck, Phone, User, CheckCircle2, FileText, AlertCircle,
+  BookOpen, BookCheck, DollarSign, Info,
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
@@ -24,26 +26,36 @@ export const FeligresPortalPage: React.FC = () => {
   const { user, logout } = useAuth();
   const { seasonInfo } = useLiturgicalTheme();
 
-  const [perfil, setPerfil]   = useState<FeligresDetalle | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError]     = useState<string | null>(null);
+  const [perfil, setPerfil]               = useState<FeligresDetalle | null>(null);
+  const [hijosDetalles, setHijosDetalles] = useState<Record<number, CatecumenoDetalle>>({});
+  const [loading, setLoading]             = useState(true);
+  const [error, setError]                 = useState<string | null>(null);
   const [selectedChild, setSelectedChild] = useState<CatecumenoDetalle | null>(null);
 
   useEffect(() => {
     setLoading(true);
     apiClient.get<FeligresDetalle>('/feligreses/mi-perfil')
-      .then(res => setPerfil(res.data))
+      .then(async res => {
+        setPerfil(res.data);
+        // Cargar detalles completos de cada hijo vinculado para mostrar sus documentos reales
+        const detallesMap: Record<number, CatecumenoDetalle> = {};
+        for (const hijo of res.data.hijos) {
+          try {
+            const hRes = await apiClient.get<CatecumenoDetalle>(`/catecumenos/${hijo.persona_id}`);
+            detallesMap[hijo.persona_id] = hRes.data;
+          } catch {
+            // Ignorar fallo puntual
+          }
+        }
+        setHijosDetalles(detallesMap);
+      })
       .catch(err => setError(err?.response?.data?.detail ?? 'No se pudo cargar el perfil del feligrés.'))
       .finally(() => setLoading(false));
   }, []);
 
-  // Cargar detalle completo del catecúmeno seleccionado para mostrar su QR Gafete oficial
-  const handleSelectHijo = async (personaId: number) => {
-    try {
-      const res = await apiClient.get<CatecumenoDetalle>(`/catecumenos/${personaId}`);
-      setSelectedChild(res.data);
-    } catch {
-      // Fallback
+  const handleOpenGafete = (personaId: number) => {
+    if (hijosDetalles[personaId]) {
+      setSelectedChild(hijosDetalles[personaId]);
     }
   };
 
@@ -103,7 +115,7 @@ export const FeligresPortalPage: React.FC = () => {
             ¡Bienvenido(a), {perfil ? `${perfil.nombres} ${perfil.primer_apellido}` : user?.username}!
           </h2>
           <p className="text-xs text-white/80 max-w-xl leading-relaxed">
-            Desde este portal puedes consultar la información de tus hijos inscritos en la catequesis, revisar la compra de sus materiales y obtener su pase de asistencia QR oficial.
+            Consulta los requisitos de ingreso de tus hijos, los documentos solicitados para la celebración del Sacramento y obtén su pase de asistencia QR oficial.
           </p>
         </div>
 
@@ -149,7 +161,7 @@ export const FeligresPortalPage: React.FC = () => {
                   <p className="flex items-center gap-1 text-lit-primary font-semibold">
                     <CheckCircle2 className="w-3.5 h-3.5" /> Identidad vinculada por CI
                   </p>
-                  <p className="text-[10px]">Si necesitas actualizar tu número de teléfono o datos, solicítalo en secretaría.</p>
+                  <p className="text-[10px]">Si necesitas actualizar tu número de teléfono o datos, solicítalo en secretaría parroquial.</p>
                 </div>
               </Card>
             </div>
@@ -171,85 +183,192 @@ export const FeligresPortalPage: React.FC = () => {
                   </p>
                 </Card>
               ) : (
-                <div className="space-y-4">
-                  {perfil.hijos.map(hijo => (
-                    <Card key={hijo.persona_id} className="p-5 space-y-4 hover:border-lit-primary/40 transition-all">
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <h4 className="text-base font-bold text-app-text">{hijo.nombres} {hijo.primer_apellido}</h4>
-                          <p className="text-xs text-app-muted flex items-center gap-1.5 mt-0.5">
-                            <span className="font-semibold text-lit-primary">
-                              {hijo.tipo_sacramento === 'PRIMERA_COMUNION' ? 'Primera Comunión' : 'Confirmación'}
+                <div className="space-y-6">
+                  {perfil.hijos.map(hijo => {
+                    const det = hijosDetalles[hijo.persona_id];
+                    const insc = det?.inscripcion;
+
+                    return (
+                      <Card key={hijo.persona_id} className="p-5 space-y-5 hover:border-lit-primary/40 transition-all shadow-xs">
+                        {/* Cabecera del hijo */}
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <h4 className="text-base font-bold text-app-text">{hijo.nombres} {hijo.primer_apellido}</h4>
+                            <p className="text-xs text-app-muted flex items-center gap-1.5 mt-0.5">
+                              <span className="font-semibold text-lit-primary">
+                                {hijo.tipo_sacramento === 'PRIMERA_COMUNION' ? 'Primera Comunión' : 'Confirmación'}
+                              </span>
+                              <span>· Sede Parroquia Jesús Obrero</span>
+                            </p>
+                          </div>
+                          <Badge variant={hijo.estado === 'ACTIVO' ? 'success' : hijo.estado === 'BAJA' ? 'warning' : 'neutral'} size="sm">
+                            {hijo.estado === 'ACTIVO' ? 'Activo' : hijo.estado === 'BAJA' ? 'Baja' : 'Graduado'}
+                          </Badge>
+                        </div>
+
+                        {/* 1. Requisitos para Iniciar / Ingreso */}
+                        <div className="p-4 rounded-xl bg-lit-surface/50 border border-lit-border space-y-3">
+                          <div className="flex items-center justify-between">
+                            <p className="text-xs font-bold text-lit-primary uppercase tracking-wide flex items-center gap-1.5">
+                              <CheckCircle2 className="w-4 h-4" /> 1. Requisitos para Iniciar (Ingreso)
+                            </p>
+                            <span className="text-[10px] text-lit-primary font-bold">Materiales & Cuota</span>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                            {/* Cuadernillo */}
+                            <div className="p-3 rounded-lg bg-white border border-app-border flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-2">
+                                <BookCheck className="w-4 h-4 text-lit-primary flex-shrink-0" />
+                                <div>
+                                  <p className="text-xs font-bold text-app-text">Cuadernillo</p>
+                                  <p className="text-[10px] text-app-muted">Asistencia</p>
+                                </div>
+                              </div>
+                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                                insc?.cuadernillo_comprado ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                              }`}>
+                                {insc?.cuadernillo_comprado ? 'Entregado ✓' : 'Falta ⚠️'}
+                              </span>
+                            </div>
+
+                            {/* Libro */}
+                            <div className="p-3 rounded-lg bg-white border border-app-border flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-2">
+                                <BookOpen className="w-4 h-4 text-lit-primary flex-shrink-0" />
+                                <div>
+                                  <p className="text-xs font-bold text-app-text">Libro Oficial</p>
+                                  <p className="text-[10px] text-app-muted">Catequesis</p>
+                                </div>
+                              </div>
+                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                                insc?.libro_comprado ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                              }`}>
+                                {insc?.libro_comprado ? 'Entregado ✓' : 'Falta ⚠️'}
+                              </span>
+                            </div>
+
+                            {/* Cuota inicial 20 Bs */}
+                            <div className="p-3 rounded-lg bg-white border border-app-border flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-2">
+                                <DollarSign className="w-4 h-4 text-lit-primary flex-shrink-0" />
+                                <div>
+                                  <p className="text-xs font-bold text-app-text">Cuota Inicial</p>
+                                  <p className="text-[10px] text-app-muted">Aporte 20 Bs</p>
+                                </div>
+                              </div>
+                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                                insc?.pago_cuota_inicial ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                              }`}>
+                                {insc?.pago_cuota_inicial ? 'Pagado ✓' : 'Pendiente ⚠️'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* 2. Documentación Requerida para Salida / Celebración del Sacramento */}
+                        <div className="p-4 rounded-xl bg-stone-50 border border-app-border space-y-3">
+                          <div className="flex items-center justify-between flex-wrap gap-1">
+                            <p className="text-xs font-bold text-stone-800 uppercase tracking-wide flex items-center gap-1.5">
+                              <FileText className="w-4 h-4 text-stone-600" /> 2. Documentos para el Sacramento (Salida)
+                            </p>
+                            <span className="text-[10px] font-semibold text-stone-600 bg-stone-200/70 px-2 py-0.5 rounded-full">
+                              📄 Solo Fotocopias (Nada original)
                             </span>
-                            <span>· Sede Parroquia Jesús Obrero</span>
+                          </div>
+
+                          <div className="space-y-2 text-xs">
+                            {/* 1. Formulario */}
+                            <div className="flex items-center justify-between p-2.5 rounded-lg bg-white border border-app-border">
+                              <span className="font-semibold text-app-text">1. Formulario de Inscripción firmado</span>
+                              <span className={`text-[10px] font-bold ${insc?.doc_formulario_inscripcion ? 'text-emerald-700' : 'text-amber-700'}`}>
+                                {insc?.doc_formulario_inscripcion ? 'Presentado ✓' : 'Pendiente ⚠️'}
+                              </span>
+                            </div>
+
+                            {/* 2. Certificado de Bautismo */}
+                            <div className="p-2.5 rounded-lg bg-white border border-app-border space-y-1.5">
+                              <div className="flex items-center justify-between">
+                                <span className="font-semibold text-app-text">2. Certificado de Bautismo / Fe de Bautizo</span>
+                                <span className={`text-[10px] font-bold ${insc?.doc_fe_bautismo ? 'text-emerald-700' : 'text-amber-700'}`}>
+                                  {insc?.doc_fe_bautismo ? 'Presentado ✓' : 'Pendiente ⚠️'}
+                                </span>
+                              </div>
+                              {det && !det.es_bautizado && (
+                                <div className="p-2 rounded-md bg-amber-50 border border-amber-200 text-[10px] text-amber-800 flex items-start gap-1.5">
+                                  <AlertCircle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-amber-600" />
+                                  <span>
+                                    <strong>Aviso pastoral importante:</strong> Si tu hijo/a aún no ha realizado su Bautismo, debe recibirlo antes de 2º año en la Vigilia Pascual.
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* 3. Certificado de Nacimiento */}
+                            <div className="flex items-center justify-between p-2.5 rounded-lg bg-white border border-app-border">
+                              <span className="font-semibold text-app-text">3. Certificado de Nacimiento</span>
+                              <span className={`text-[10px] font-bold ${insc?.doc_cert_nacimiento ? 'text-emerald-700' : 'text-amber-700'}`}>
+                                {insc?.doc_cert_nacimiento ? 'Presentado ✓' : 'Pendiente ⚠️'}
+                              </span>
+                            </div>
+
+                            {/* 4. Certificado de Matrimonio Religioso o Compromiso */}
+                            <div className="flex items-center justify-between p-2.5 rounded-lg bg-white border border-app-border">
+                              <span className="font-semibold text-app-text">4. Certificado de Matrimonio Religioso o Compromiso de Matrimonio</span>
+                              <span className={`text-[10px] font-bold ${insc?.doc_cert_matrimonio_padres ? 'text-emerald-700' : 'text-amber-700'}`}>
+                                {insc?.doc_cert_matrimonio_padres ? 'Presentado ✓' : 'Pendiente ⚠️'}
+                              </span>
+                            </div>
+
+                            {/* 5. Fotocopias de CIs */}
+                            <div className="p-2.5 rounded-lg bg-white border border-app-border space-y-1.5">
+                              <span className="font-semibold text-app-text block">5. Fotocopias de Cédulas de Identidad (CIs):</span>
+                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[10px] pt-1">
+                                <div className={`p-1.5 rounded border text-center font-bold ${insc?.doc_ci_nino ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-stone-50 border-stone-200 text-stone-600'}`}>
+                                  CI Catecúmeno {insc?.doc_ci_nino ? '✓' : '⚠️'}
+                                </div>
+                                <div className={`p-1.5 rounded border text-center font-bold ${insc?.doc_ci_padre ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-stone-50 border-stone-200 text-stone-600'}`}>
+                                  CI Padre {insc?.doc_ci_padre ? '✓' : '⚠️'}
+                                </div>
+                                <div className={`p-1.5 rounded border text-center font-bold ${insc?.doc_ci_madre ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-stone-50 border-stone-200 text-stone-600'}`}>
+                                  CI Madre {insc?.doc_ci_madre ? '✓' : '⚠️'}
+                                </div>
+                                <div className={`p-1.5 rounded border text-center font-bold ${insc?.doc_ci_tutor ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-stone-50 border-stone-200 text-stone-600'}`}>
+                                  CI Tutor {insc?.doc_ci_tutor ? '✓' : '⚠️'}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <p className="text-[10px] text-app-muted flex items-center gap-1 pt-1">
+                            <Info className="w-3.5 h-3.5" /> Entrega los documentos pendientes en secretaría parroquial para la habilitación sacramental.
                           </p>
                         </div>
-                        <Badge variant={hijo.estado === 'ACTIVO' ? 'success' : hijo.estado === 'BAJA' ? 'warning' : 'neutral'} size="sm">
-                          {hijo.estado === 'ACTIVO' ? 'Activo' : hijo.estado === 'BAJA' ? 'Baja' : 'Graduado'}
-                        </Badge>
-                      </div>
 
-                      {/* Panel Provisional de Estado Documental y Requisitos */}
-                      <div className="p-3.5 rounded-xl bg-stone-50 border border-app-border space-y-2">
-                        <p className="text-[11px] font-bold text-lit-primary uppercase tracking-wide flex items-center gap-1.5">
-                          <FileText className="w-3.5 h-3.5" /> Requisitos y Estado Documental (Provisional)
-                        </p>
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
-                          <div className="flex items-center gap-1.5 p-2 rounded-lg bg-white border border-app-border">
-                            <CheckCircle2 className="w-3.5 h-3.5 text-semantic-success flex-shrink-0" />
-                            <div>
-                              <p className="font-semibold text-app-text">Fe de Bautismo</p>
-                              <p className="text-[9px] text-semantic-success font-bold">Presentado ✓</p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-1.5 p-2 rounded-lg bg-white border border-app-border">
-                            <CheckCircle2 className="w-3.5 h-3.5 text-semantic-success flex-shrink-0" />
-                            <div>
-                              <p className="font-semibold text-app-text">Cert. Nacimiento</p>
-                              <p className="text-[9px] text-semantic-success font-bold">Presentado ✓</p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-1.5 p-2 rounded-lg bg-white border border-app-border">
-                            <AlertCircle className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
-                            <div>
-                              <p className="font-semibold text-app-text">Fotocopia CI Niño</p>
-                              <p className="text-[9px] text-amber-600 font-bold">Pendiente ⚠️</p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-1.5 p-2 rounded-lg bg-white border border-app-border">
-                            <CheckCircle2 className="w-3.5 h-3.5 text-semantic-success flex-shrink-0" />
-                            <div>
-                              <p className="font-semibold text-app-text">Fotocopia CI Tutor</p>
-                              <p className="text-[9px] text-semantic-success font-bold">Presentado ✓</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between pt-3 border-t border-app-border text-xs flex-wrap gap-2">
-                        <div className="flex items-center gap-3">
+                        {/* Botón para ver Gafete QR */}
+                        <div className="flex items-center justify-between pt-2 border-t border-app-border text-xs flex-wrap gap-2">
                           <span className="flex items-center gap-1 text-lit-primary font-medium">
-                            <QrCode className="w-3.5 h-3.5" /> Gafete QR de Asistencia del Niño
+                            <QrCode className="w-3.5 h-3.5" /> Gafete Oficial de Asistencia
                           </span>
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            leftIcon={<QrCode className="w-3.5 h-3.5" />}
+                            onClick={() => handleOpenGafete(hijo.persona_id)}
+                          >
+                            Ver / Imprimir Gafete QR
+                          </Button>
                         </div>
-                        <Button
-                          variant="primary"
-                          size="sm"
-                          leftIcon={<QrCode className="w-3.5 h-3.5" />}
-                          onClick={() => handleSelectHijo(hijo.persona_id)}
-                        >
-                          Ver Gafete QR
-                        </Button>
-                      </div>
-                    </Card>
-                  ))}
+                      </Card>
+                    );
+                  })}
                 </div>
               )}
 
-              {/* Modal / Vista de Gafete QR del hijo seleccionado */}
+              {/* Modal de Gafete QR del hijo seleccionado */}
               {selectedChild && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-                  <div className="bg-white rounded-2xl p-6 max-w-md w-full space-y-4 shadow-2xl border border-app-border">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">
+                  <div className="bg-white rounded-2xl p-6 max-w-md w-full space-y-4 shadow-2xl border border-app-border animate-slide-in-right">
                     <div className="flex items-center justify-between">
                       <h4 className="text-sm font-bold text-app-text flex items-center gap-2">
                         <QrCode className="w-4 h-4 text-lit-primary" /> Gafete Oficial de Asistencia

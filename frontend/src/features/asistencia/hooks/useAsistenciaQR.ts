@@ -32,7 +32,9 @@ export function useRegistrarAsistenciaQR() {
   const escanear = useCallback(async (
     token_qr: string,
     estado?: string,
-    observacion?: string
+    observacion?: string,
+    capilla_id?: number,
+    hora_simulada?: string
   ): Promise<AsistenciaScanResponse | null> => {
     setLoading(true);
     setError(null);
@@ -41,6 +43,8 @@ export function useRegistrarAsistenciaQR() {
         token_qr,
         estado,
         observacion,
+        capilla_id,
+        hora_simulada,
       });
       return res.data;
     } catch (err: any) {

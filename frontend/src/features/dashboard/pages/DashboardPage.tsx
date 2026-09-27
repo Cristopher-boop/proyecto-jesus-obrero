@@ -19,6 +19,7 @@ import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import Alert from '@/components/ui/Alert';
 import Input from '@/components/ui/Input';
+import Select from '@/components/ui/Select';
 
 export const DashboardPage: React.FC = () => {
   const { season, seasonInfo, setSeason } = useLiturgicalTheme();
@@ -372,18 +373,19 @@ export const DashboardPage: React.FC = () => {
             />
           </div>
 
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            <Filter className="w-4 h-4 text-app-muted" />
-            <select
+          <div className="w-full sm:w-60">
+            <Select
+              size="sm"
+              leftIcon={<Filter className="w-3.5 h-3.5 text-app-muted" />}
               value={filterCapilla}
-              onChange={(e) => setFilterCapilla(e.target.value)}
-              className="text-xs bg-white border border-app-border rounded-lg px-3 py-2 text-app-text focus:outline-none focus:ring-2 focus:ring-lit-accent/30 font-medium"
-            >
-              <option value="TODAS">Todas las Capillas</option>
-              <option value="Jesús Obrero">Jesús Obrero (Principal)</option>
-              <option value="San Martín de Porras">San Martín de Porras</option>
-              <option value="Señor de la Santa Cruz">Señor de la Santa Cruz</option>
-            </select>
+              onChange={(val) => setFilterCapilla(val)}
+              options={[
+                { value: 'TODAS', label: 'Todas las Capillas' },
+                { value: 'Jesús Obrero', label: 'Jesús Obrero (Principal)' },
+                { value: 'San Martín de Porras', label: 'San Martín de Porras' },
+                { value: 'Señor de la Santa Cruz', label: 'Señor de la Santa Cruz' },
+              ]}
+            />
           </div>
         </div>
 

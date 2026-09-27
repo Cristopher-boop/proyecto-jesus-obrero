@@ -135,4 +135,19 @@
   .animate-slide-in-right {
     animation: slideInRight 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
+
+  @keyframes slideOutRight {
+    from {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateX(18px);
+    }
+  }
+
+  .animate-slide-out-right {
+    animation: slideOutRight 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
 }

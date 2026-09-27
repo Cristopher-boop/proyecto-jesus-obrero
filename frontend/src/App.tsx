@@ -9,6 +9,7 @@ import FeligresesPage    from './features/feligreses/pages/FeligresesPage';
 import FeligresPortalPage from './features/feligreses/pages/FeligresPortalPage';
 import AsistenciaPage     from './features/asistencia/pages/AsistenciaPage';
 import CalendarioPage     from './features/calendario/pages/CalendarioPage';
+import CapillasPage       from './features/capillas/pages/CapillasPage';
 
 function MainContent() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -41,7 +42,8 @@ function MainContent() {
       {activeTab === 'catecumenos' && <CatecumenosPage />}
       {activeTab === 'feligreses'  && <FeligresesPage />}
       {activeTab === 'calendario'  && <CalendarioPage />}
-      {!['dashboard', 'asistencia', 'catecumenos', 'feligreses', 'calendario'].includes(activeTab) && (
+      {activeTab === 'capillas'    && <CapillasPage />}
+      {!['dashboard', 'asistencia', 'catecumenos', 'feligreses', 'calendario', 'capillas'].includes(activeTab) && (
         <div className="bg-white p-12 rounded-2xl border border-app-border text-center shadow-xs">
           <span className="text-4xl">🚧</span>
           <h3 className="text-lg font-bold text-app-text mt-3">Módulo en Desarrollo</h3>
