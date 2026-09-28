@@ -38,7 +38,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const navigation = [
     { id: 'dashboard',    name: 'Panel Principal',      icon: LayoutDashboard },
-    { id: 'asistencia',   name: 'Asistencia QR',        icon: QrCode, badge: 'En Vivo' },
+    { id: 'asistencia',   name: 'Asistencia',           icon: QrCode, badge: 'En Vivo' },
     { id: 'catecumenos',  name: 'Catecúmenos',          icon: Users },
     { id: 'feligreses',   name: 'Feligreses',           icon: UserCheck },
     { id: 'calendario',   name: 'Calendario Litúrgico', icon: Calendar, badge: '2026' },

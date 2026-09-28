@@ -1,344 +1,204 @@
 /**
- * QRScannerWidget — Widget de escaneo y simulación de Asistencia QR con control de horarios por Capilla.
- *
- * Integra:
- *  1. Selector de Capilla activa (Sede Central Jesús Obrero o Capillas Filiales).
- *  2. Indicador en vivo de la Fase Horaria actual.
- *  3. Simulador de horas clave (Puntual, Durante Misa, Catequesis/Atraso y Fuera de Horario/Falta).
- *  4. Escaneo óptico por Cámara Web / Móvil con evaluación horaria en tiempo real.
+ * QRScannerWidget — Escáner óptico mediante Cámara Web / Móvil en tiempo real.
+ * Exclusivamente cámara web para la marcación en puerta de templo o salón parroquial.
  */
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Html5QrcodeScanner } from 'html5-qrcode';
-import { Camera, Zap, QrCode, Sparkles, Clock, BookOpen, Church, AlertCircle } from 'lucide-react';
+import { Camera, Church, RefreshCw, X } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import Select from '@/components/ui/Select';
-import { useCatecumenos } from '@/features/catecumenos/hooks/useCatecumenos';
 import { useCapillas, useFaseActual } from '@/features/capillas/hooks/useCapillas';
-import type { CatecumenoListItem } from '@/types';
-
-type ScanMode = 'simulador' | 'camara';
 
 interface Props {
-  onScan: (token: string, estado?: string, observacion?: string, capilla_id?: number, hora_simulada?: string) => void;
+  onScan: (token: string, estado?: string, observacion?: string, capilla_id?: number) => void;
   loading: boolean;
+  selectedCapillaId: number;
+  onCapillaChange: (capillaId: number) => void;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
-interface FranjaHorarioSimulada {
-  id: string;
-  label: string;
-  sublabel: string;
-  hora: string;
-  estadoEsperado: 'PRESENTE' | 'ATRASO' | 'FALTA';
-  icon: React.FC<any>;
-  colorClass: string;
-  badgeVariant: 'success' | 'warning' | 'error' | 'neutral';
-}
-
-const FRANJAS_SIMULADAS: FranjaHorarioSimulada[] = [
-  {
-    id: 'puntual',
-    label: 'Puntual',
-    sublabel: '09:20 - 10:10 (Antes de Misa)',
-    hora: '09:35',
-    estadoEsperado: 'PRESENTE',
-    icon: Clock,
-    colorClass: 'border-semantic-success/40 bg-semantic-success-bg text-semantic-success-text',
-    badgeVariant: 'success',
-  },
-  {
-    id: 'misa',
-    label: 'Durante la Misa',
-    sublabel: '10:11 - 12:00 (Celebración)',
-    hora: '10:45',
-    estadoEsperado: 'PRESENTE',
-    icon: Church,
-    colorClass: 'border-semantic-warning/40 bg-semantic-warning-bg text-semantic-warning-text',
-    badgeVariant: 'warning',
-  },
-  {
-    id: 'catequesis',
-    label: 'En Catequesis (Atraso)',
-    sublabel: '12:01 - 13:00 (Aulas formativas)',
-    hora: '12:20',
-    estadoEsperado: 'ATRASO',
-    icon: BookOpen,
-    colorClass: 'border-semantic-error/40 bg-semantic-error-bg text-semantic-error-text',
-    badgeVariant: 'error',
-  },
-  {
-    id: 'falta',
-    label: 'Fuera de Horario (Falta)',
-    sublabel: 'Fuera de rango (> 13:00)',
-    hora: '14:15',
-    estadoEsperado: 'FALTA',
-    icon: AlertCircle,
-    colorClass: 'border-app-border bg-app-card text-app-muted',
-    badgeVariant: 'neutral',
-  },
-];
-
-export const QRScannerWidget: React.FC<Props> = ({ onScan, loading }) => {
-  const [mode, setMode] = useState<ScanMode>('simulador');
-  const [selectedChild, setSelectedChild] = useState<CatecumenoListItem | null>(null);
-  const [selectedCapillaId, setSelectedCapillaId] = useState<number | null>(null);
-  const [selectedFranja, setSelectedFranja] = useState<FranjaHorarioSimulada>(FRANJAS_SIMULADAS[0]);
-  const [usarHoraActual, setUsarHoraActual] = useState(false);
-
-  // Cargar datos
-  const { data: capillasData } = useCapillas();
-  const { data: catecumenosData } = useCatecumenos({ skip: 0, limit: 100, estado: 'ACTIVO' });
-
-  // Establecer Sede Central por defecto al cargar capillas
-  useEffect(() => {
-    if (capillasData?.items && capillasData.items.length > 0 && selectedCapillaId === null) {
-      const sede = capillasData.items.find(c => c.es_sede_principal) || capillasData.items[0];
-      setSelectedCapillaId(sede.id);
-    }
-  }, [capillasData, selectedCapillaId]);
-
-  // Fase actual de la capilla seleccionada
-  const { fase: faseActual } = useFaseActual(selectedCapillaId ?? undefined);
-
+export const QRScannerWidget: React.FC<Props> = ({
+  onScan,
+  loading,
+  selectedCapillaId,
+  onCapillaChange,
+  isOpen = true,
+  onClose,
+}) => {
+  const [cameraActive, setCameraActive] = useState(false);
+  const [lastScannedToken, setLastScannedToken] = useState<string | null>(null);
   const scannerRef = useRef<Html5QrcodeScanner | null>(null);
 
-  // Inicializar escáner de cámara cuando el modo es 'camara'
-  useEffect(() => {
-    if (mode === 'camara') {
-      const config = { fps: 10, qrbox: { width: 250, height: 250 } };
-      const scanner = new Html5QrcodeScanner("reader", config, /* verbose= */ false);
-      scannerRef.current = scanner;
-
-      scanner.render(
-        (decodedText) => {
-          // Envía con la capilla seleccionada para evaluar automáticamente el horario
-          onScan(decodedText, undefined, undefined, selectedCapillaId ?? undefined, undefined);
-        },
-        (_errorMessage) => {
-          // Ignorar frames incompletos
-        }
-      );
-
-      return () => {
-        scanner.clear().catch(console.error);
-      };
-    }
-  }, [mode, selectedCapillaId, onScan]);
-
-  const handleSimulate = () => {
-    if (selectedChild) {
-      const hora = usarHoraActual ? undefined : selectedFranja.hora;
-      // No pasamos estado manual para que el backend evalúe exactamente según la franja horaria
-      onScan(
-        selectedChild.token_qr,
-        undefined,
-        undefined,
-        selectedCapillaId ?? undefined,
-        hora
-      );
-    }
-  };
+  const { data: capillasData } = useCapillas();
+  const { fase: faseActual } = useFaseActual(selectedCapillaId);
 
   const selectedCapilla = capillasData?.items.find(c => c.id === selectedCapillaId);
 
+  // Iniciar / Limpiar escáner de cámara
+  useEffect(() => {
+    if (!cameraActive || !isOpen) {
+      if (scannerRef.current) {
+        scannerRef.current.clear().catch(() => {});
+        scannerRef.current = null;
+      }
+      return;
+    }
+
+    // Inicializar lector óptico
+    const scanner = new Html5QrcodeScanner(
+      'qr-camera-reader',
+      {
+        fps: 10,
+        qrbox: { width: 250, height: 250 },
+        aspectRatio: 1.0,
+        showTorchButtonIfSupported: true,
+      },
+      false
+    );
+
+    scanner.render(
+      (decodedText) => {
+        if (decodedText !== lastScannedToken) {
+          setLastScannedToken(decodedText);
+          onScan(decodedText, undefined, undefined, selectedCapillaId);
+
+          // Pausar relectura durante 3 segundos para el mismo token
+          setTimeout(() => {
+            setLastScannedToken(null);
+          }, 3500);
+        }
+      },
+      (_error) => {
+        // Ignorar errores de frames continuos sin QR
+      }
+    );
+
+    scannerRef.current = scanner;
+
+    return () => {
+      if (scannerRef.current) {
+        scannerRef.current.clear().catch(() => {});
+        scannerRef.current = null;
+      }
+    };
+  }, [cameraActive, isOpen, onScan, selectedCapillaId, lastScannedToken]);
+
+  if (!isOpen) return null;
+
   return (
-    <div className="bg-app-card rounded-2xl border border-app-border shadow-md overflow-hidden">
-      {/* Barra Superior: Selector de Capilla y Estado de Fase en Vivo */}
-      <div className="p-4 bg-lit-surface text-app-text flex flex-col md:flex-row items-start md:items-center justify-between gap-3 border-b border-lit-border transition-colors">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-app-card border border-lit-border flex items-center justify-center text-lg flex-shrink-0 shadow-2xs">
-            ⛪
+    <div className="rounded-2xl border border-app-border bg-app-card shadow-sm overflow-hidden transition-all duration-300">
+      {/* Barra superior de control */}
+      <div className="p-4 sm:p-5 border-b border-app-border bg-app-bg/60 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-lit-surface text-lit-primary border border-lit-border flex items-center justify-center text-xl flex-shrink-0 shadow-2xs">
+            <Camera className="w-5 h-5 text-lit-primary" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <label className="text-[11px] font-bold text-app-muted uppercase tracking-wider">
-                Capilla de Control:
-              </label>
-            </div>
-            <div className="w-56 mt-1">
-              <Select<number>
-                variant="default"
-                size="sm"
-                value={selectedCapillaId ?? undefined}
-                onChange={val => setSelectedCapillaId(val)}
-                options={capillasData?.items.map(c => ({
-                  value: c.id,
-                  label: `${c.nombre} ${c.es_sede_principal ? '★ (Sede Central)' : ''}`,
-                })) ?? []}
-              />
-            </div>
+            <h3 className="text-sm font-bold text-app-text flex items-center gap-2 font-serif">
+              <span>Escáner Óptico de Cámara Web</span>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-lit-surface text-lit-primary font-bold">
+                100% Cámara
+              </span>
+            </h3>
+            <p className="text-xs text-app-muted mt-0.5">
+              Acerca el gafete QR del catecúmeno frente a la cámara de la laptop o dispositivo móvil.
+            </p>
           </div>
         </div>
 
-        {/* Indicador de Fase Operativa */}
-        {faseActual && (
-          <div className="flex items-center gap-2 bg-app-card border border-app-border px-3 py-1.5 rounded-xl shadow-2xs">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-[11px] text-app-muted">
-              Fase Actual: <strong className="text-lit-primary font-bold">{faseActual.fase}</strong>
-            </span>
-            <Badge
-              variant={faseActual.estado === 'PRESENTE' ? 'success' : faseActual.estado === 'ATRASO' ? 'warning' : 'neutral'}
+        <div className="flex items-center gap-3 flex-wrap">
+          {/* Selector de Capilla */}
+          <div className="w-48 sm:w-56">
+            <Select<number>
+              variant="filter"
               size="sm"
-            >
-              {faseActual.estado}
-            </Badge>
+              leftIcon={<Church className="w-3.5 h-3.5 text-app-muted" />}
+              value={selectedCapillaId}
+              onChange={(val) => onCapillaChange(val)}
+              options={capillasData?.items.map(c => ({
+                value: c.id,
+                label: `${c.nombre} ${c.es_sede_principal ? '★ (Central)' : ''}`,
+              })) ?? []}
+            />
           </div>
-        )}
-      </div>
 
-      {/* Selector de Modos (Simulador 1-Clic vs Cámara) */}
-      <div className="flex items-center border-b border-app-border bg-app-bg p-2 gap-2">
-        <button
-          onClick={() => setMode('simulador')}
-          className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all ${
-            mode === 'simulador'
-              ? 'bg-app-card shadow-xs text-lit-primary border border-app-border'
-              : 'text-app-muted hover:text-app-text hover:bg-lit-surface'
-          }`}
-        >
-          <Zap className="w-4 h-4 text-amber-500" />
-          <span>⚡ Simulador con Horarios de Asistencia</span>
-        </button>
-
-        <button
-          onClick={() => setMode('camara')}
-          className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all ${
-            mode === 'camara'
-              ? 'bg-app-card shadow-xs text-lit-primary border border-app-border'
-              : 'text-app-muted hover:text-app-text hover:bg-lit-surface'
-          }`}
-        >
-          <Camera className="w-4 h-4 text-lit-primary" />
-          <span>📷 Cámara Web / Móvil (En Vivo)</span>
-        </button>
-      </div>
-
-      <div className="p-6">
-        {/* ─── Modo 1: Simulador con Horarios ────── */}
-        {mode === 'simulador' && (
-          <div className="space-y-5">
-            <div className="flex items-start gap-3 p-3.5 rounded-xl bg-lit-surface border border-lit-border text-xs text-lit-primary">
-              <Sparkles className="w-5 h-5 flex-shrink-0 mt-0.5" />
-              <div>
-                <strong>Evaluación Automática por Horario:</strong> Elige un catecúmeno y una franja horaria para comprobar cómo el sistema clasifica la asistencia en <span className="font-bold">{selectedCapilla?.nombre}</span>.
-              </div>
+          {/* Indicador de Fase */}
+          {faseActual && (
+            <div className="flex items-center gap-2 bg-app-card border border-app-border px-3 py-1.5 rounded-xl shadow-2xs">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-[11px] text-app-muted hidden sm:inline">Fase:</span>
+              <span className="text-[11px] font-bold text-lit-primary truncate max-w-[120px]">
+                {faseActual.fase}
+              </span>
+              <Badge
+                variant={faseActual.estado === 'PRESENTE' ? 'success' : faseActual.estado === 'ATRASO' ? 'warning' : 'neutral'}
+                size="sm"
+              >
+                {faseActual.estado}
+              </Badge>
             </div>
+          )}
 
-            {/* 1. Selector de Catecúmeno */}
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="p-1.5 rounded-lg text-app-muted hover:text-app-text hover:bg-lit-surface transition-colors"
+              title="Cerrar panel de cámara"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Contenedor del visor óptico */}
+      <div className="p-6 flex flex-col items-center justify-center space-y-4">
+        {!cameraActive ? (
+          <div className="py-10 px-4 text-center max-w-md mx-auto space-y-4">
+            <div className="w-16 h-16 rounded-2xl bg-lit-surface border border-lit-border mx-auto flex items-center justify-center text-3xl shadow-sm text-lit-primary">
+              <Camera className="w-8 h-8" />
+            </div>
             <div>
-              <Select<number>
-                label="1. Seleccionar Catecúmeno"
-                value={selectedChild?.persona_id ?? undefined}
-                onChange={val => {
-                  const found = catecumenosData?.items.find(c => c.persona_id === val);
-                  setSelectedChild(found || null);
-                }}
-                placeholder="-- Elige un catecúmeno para marcar --"
-                options={catecumenosData?.items.map(c => ({
-                  value: c.persona_id,
-                  label: `${c.nombres} ${c.primer_apellido} ${c.segundo_apellido ?? ''}`,
-                  description: `${c.tipo_sacramento === 'PRIMERA_COMUNION' ? '1ª Comunión' : 'Confirmación'}${c.grupo_nombre ? ` · ${c.grupo_nombre}` : ''}`,
-                })) ?? []}
-              />
+              <h4 className="text-base font-bold text-app-text">Cámara Web en Pausa</h4>
+              <p className="text-xs text-app-muted mt-1 leading-relaxed">
+                Para iniciar la lectura óptica en vivo de gafetes QR en <strong className="text-app-text">{selectedCapilla?.nombre}</strong>, activa el visor con el botón inferior.
+              </p>
             </div>
-
-            {/* 2. Selector de Franja Horaria de Prueba */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-bold text-app-text">
-                  2. Franja Horaria a Simular
-                </label>
-                <label className="flex items-center gap-1.5 text-xs text-app-muted cursor-pointer hover:text-app-text">
-                  <input
-                    type="checkbox"
-                    checked={usarHoraActual}
-                    onChange={e => setUsarHoraActual(e.target.checked)}
-                    className="rounded text-lit-primary focus:ring-lit-primary"
-                  />
-                  <span>Usar reloj en vivo actual</span>
-                </label>
-              </div>
-
-              {!usarHoraActual ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
-                  {FRANJAS_SIMULADAS.map(f => {
-                    const Icon = f.icon;
-                    const isSelected = selectedFranja.id === f.id;
-                    return (
-                      <button
-                        key={f.id}
-                        type="button"
-                        onClick={() => setSelectedFranja(f)}
-                        className={`p-3 rounded-xl border text-left flex flex-col justify-between gap-1.5 transition-all ${
-                          isSelected
-                            ? `${f.colorClass} ring-2 ring-lit-primary shadow-xs font-bold`
-                            : 'bg-app-card border-app-border hover:bg-lit-surface text-app-muted hover:text-app-text'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold flex items-center gap-1.5">
-                            <Icon className="w-3.5 h-3.5" />
-                            <span>{f.label}</span>
-                          </span>
-                          <Badge variant={f.badgeVariant} size="sm">
-                            {f.estadoEsperado}
-                          </Badge>
-                        </div>
-                        <div className="space-y-0.5">
-                          <span className="text-xs font-mono font-bold block text-app-text">
-                            Hora: {f.hora}
-                          </span>
-                          <span className="text-[10px] opacity-80 block">
-                            {f.sublabel}
-                          </span>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="p-3 rounded-xl bg-semantic-success-bg border border-semantic-success/30 text-xs text-semantic-success-text flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-semantic-success-text animate-spin" />
-                  <span>El escaneo se procesará con la hora exacta en tiempo real del reloj del sistema.</span>
+            <Button
+              variant="primary"
+              size="md"
+              leftIcon={<Camera className="w-4 h-4" />}
+              onClick={() => setCameraActive(true)}
+              className="shadow-sm"
+            >
+              Activar Cámara Web
+            </Button>
+          </div>
+        ) : (
+          <div className="w-full flex flex-col items-center space-y-3">
+            <div className="w-full max-w-sm rounded-2xl overflow-hidden border-2 border-lit-primary/40 shadow-md bg-black relative">
+              <div id="qr-camera-reader" className="w-full" />
+              {loading && (
+                <div className="absolute inset-0 bg-black/60 backdrop-blur-2xs flex flex-col items-center justify-center text-white space-y-2 z-10">
+                  <RefreshCw className="w-8 h-8 animate-spin text-lit-accent" />
+                  <span className="text-xs font-bold">Procesando código QR...</span>
                 </div>
               )}
             </div>
 
-            {/* 3. Botón de Ejecución */}
-            {selectedChild && (
-              <div className="p-4 rounded-xl bg-app-card border border-app-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-fadeIn">
-                <div>
-                  <p className="text-xs font-bold text-app-text">
-                    Catecúmeno: {selectedChild.nombres} {selectedChild.primer_apellido}
-                  </p>
-                  <p className="text-[11px] text-lit-primary font-medium mt-0.5">
-                    Evaluando en: <strong>{selectedCapilla?.nombre}</strong> — Hora: <strong>{usarHoraActual ? 'Hora Actual' : selectedFranja.hora}</strong>
-                  </p>
-                </div>
-
-                <Button
-                  variant="primary"
-                  size="sm"
-                  isLoading={loading}
-                  onClick={handleSimulate}
-                  leftIcon={<QrCode className="w-4 h-4" />}
-                >
-                  ⚡ Registrar Asistencia QR
-                </Button>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* ─── Modo 2: Cámara Web ─────────────────────────────────── */}
-        {mode === 'camara' && (
-          <div className="space-y-3 flex flex-col items-center">
-            <p className="text-xs text-app-muted font-medium text-center">
-              Apunta la cámara de tu laptop o celular hacia el Gafete QR del niño. El sistema evaluará automáticamente la asistencia según el horario de <strong className="text-app-text">{selectedCapilla?.nombre}</strong>.
-            </p>
-            <div id="reader" className="w-full max-w-sm overflow-hidden rounded-xl border border-app-border" />
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCameraActive(false)}
+                leftIcon={<X className="w-3.5 h-3.5" />}
+              >
+                Pausar Cámara
+              </Button>
+            </div>
           </div>
         )}
       </div>
