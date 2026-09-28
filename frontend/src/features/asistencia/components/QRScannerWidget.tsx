@@ -44,7 +44,7 @@ const FRANJAS_SIMULADAS: FranjaHorarioSimulada[] = [
     hora: '09:35',
     estadoEsperado: 'PRESENTE',
     icon: Clock,
-    colorClass: 'border-emerald-300 bg-emerald-50 text-emerald-950',
+    colorClass: 'border-semantic-success/40 bg-semantic-success-bg text-semantic-success-text',
     badgeVariant: 'success',
   },
   {
@@ -54,7 +54,7 @@ const FRANJAS_SIMULADAS: FranjaHorarioSimulada[] = [
     hora: '10:45',
     estadoEsperado: 'PRESENTE',
     icon: Church,
-    colorClass: 'border-amber-300 bg-amber-50 text-amber-950',
+    colorClass: 'border-semantic-warning/40 bg-semantic-warning-bg text-semantic-warning-text',
     badgeVariant: 'warning',
   },
   {
@@ -64,7 +64,7 @@ const FRANJAS_SIMULADAS: FranjaHorarioSimulada[] = [
     hora: '12:20',
     estadoEsperado: 'ATRASO',
     icon: BookOpen,
-    colorClass: 'border-rose-300 bg-rose-50 text-rose-950',
+    colorClass: 'border-semantic-error/40 bg-semantic-error-bg text-semantic-error-text',
     badgeVariant: 'error',
   },
   {
@@ -74,7 +74,7 @@ const FRANJAS_SIMULADAS: FranjaHorarioSimulada[] = [
     hora: '14:15',
     estadoEsperado: 'FALTA',
     icon: AlertCircle,
-    colorClass: 'border-stone-300 bg-stone-100 text-stone-800',
+    colorClass: 'border-app-border bg-app-card text-app-muted',
     badgeVariant: 'neutral',
   },
 ];
@@ -143,22 +143,22 @@ export const QRScannerWidget: React.FC<Props> = ({ onScan, loading }) => {
   const selectedCapilla = capillasData?.items.find(c => c.id === selectedCapillaId);
 
   return (
-    <div className="bg-white rounded-2xl border border-app-border shadow-md overflow-hidden">
+    <div className="bg-app-card rounded-2xl border border-app-border shadow-md overflow-hidden">
       {/* Barra Superior: Selector de Capilla y Estado de Fase en Vivo */}
-      <div className="p-4 bg-stone-900 text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-3 border-b border-stone-800">
+      <div className="p-4 bg-lit-surface text-app-text flex flex-col md:flex-row items-start md:items-center justify-between gap-3 border-b border-lit-border transition-colors">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center text-lg flex-shrink-0">
+          <div className="w-8 h-8 rounded-xl bg-app-card border border-lit-border flex items-center justify-center text-lg flex-shrink-0 shadow-2xs">
             ⛪
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <label className="text-[11px] font-bold text-stone-400 uppercase tracking-wider">
+              <label className="text-[11px] font-bold text-app-muted uppercase tracking-wider">
                 Capilla de Control:
               </label>
             </div>
             <div className="w-56 mt-1">
               <Select<number>
-                variant="dark"
+                variant="default"
                 size="sm"
                 value={selectedCapillaId ?? undefined}
                 onChange={val => setSelectedCapillaId(val)}
@@ -173,10 +173,10 @@ export const QRScannerWidget: React.FC<Props> = ({ onScan, loading }) => {
 
         {/* Indicador de Fase Operativa */}
         {faseActual && (
-          <div className="flex items-center gap-2 bg-stone-800/90 border border-stone-700 px-3 py-1.5 rounded-xl">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-[11px] text-stone-300">
-              Fase Actual: <strong className="text-lit-accent">{faseActual.fase}</strong>
+          <div className="flex items-center gap-2 bg-app-card border border-app-border px-3 py-1.5 rounded-xl shadow-2xs">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-[11px] text-app-muted">
+              Fase Actual: <strong className="text-lit-primary font-bold">{faseActual.fase}</strong>
             </span>
             <Badge
               variant={faseActual.estado === 'PRESENTE' ? 'success' : faseActual.estado === 'ATRASO' ? 'warning' : 'neutral'}
@@ -189,13 +189,13 @@ export const QRScannerWidget: React.FC<Props> = ({ onScan, loading }) => {
       </div>
 
       {/* Selector de Modos (Simulador 1-Clic vs Cámara) */}
-      <div className="flex items-center border-b border-app-border bg-stone-50 p-2 gap-2">
+      <div className="flex items-center border-b border-app-border bg-app-bg p-2 gap-2">
         <button
           onClick={() => setMode('simulador')}
           className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all ${
             mode === 'simulador'
-              ? 'bg-white shadow-xs text-lit-primary border border-lit-border'
-              : 'text-app-muted hover:text-app-text hover:bg-stone-100'
+              ? 'bg-app-card shadow-xs text-lit-primary border border-app-border'
+              : 'text-app-muted hover:text-app-text hover:bg-lit-surface'
           }`}
         >
           <Zap className="w-4 h-4 text-amber-500" />
@@ -206,8 +206,8 @@ export const QRScannerWidget: React.FC<Props> = ({ onScan, loading }) => {
           onClick={() => setMode('camara')}
           className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all ${
             mode === 'camara'
-              ? 'bg-white shadow-xs text-lit-primary border border-lit-border'
-              : 'text-app-muted hover:text-app-text hover:bg-stone-100'
+              ? 'bg-app-card shadow-xs text-lit-primary border border-app-border'
+              : 'text-app-muted hover:text-app-text hover:bg-lit-surface'
           }`}
         >
           <Camera className="w-4 h-4 text-lit-primary" />
@@ -274,7 +274,7 @@ export const QRScannerWidget: React.FC<Props> = ({ onScan, loading }) => {
                         className={`p-3 rounded-xl border text-left flex flex-col justify-between gap-1.5 transition-all ${
                           isSelected
                             ? `${f.colorClass} ring-2 ring-lit-primary shadow-xs font-bold`
-                            : 'bg-stone-50 border-app-border hover:bg-stone-100 text-stone-700'
+                            : 'bg-app-card border-app-border hover:bg-lit-surface text-app-muted hover:text-app-text'
                         }`}
                       >
                         <div className="flex items-center justify-between">
@@ -287,7 +287,7 @@ export const QRScannerWidget: React.FC<Props> = ({ onScan, loading }) => {
                           </Badge>
                         </div>
                         <div className="space-y-0.5">
-                          <span className="text-xs font-mono font-bold block">
+                          <span className="text-xs font-mono font-bold block text-app-text">
                             Hora: {f.hora}
                           </span>
                           <span className="text-[10px] opacity-80 block">
@@ -299,8 +299,8 @@ export const QRScannerWidget: React.FC<Props> = ({ onScan, loading }) => {
                   })}
                 </div>
               ) : (
-                <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-900 flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-emerald-700 animate-spin" />
+                <div className="p-3 rounded-xl bg-semantic-success-bg border border-semantic-success/30 text-xs text-semantic-success-text flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-semantic-success-text animate-spin" />
                   <span>El escaneo se procesará con la hora exacta en tiempo real del reloj del sistema.</span>
                 </div>
               )}
@@ -308,7 +308,7 @@ export const QRScannerWidget: React.FC<Props> = ({ onScan, loading }) => {
 
             {/* 3. Botón de Ejecución */}
             {selectedChild && (
-              <div className="p-4 rounded-xl bg-stone-50 border border-app-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-fadeIn">
+              <div className="p-4 rounded-xl bg-app-card border border-app-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-fadeIn">
                 <div>
                   <p className="text-xs font-bold text-app-text">
                     Catecúmeno: {selectedChild.nombres} {selectedChild.primer_apellido}

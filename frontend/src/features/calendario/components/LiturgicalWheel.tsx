@@ -3,10 +3,12 @@
  * 
  * Renderiza un disco celestial astronómico-litúrgico en SVG dividido en sectores
  * proporcionales con animaciones de halo, rotación suave y selección táctil/ratón.
+ * Adaptado con soporte dual y armónico para Modo Oscuro y Modo Claro.
  */
 
 import React, { useMemo } from 'react';
 import { LITURGICAL_STATIONS, LiturgicalStation } from '../data/liturgicalData';
+import { useTheme } from '@/core/context/ThemeContext';
 import { Compass } from 'lucide-react';
 
 interface Props {
@@ -14,7 +16,25 @@ interface Props {
   onSelectStation: (station: LiturgicalStation) => void;
 }
 
+// Paleta de colores luminosa y viva para Modo Claro (armoniosa con fondos blancos/piedra)
+const LIGHT_STATION_COLORS: Record<string, string> = {
+  adviento: '#7B3564',       // Morado cálido luminoso
+  navidad: '#C59B27',        // Oro noble
+  ordinario_1: '#2E7D32',    // Verde litúrgico esperanza
+  cuaresma: '#6A295E',       // Morado penitencial visible
+  semana_santa: '#A8252C',   // Rojo solemne de la Pasión
+  pascua: '#D4AF37',         // Oro glorioso de Resurrección
+  pentecostes: '#C62828',    // Rojo fuego del Espíritu Santo
+  trinidad: '#C59B27',       // Oro de la Santísima Trinidad
+  corpus_christi: '#D4AF37', // Oro eucarístico
+  ordinario_2: '#2E7D32',    // Verde litúrgico esperanza
+  cristo_rey: '#B8860B',     // Oro solemne de Cristo Rey
+};
+
 export const LiturgicalWheel: React.FC<Props> = ({ selectedStation, onSelectStation }) => {
+  const { resolvedColorMode } = useTheme();
+  const isDark = resolvedColorMode === 'dark';
+
   const total = LITURGICAL_STATIONS.length;
   const radius = 170;
   const innerRadius = 90;
@@ -54,6 +74,9 @@ export const LiturgicalWheel: React.FC<Props> = ({ selectedStation, onSelectStat
       `;
 
       const isSelected = selectedStation.id === station.id;
+      const fillColor = isDark
+        ? station.colorHex
+        : (LIGHT_STATION_COLORS[station.id] || station.colorHex);
 
       return {
         station,
@@ -62,16 +85,23 @@ export const LiturgicalWheel: React.FC<Props> = ({ selectedStation, onSelectStat
         iconY,
         midAngle,
         isSelected,
+        fillColor,
       };
     });
-  }, [total, selectedStation.id]);
+  }, [total, selectedStation.id, isDark]);
+
+  const activeColor = isDark
+    ? selectedStation.colorHex
+    : (LIGHT_STATION_COLORS[selectedStation.id] || selectedStation.colorHex);
 
   return (
     <div className="relative flex flex-col items-center justify-center p-4">
       {/* Halo celestial animado de fondo */}
       <div 
-        className="absolute w-80 h-80 rounded-full blur-3xl opacity-25 pointer-events-none transition-all duration-700 animate-pulse"
-        style={{ backgroundColor: selectedStation.colorHex }}
+        className={`absolute w-80 h-80 rounded-full blur-3xl pointer-events-none transition-all duration-700 animate-pulse ${
+          isDark ? 'opacity-25' : 'opacity-15'
+        }`}
+        style={{ backgroundColor: activeColor }}
       />
 
       <div className="relative w-[340px] h-[340px] sm:w-[420px] sm:h-[420px]">
@@ -80,11 +110,19 @@ export const LiturgicalWheel: React.FC<Props> = ({ selectedStation, onSelectStat
           className="w-full h-full drop-shadow-2xl select-none"
         >
           <defs>
-            {/* Gradiente radial de fondo sagrado */}
+            {/* Gradiente radial de fondo sagrado adaptativo */}
             <radialGradient id="centerGlow" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.9" />
-              <stop offset="70%" stopColor="#FAF9F6" stopOpacity="0.95" />
-              <stop offset="100%" stopColor="#E7E5E4" stopOpacity="1" />
+              {isDark ? (
+                <>
+                  <stop offset="0%" stopColor="#262220" stopOpacity="0.95" />
+                  <stop offset="100%" stopColor="#1C1917" stopOpacity="1" />
+                </>
+              ) : (
+                <>
+                  <stop offset="0%" stopColor="#FFFFFF" stopOpacity="1" />
+                  <stop offset="100%" stopColor="#FAF7F2" stopOpacity="1" />
+                </>
+              )}
             </radialGradient>
 
             {/* Filtro de sombra dorada */}
@@ -111,13 +149,13 @@ export const LiturgicalWheel: React.FC<Props> = ({ selectedStation, onSelectStat
             cy={center}
             r={radius + 3}
             fill="none"
-            stroke="#E7E5E4"
+            stroke="currentColor"
             strokeWidth="1"
-            className="opacity-75"
+            className="text-app-border opacity-75"
           />
 
           {/* Sectores de las Estaciones Litúrgicas */}
-          {segments.map(({ station, pathData, iconX, iconY, isSelected }) => {
+          {segments.map(({ station, pathData, iconX, iconY, isSelected, fillColor }) => {
             return (
               <g 
                 key={station.id}
@@ -126,13 +164,15 @@ export const LiturgicalWheel: React.FC<Props> = ({ selectedStation, onSelectStat
               >
                 <path
                   d={pathData}
-                  fill={station.colorHex}
+                  fill={fillColor}
                   stroke={isSelected ? '#C5A059' : '#FFFFFF'}
                   strokeWidth={isSelected ? '3.5' : '1.5'}
                   className={`transition-all duration-300 ${
                     isSelected 
                       ? 'filter drop-shadow-lg opacity-100 scale-[1.02] origin-center' 
-                      : 'opacity-85 hover:opacity-100 hover:brightness-110'
+                      : isDark
+                      ? 'opacity-85 hover:opacity-100 hover:brightness-110'
+                      : 'opacity-90 hover:opacity-100 hover:brightness-105'
                   }`}
                   style={{
                     transformOrigin: `${center}px ${center}px`,
@@ -148,9 +188,8 @@ export const LiturgicalWheel: React.FC<Props> = ({ selectedStation, onSelectStat
                     cx="0"
                     cy="0"
                     r={isSelected ? "14" : "12"}
-                    fill="#FFFFFF"
-                    className="shadow-sm"
-                    stroke={isSelected ? '#C5A059' : 'transparent'}
+                    className={isDark ? "fill-app-card shadow-sm" : "fill-white shadow-sm"}
+                    stroke={isSelected ? '#C5A059' : isDark ? 'transparent' : '#E7E5E4'}
                     strokeWidth="2"
                   />
                   <text
@@ -198,7 +237,9 @@ export const LiturgicalWheel: React.FC<Props> = ({ selectedStation, onSelectStat
               x="0"
               y="-32"
               textAnchor="middle"
-              className="text-[10px] font-bold tracking-widest uppercase fill-[#C5A059]"
+              className={`text-[10px] font-bold tracking-widest uppercase ${
+                isDark ? 'fill-[#C5A059]' : 'fill-[#916B1E]'
+              }`}
             >
               AÑO LITÚRGICO
             </text>
@@ -217,7 +258,7 @@ export const LiturgicalWheel: React.FC<Props> = ({ selectedStation, onSelectStat
               x="0"
               y="14"
               textAnchor="middle"
-              className="text-xs font-extrabold fill-stone-900 font-serif"
+              className="text-xs font-extrabold fill-app-text font-serif"
             >
               {selectedStation.name.length > 16 
                 ? selectedStation.name.slice(0, 15) + '…' 
@@ -228,7 +269,7 @@ export const LiturgicalWheel: React.FC<Props> = ({ selectedStation, onSelectStat
               x="0"
               y="30"
               textAnchor="middle"
-              className="text-[9px] font-medium fill-stone-500 max-w-[120px]"
+              className="text-[9px] font-medium fill-app-muted max-w-[120px]"
             >
               {selectedStation.colorName.split(' ')[0]}
             </text>
@@ -237,7 +278,9 @@ export const LiturgicalWheel: React.FC<Props> = ({ selectedStation, onSelectStat
               x="0"
               y="44"
               textAnchor="middle"
-              className="text-[8px] font-mono font-bold fill-[#916B1E] tracking-tighter"
+              className={`text-[8px] font-mono font-bold tracking-tighter ${
+                isDark ? 'fill-[#C5A059]' : 'fill-[#916B1E]'
+              }`}
             >
               Α · ✝ · Ω
             </text>

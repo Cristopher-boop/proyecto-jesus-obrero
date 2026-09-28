@@ -16,7 +16,7 @@ interface Props {
 
 export const LiturgicalTimeline: React.FC<Props> = ({ selectedStation, onSelectStation }) => {
   return (
-    <div className="bg-white rounded-3xl border border-app-border p-6 shadow-sm space-y-4">
+    <div className="bg-app-card rounded-3xl border border-app-border p-6 shadow-sm space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-xs font-bold text-app-muted uppercase tracking-wider flex items-center gap-2">
           <Calendar className="w-4 h-4 text-lit-primary" /> Secuencia del Año Litúrgico
@@ -38,7 +38,7 @@ export const LiturgicalTimeline: React.FC<Props> = ({ selectedStation, onSelectS
                   className={`flex flex-col items-start p-3 rounded-2xl border text-left transition-all duration-300 relative group flex-1 ${
                     isSelected
                       ? 'bg-lit-surface border-lit-primary shadow-md scale-105 z-10'
-                      : 'bg-stone-50 border-app-border/70 hover:bg-white hover:border-lit-primary/40 hover:shadow-xs'
+                      : 'bg-app-bg border-app-border/70 hover:bg-lit-surface/50 hover:border-lit-primary/40 hover:shadow-xs'
                   }`}
                 >
                   {/* Barra superior con el color litúrgico oficial */}
@@ -58,7 +58,7 @@ export const LiturgicalTimeline: React.FC<Props> = ({ selectedStation, onSelectS
                     {station.colorName.split(' ')[0]}
                   </p>
 
-                  <p className="text-[9px] text-stone-400 mt-1 truncate w-full">
+                  <p className="text-[9px] text-app-muted mt-1 truncate w-full">
                     {station.approxDates}
                   </p>
 
@@ -69,7 +69,7 @@ export const LiturgicalTimeline: React.FC<Props> = ({ selectedStation, onSelectS
                 </button>
 
                 {index < LITURGICAL_STATIONS.length - 1 && (
-                  <ChevronRight className="w-3.5 h-3.5 text-stone-300 flex-shrink-0" />
+                  <ChevronRight className="w-3.5 h-3.5 text-app-muted/40 flex-shrink-0" />
                 )}
               </React.Fragment>
             );

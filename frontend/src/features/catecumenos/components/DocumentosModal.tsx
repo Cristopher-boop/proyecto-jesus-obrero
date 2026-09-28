@@ -211,28 +211,28 @@ export const DocumentosModal: React.FC<DocumentosModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in">
       <div
-        className="bg-white rounded-2xl shadow-2xl border border-app-border w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-scale-in"
+        className="bg-app-card rounded-2xl shadow-2xl border border-app-border w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-scale-in"
         onClick={e => e.stopPropagation()}
       >
         {/* Cabecera Estilo Litúrgico */}
-        <div className="px-6 py-5 border-b border-app-border bg-stone-900 text-white relative overflow-hidden">
+        <div className="px-6 py-5 border-b border-lit-border bg-lit-surface text-app-text relative overflow-hidden transition-colors">
           <div className="absolute top-0 right-0 w-80 h-80 bg-lit-accent/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
           
           <div className="relative z-10 flex items-start justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-2xl bg-white/10 border border-white/15 flex items-center justify-center text-2xl shadow-inner">
+              <div className="w-11 h-11 rounded-2xl bg-app-card border border-app-border flex items-center justify-center text-2xl shadow-2xs">
                 📁
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-bold tracking-widest uppercase text-lit-accent flex items-center gap-1">
-                    <Sparkles className="w-3 h-3" /> Expediente Digital
+                  <span className="text-[10px] font-bold tracking-widest uppercase text-lit-primary flex items-center gap-1">
+                    <Sparkles className="w-3 h-3 text-lit-accent" /> Expediente Digital
                   </span>
                 </div>
-                <h2 className="text-base sm:text-lg font-bold text-white font-serif tracking-tight">
+                <h2 className="text-base sm:text-lg font-bold text-lit-primary font-serif tracking-tight">
                   Documentación Sacramental · {nombreCatecumeno}
                 </h2>
-                <p className="text-xs text-stone-300">
+                <p className="text-xs text-app-muted">
                   Carga, verificación y validación digital de las 8 fotocopias requeridas para el sacramento.
                 </p>
               </div>
@@ -242,14 +242,14 @@ export const DocumentosModal: React.FC<DocumentosModalProps> = ({
               <button
                 onClick={refetch}
                 disabled={loading}
-                className="p-2 rounded-xl text-stone-300 hover:text-white hover:bg-white/10 transition-colors"
+                className="p-2 rounded-xl text-app-muted hover:text-app-text hover:bg-lit-surface transition-colors"
                 title="Actualizar documentos"
               >
                 <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
               </button>
               <button
                 onClick={onClose}
-                className="p-2 rounded-xl text-stone-300 hover:text-white hover:bg-white/10 transition-colors"
+                className="p-2 rounded-xl text-app-muted hover:text-app-text hover:bg-lit-surface transition-colors"
                 title="Cerrar modal"
               >
                 <X className="w-5 h-5" />
@@ -258,28 +258,28 @@ export const DocumentosModal: React.FC<DocumentosModalProps> = ({
           </div>
 
           {/* Barra de Progreso de Documentación */}
-          <div className="mt-4 pt-4 border-t border-white/10 grid grid-cols-1 sm:grid-cols-3 gap-3 items-center">
+          <div className="mt-4 pt-4 border-t border-lit-border grid grid-cols-1 sm:grid-cols-3 gap-3 items-center">
             <div className="flex items-center gap-3">
-              <div className="flex-1 bg-white/20 rounded-full h-2 overflow-hidden">
+              <div className="flex-1 bg-app-bg border border-app-border rounded-full h-2 overflow-hidden">
                 <div
-                  className="bg-emerald-400 h-full rounded-full transition-all duration-500 ease-out"
+                  className="bg-lit-primary h-full rounded-full transition-all duration-500 ease-out"
                   style={{ width: `${porcentaje}%` }}
                 />
               </div>
-              <span className="text-xs font-mono font-bold text-lit-accent">{porcentaje}%</span>
+              <span className="text-xs font-mono font-bold text-lit-primary">{porcentaje}%</span>
             </div>
 
             <div className="flex items-center gap-4 sm:justify-center text-xs">
-              <span className="text-stone-300">
-                <strong className="text-white">{docsSubidosCount}</strong> de {totalDocs} archivos
+              <span className="text-app-muted">
+                <strong className="text-app-text">{docsSubidosCount}</strong> de {totalDocs} archivos
               </span>
-              <span className="text-emerald-400 flex items-center gap-1 font-semibold">
+              <span className="text-semantic-success-text flex items-center gap-1 font-semibold">
                 <ShieldCheck className="w-3.5 h-3.5" />
                 {docsVerificadosCount} verificados
               </span>
             </div>
 
-            <div className="text-right text-[11px] text-stone-400">
+            <div className="text-right text-[11px] text-app-muted">
               Formatos: PDF, JPG, PNG, WEBP (máx. 10MB)
             </div>
           </div>
@@ -314,25 +314,25 @@ export const DocumentosModal: React.FC<DocumentosModalProps> = ({
 
         {/* Área de Confirmación de Carga Activa */}
         {activeUploadTipo && selectedFile && (
-          <div className="mx-6 mt-4 p-4 rounded-xl bg-amber-50/80 border border-amber-200/80 space-y-3">
+          <div className="mx-6 mt-4 p-4 rounded-xl bg-semantic-warning-bg border border-semantic-warning/30 space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <FileUp className="w-4 h-4 text-amber-700" />
-                <span className="text-xs font-bold text-amber-900">
+                <FileUp className="w-4 h-4 text-semantic-warning-text" />
+                <span className="text-xs font-bold text-semantic-warning-text">
                   Subiendo a: {DOCUMENTOS_CONFIG.find(d => d.tipo === activeUploadTipo)?.titulo}
                 </span>
               </div>
               <button
                 onClick={() => { setActiveUploadTipo(null); setSelectedFile(null); }}
-                className="text-stone-500 hover:text-stone-800 text-xs"
+                className="text-app-muted hover:text-app-text text-xs"
               >
                 Cancelar
               </button>
             </div>
 
-            <div className="flex items-center justify-between bg-white p-2.5 rounded-lg border border-amber-200 text-xs">
+            <div className="flex items-center justify-between bg-app-card p-2.5 rounded-lg border border-app-border text-xs">
               <div className="flex items-center gap-2 truncate">
-                <FileText className="w-4 h-4 text-stone-400 flex-shrink-0" />
+                <FileText className="w-4 h-4 text-app-muted flex-shrink-0" />
                 <span className="font-medium text-app-text truncate">{selectedFile.name}</span>
                 <span className="text-[10px] text-app-muted">({formatFileSize(selectedFile.size)})</span>
               </div>
@@ -350,7 +350,7 @@ export const DocumentosModal: React.FC<DocumentosModalProps> = ({
                 value={observaciones}
                 onChange={e => setObservaciones(e.target.value)}
                 placeholder="Observaciones opcionales (ej: Original verificado, copia legalizada)..."
-                className="w-full text-xs px-3 py-1.5 rounded-lg border border-stone-300 focus:outline-none focus:ring-1 focus:ring-lit-primary"
+                className="w-full text-xs px-3 py-1.5 rounded-lg border border-app-border bg-app-bg text-app-text focus:outline-none focus:ring-1 focus:ring-lit-primary"
               />
               <Button
                 variant="primary"
@@ -389,9 +389,9 @@ export const DocumentosModal: React.FC<DocumentosModalProps> = ({
                     className={`rounded-xl border p-4 transition-all duration-150 flex flex-col justify-between ${
                       hasDoc
                         ? uploadedDoc?.estado === 'VERIFICADO'
-                          ? 'border-emerald-200 bg-emerald-50/20'
-                          : 'border-amber-200 bg-amber-50/15'
-                        : 'border-dashed border-stone-300 bg-stone-50/50 hover:bg-stone-50'
+                          ? 'border-semantic-success/40 bg-semantic-success-bg/30'
+                          : 'border-semantic-warning/40 bg-semantic-warning-bg/30'
+                        : 'border-dashed border-app-border bg-app-bg/50 hover:bg-app-bg'
                     }`}
                   >
                     <div>
@@ -402,11 +402,11 @@ export const DocumentosModal: React.FC<DocumentosModalProps> = ({
                               {docConfig.titulo}
                             </h4>
                             {docConfig.esObligatorio ? (
-                              <span className="text-[9px] font-semibold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded">
+                              <span className="text-[9px] font-semibold text-semantic-error-text bg-semantic-error-bg px-1.5 py-0.5 rounded border border-semantic-error/20">
                                 Requerido
                               </span>
                             ) : (
-                              <span className="text-[9px] text-stone-500 bg-stone-100 px-1.5 py-0.5 rounded">
+                              <span className="text-[9px] text-app-muted bg-app-bg px-1.5 py-0.5 rounded border border-app-border">
                                 Opcional
                               </span>
                             )}
@@ -428,7 +428,7 @@ export const DocumentosModal: React.FC<DocumentosModalProps> = ({
                           ) : (
                             <Badge variant="neutral" size="sm">
                               <span className="flex items-center gap-1">
-                                <AlertCircle className="w-3 h-3 text-stone-400" />
+                                <AlertCircle className="w-3 h-3 text-app-muted" />
                                 Pendiente
                               </span>
                             </Badge>
@@ -438,8 +438,8 @@ export const DocumentosModal: React.FC<DocumentosModalProps> = ({
 
                       {/* Detalles si ya está subido */}
                       {hasDoc && uploadedDoc && (
-                        <div className="mt-3 p-2.5 rounded-lg bg-white border border-app-border/80 text-xs space-y-1">
-                          <div className="flex items-center justify-between text-stone-700">
+                        <div className="mt-3 p-2.5 rounded-lg bg-app-card border border-app-border/80 text-xs space-y-1">
+                          <div className="flex items-center justify-between text-app-text">
                             <span className="truncate font-medium flex items-center gap-1.5">
                               <FileText className="w-3.5 h-3.5 text-lit-primary flex-shrink-0" />
                               <span className="truncate max-w-[200px]" title={uploadedDoc.nombre_archivo}>
@@ -452,7 +452,7 @@ export const DocumentosModal: React.FC<DocumentosModalProps> = ({
                           </div>
 
                           {uploadedDoc.observaciones && (
-                            <p className="text-[11px] text-stone-600 italic border-l-2 border-lit-primary/40 pl-2 mt-1">
+                            <p className="text-[11px] text-app-muted italic border-l-2 border-lit-primary/40 pl-2 mt-1">
                               "{uploadedDoc.observaciones}"
                             </p>
                           )}
@@ -488,8 +488,8 @@ export const DocumentosModal: React.FC<DocumentosModalProps> = ({
                               disabled={actionLoading}
                               className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors ${
                                 uploadedDoc.estado === 'VERIFICADO'
-                                  ? 'text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200'
-                                  : 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200'
+                                  ? 'text-semantic-warning-text bg-semantic-warning-bg hover:bg-semantic-warning-bg/80 border border-semantic-warning/30'
+                                  : 'text-semantic-success-text bg-semantic-success-bg hover:bg-semantic-success-bg/80 border border-semantic-success/30'
                               }`}
                               title={uploadedDoc.estado === 'VERIFICADO' ? 'Marcar como pendiente de revisión' : 'Validar autenticidad del documento'}
                             >
@@ -504,13 +504,13 @@ export const DocumentosModal: React.FC<DocumentosModalProps> = ({
                                 <button
                                   onClick={() => handleDeleteDoc(uploadedDoc.id)}
                                   disabled={actionLoading}
-                                  className="px-2 py-0.5 rounded text-[11px] bg-rose-600 text-white font-bold hover:bg-rose-700"
+                                  className="px-2 py-0.5 rounded text-[11px] bg-semantic-error-bg text-semantic-error-text border border-semantic-error/40 font-bold hover:bg-semantic-error/20"
                                 >
                                   Confirmar
                                 </button>
                                 <button
                                   onClick={() => setConfirmDeleteId(null)}
-                                  className="px-1.5 py-0.5 text-[11px] text-stone-500 hover:text-stone-800"
+                                  className="px-1.5 py-0.5 text-[11px] text-app-muted hover:text-app-text"
                                 >
                                   No
                                 </button>
@@ -518,7 +518,7 @@ export const DocumentosModal: React.FC<DocumentosModalProps> = ({
                             ) : (
                               <button
                                 onClick={() => setConfirmDeleteId(uploadedDoc.id)}
-                                className="p-1 rounded-md text-stone-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                                className="p-1 rounded-md text-app-muted hover:text-semantic-error-text hover:bg-semantic-error-bg/30 transition-colors"
                                 title="Eliminar archivo adjunto"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
@@ -528,7 +528,7 @@ export const DocumentosModal: React.FC<DocumentosModalProps> = ({
                         </>
                       ) : (
                         <div className="w-full flex items-center justify-between">
-                          <span className="text-[11px] text-stone-400 italic">
+                          <span className="text-[11px] text-app-muted italic">
                             Sin archivo adjunto
                           </span>
                           <button
@@ -549,9 +549,9 @@ export const DocumentosModal: React.FC<DocumentosModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 bg-stone-50 border-t border-app-border flex items-center justify-between">
+        <div className="px-6 py-4 bg-app-bg border-t border-app-border flex items-center justify-between">
           <div className="text-xs text-app-muted flex items-center gap-1.5">
-            <FolderArchive className="w-4 h-4 text-stone-400" />
+            <FolderArchive className="w-4 h-4 text-app-muted" />
             <span>Almacenamiento seguro Parroquia Jesús Obrero</span>
           </div>
 

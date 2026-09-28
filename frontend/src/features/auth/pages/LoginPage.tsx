@@ -7,6 +7,7 @@ import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Alert from '@/components/ui/Alert';
 import { CrearFeligresModal } from '@/features/feligreses/components/CrearFeligresModal';
+import { ThemeModeToggle } from '@/components/ui/ThemeModeToggle';
 
 const ACTIVE_BG_IMAGE: string | null = '/fondo_login_5.webp';
 
@@ -55,7 +56,7 @@ export const LoginPage: React.FC = () => {
   const seasonKeys: LiturgicalSeason[] = ['ordinario', 'cuaresma', 'pentecostes', 'pascua'];
 
   return (
-    <div className="min-h-screen w-full flex flex-col lg:flex-row bg-app-bg">
+    <div className="min-h-screen w-full flex flex-col lg:flex-row bg-app-bg transition-colors">
       {/* ──────────────────────────────────────────────────────────────────
           LADO IZQUIERDO: Panel Visual / Imagen Parroquial Adaptativa
           ────────────────────────────────────────────────────────────────── */}
@@ -70,7 +71,7 @@ export const LoginPage: React.FC = () => {
             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-lit-primary-dark/60 to-black/40 backdrop-blur-[1px]" />
           </div>
         ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-lit-primary via-lit-primary-dark to-stone-900">
+          <div className="absolute inset-0 bg-gradient-to-br from-lit-primary via-lit-primary-dark to-lit-primary">
             {/* Textura eclesiástica de fondo con cruz solemne en transparencia */}
             <div className="absolute inset-0 opacity-10 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white via-transparent to-black" />
             <div className="absolute right-[-8%] top-[15%] text-[22rem] opacity-5 pointer-events-none select-none font-serif leading-none">
@@ -95,7 +96,7 @@ export const LoginPage: React.FC = () => {
           </div>
 
           {/* Badge del tiempo litúrgico */}
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/30 backdrop-blur-md border border-white/15 text-xs font-semibold text-lit-accent-light">
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-xs font-semibold text-lit-accent-light">
             <span>{seasonInfo.icon}</span>
             <span className="hidden sm:inline">{seasonInfo.name}</span>
           </div>
@@ -134,7 +135,7 @@ export const LoginPage: React.FC = () => {
             <span className="font-medium">Probar tiempo litúrgico:</span>
           </div>
 
-          <div className="flex items-center gap-1.5 bg-black/40 backdrop-blur-md p-1 rounded-xl border border-white/15">
+          <div className="flex items-center gap-1.5 bg-white/15 backdrop-blur-md p-1 rounded-xl border border-white/20">
             {seasonKeys.map((key) => {
               const item = LITURGICAL_SEASONS[key];
               const isSelected = season === key;
@@ -143,7 +144,7 @@ export const LoginPage: React.FC = () => {
                   key={key}
                   onClick={() => setSeason(key)}
                   className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${isSelected
-                    ? 'bg-white text-stone-900 font-bold shadow-xs'
+                    ? 'bg-white text-lit-primary-dark font-bold shadow-xs'
                     : 'text-white/75 hover:text-white hover:bg-white/10'
                     }`}
                   title={`Cambiar a ${item.name}`}
@@ -160,8 +161,13 @@ export const LoginPage: React.FC = () => {
       {/* ──────────────────────────────────────────────────────────────────
           LADO DERECHO: Formulario de Inicio de Sesión
           ────────────────────────────────────────────────────────────────── */}
-      <div className="lg:w-1/2 xl:w-5/12 flex items-center justify-center p-6 sm:p-12 lg:p-16">
-        <div className="w-full max-w-md space-y-8 bg-white p-8 sm:p-10 rounded-2xl border border-app-border shadow-ecclesiastical transition-all">
+      <div className="lg:w-1/2 xl:w-5/12 flex items-center justify-center p-6 sm:p-12 lg:p-16 relative">
+        {/* Conmutador de tema en la esquina del login */}
+        <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-20">
+          <ThemeModeToggle size="sm" />
+        </div>
+
+        <div className="w-full max-w-md space-y-8 bg-app-card p-8 sm:p-10 rounded-2xl border border-app-border shadow-ecclesiastical transition-all">
           {/* Encabezado del Formulario */}
           <div className="space-y-2">
             <h3 className="text-2xl font-bold tracking-tight text-app-text">

@@ -149,7 +149,7 @@ export const HorarioModal: React.FC<HorarioModalProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="fixed inset-0 bg-black/50 backdrop-blur-xs animate-fadeIn" onClick={onClose} />
 
-      <div className="relative bg-white rounded-2xl border border-app-border shadow-2xl max-w-2xl w-full p-6 z-10 animate-scaleUp overflow-y-auto max-h-[90vh]">
+      <div className="relative bg-app-card rounded-2xl border border-app-border shadow-2xl max-w-2xl w-full p-6 z-10 animate-scaleUp overflow-y-auto max-h-[90vh]">
         {/* Cabecera */}
         <div className="flex items-start justify-between pb-4 border-b border-app-border">
           <div className="flex items-center gap-3">
@@ -168,7 +168,7 @@ export const HorarioModal: React.FC<HorarioModalProps> = ({
 
           <button
             onClick={onClose}
-            className="p-1.5 rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-colors"
+            className="p-1.5 rounded-xl text-app-muted hover:text-app-text hover:bg-lit-surface transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -181,41 +181,41 @@ export const HorarioModal: React.FC<HorarioModalProps> = ({
         )}
 
         {validationMsg && (
-          <div className="mt-4 p-3 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 text-xs flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-amber-700 flex-shrink-0" />
+          <div className="mt-4 p-3 rounded-xl bg-semantic-warning-bg border border-semantic-warning-border text-semantic-warning-text text-xs flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-semantic-warning-text flex-shrink-0" />
             <span><strong>Inconsistencia horaria:</strong> {validationMsg}</span>
           </div>
         )}
 
         {/* Previsualización en Vivo de la Línea de Tiempo */}
-        <div className="mt-4 p-4 rounded-xl bg-stone-900 text-white space-y-3 shadow-xs">
+        <div className="mt-4 p-4 rounded-xl bg-lit-surface text-app-text border border-lit-border space-y-3 shadow-xs transition-colors">
           <div className="flex items-center justify-between text-xs">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-lit-accent flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5" /> Previsualización en Vivo de Franjas
+            <span className="text-[10px] font-bold uppercase tracking-wider text-lit-primary flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-lit-accent" /> Previsualización en Vivo de Franjas
             </span>
-            <span className="font-mono text-stone-300">
+            <span className="font-mono text-app-muted">
               {horaInicioPuntual} → {horaFinCatequesis}
             </span>
           </div>
 
           <div className="grid grid-cols-3 gap-2">
             {/* Puntual */}
-            <div className="p-2 rounded-lg bg-emerald-950/80 border border-emerald-500/30 text-emerald-200">
-              <span className="text-[9px] font-bold block uppercase text-emerald-400">1. Puntual</span>
+            <div className="p-2.5 rounded-lg bg-semantic-success-bg border border-semantic-success-border text-semantic-success-text">
+              <span className="text-[9px] font-bold block uppercase opacity-90">1. Puntual</span>
               <span className="text-xs font-mono font-bold">{horaInicioPuntual} - {horaFinPuntual}</span>
               <Badge variant="success" size="sm" className="mt-1">PRESENTE</Badge>
             </div>
 
             {/* Misa */}
-            <div className="p-2 rounded-lg bg-amber-950/80 border border-amber-500/30 text-amber-200">
-              <span className="text-[9px] font-bold block uppercase text-amber-400">2. Misa</span>
+            <div className="p-2.5 rounded-lg bg-semantic-warning-bg border border-semantic-warning-border text-semantic-warning-text">
+              <span className="text-[9px] font-bold block uppercase opacity-90">2. Misa</span>
               <span className="text-xs font-mono font-bold">{horaInicioMisa} - {horaFinMisa}</span>
               <Badge variant="warning" size="sm" className="mt-1">PRESENTE</Badge>
             </div>
 
             {/* Catequesis */}
-            <div className="p-2 rounded-lg bg-rose-950/80 border border-rose-500/30 text-rose-200">
-              <span className="text-[9px] font-bold block uppercase text-rose-400">3. Catequesis</span>
+            <div className="p-2.5 rounded-lg bg-semantic-error-bg border border-semantic-error-border text-semantic-error-text">
+              <span className="text-[9px] font-bold block uppercase opacity-90">3. Catequesis</span>
               <span className="text-xs font-mono font-bold">{horaInicioCatequesis} - {horaFinCatequesis}</span>
               <Badge variant="error" size="sm" className="mt-1">ATRASO</Badge>
             </div>
@@ -236,114 +236,114 @@ export const HorarioModal: React.FC<HorarioModalProps> = ({
           </div>
 
           {/* Franja 1: Puntual */}
-          <div className="p-3.5 rounded-xl border border-emerald-200 bg-emerald-50/40 space-y-2">
+          <div className="p-3.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-emerald-950 flex items-center gap-1.5">
+              <span className="text-xs font-bold text-emerald-950 dark:text-emerald-200 flex items-center gap-1.5">
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                 1. Franja Puntual (Antes del Inicio)
               </span>
-              <span className="text-[10px] font-bold text-emerald-700">Estado: PRESENTE</span>
+              <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300">Estado: PRESENTE</span>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-[11px] font-medium text-stone-600 mb-1">Hora Inicio</label>
+                <label className="block text-[11px] font-medium text-app-muted mb-1">Hora Inicio</label>
                 <input
                   type="time"
                   value={horaInicioPuntual}
                   onChange={(e) => setHoraInicioPuntual(e.target.value)}
-                  className="w-full text-xs font-mono font-bold rounded-lg border border-emerald-300 p-2 bg-white outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full text-xs font-mono font-bold rounded-lg border border-emerald-500/40 p-2 bg-app-card text-app-text outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
               <div>
-                <label className="block text-[11px] font-medium text-stone-600 mb-1">Hora Fin</label>
+                <label className="block text-[11px] font-medium text-app-muted mb-1">Hora Fin</label>
                 <input
                   type="time"
                   value={horaFinPuntual}
                   onChange={(e) => setHoraFinPuntual(e.target.value)}
-                  className="w-full text-xs font-mono font-bold rounded-lg border border-emerald-300 p-2 bg-white outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full text-xs font-mono font-bold rounded-lg border border-emerald-500/40 p-2 bg-app-card text-app-text outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
             </div>
           </div>
 
           {/* Franja 2: Durante Misa */}
-          <div className="p-3.5 rounded-xl border border-amber-200 bg-amber-50/40 space-y-2">
+          <div className="p-3.5 rounded-xl border border-amber-500/30 bg-amber-500/10 space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-amber-950 flex items-center gap-1.5">
+              <span className="text-xs font-bold text-amber-950 dark:text-amber-200 flex items-center gap-1.5">
                 <Church className="w-3.5 h-3.5 text-amber-600" />
                 2. Franja Durante la Misa
               </span>
-              <span className="text-[10px] font-bold text-amber-700">Estado: PRESENTE (En Misa)</span>
+              <span className="text-[10px] font-bold text-amber-700 dark:text-amber-300">Estado: PRESENTE (En Misa)</span>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-[11px] font-medium text-stone-600 mb-1">Hora Inicio Misa</label>
+                <label className="block text-[11px] font-medium text-app-muted mb-1">Hora Inicio Misa</label>
                 <input
                   type="time"
                   value={horaInicioMisa}
                   onChange={(e) => setHoraInicioMisa(e.target.value)}
-                  className="w-full text-xs font-mono font-bold rounded-lg border border-amber-300 p-2 bg-white outline-none focus:ring-2 focus:ring-amber-500"
+                  className="w-full text-xs font-mono font-bold rounded-lg border border-amber-500/40 p-2 bg-app-card text-app-text outline-none focus:ring-2 focus:ring-amber-500"
                 />
               </div>
               <div>
-                <label className="block text-[11px] font-medium text-stone-600 mb-1">Hora Fin Misa</label>
+                <label className="block text-[11px] font-medium text-app-muted mb-1">Hora Fin Misa</label>
                 <input
                   type="time"
                   value={horaFinMisa}
                   onChange={(e) => setHoraFinMisa(e.target.value)}
-                  className="w-full text-xs font-mono font-bold rounded-lg border border-amber-300 p-2 bg-white outline-none focus:ring-2 focus:ring-amber-500"
+                  className="w-full text-xs font-mono font-bold rounded-lg border border-amber-500/40 p-2 bg-app-card text-app-text outline-none focus:ring-2 focus:ring-amber-500"
                 />
               </div>
             </div>
             <div>
-              <label className="block text-[11px] font-medium text-stone-600 mb-1">Descripción de la Celebración</label>
+              <label className="block text-[11px] font-medium text-app-muted mb-1">Descripción de la Celebración</label>
               <input
                 type="text"
                 value={descripcionMisa}
                 onChange={(e) => setDescripcionMisa(e.target.value)}
                 placeholder="Ej: Misa Dominical Comunitaria"
-                className="w-full text-xs rounded-lg border border-amber-300 p-2 bg-white outline-none focus:ring-1 focus:ring-amber-500"
+                className="w-full text-xs rounded-lg border border-amber-500/40 p-2 bg-app-card text-app-text outline-none focus:ring-1 focus:ring-amber-500"
               />
             </div>
           </div>
 
           {/* Franja 3: Catequesis / Atraso */}
-          <div className="p-3.5 rounded-xl border border-rose-200 bg-rose-50/40 space-y-2">
+          <div className="p-3.5 rounded-xl border border-rose-500/30 bg-rose-500/10 space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-rose-950 flex items-center gap-1.5">
+              <span className="text-xs font-bold text-rose-950 dark:text-rose-200 flex items-center gap-1.5">
                 <BookOpen className="w-3.5 h-3.5 text-rose-600" />
                 3. Franja Durante la Catequesis (Atraso)
               </span>
-              <span className="text-[10px] font-bold text-rose-700">Estado: ATRASO</span>
+              <span className="text-[10px] font-bold text-rose-700 dark:text-rose-300">Estado: ATRASO</span>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-[11px] font-medium text-stone-600 mb-1">Hora Inicio Catequesis</label>
+                <label className="block text-[11px] font-medium text-app-muted mb-1">Hora Inicio Catequesis</label>
                 <input
                   type="time"
                   value={horaInicioCatequesis}
                   onChange={(e) => setHoraInicioCatequesis(e.target.value)}
-                  className="w-full text-xs font-mono font-bold rounded-lg border border-rose-300 p-2 bg-white outline-none focus:ring-2 focus:ring-rose-500"
+                  className="w-full text-xs font-mono font-bold rounded-lg border border-rose-500/40 p-2 bg-app-card text-app-text outline-none focus:ring-2 focus:ring-rose-500"
                 />
               </div>
               <div>
-                <label className="block text-[11px] font-medium text-stone-600 mb-1">Hora Fin Catequesis</label>
+                <label className="block text-[11px] font-medium text-app-muted mb-1">Hora Fin Catequesis</label>
                 <input
                   type="time"
                   value={horaFinCatequesis}
                   onChange={(e) => setHoraFinCatequesis(e.target.value)}
-                  className="w-full text-xs font-mono font-bold rounded-lg border border-rose-300 p-2 bg-white outline-none focus:ring-2 focus:ring-rose-500"
+                  className="w-full text-xs font-mono font-bold rounded-lg border border-rose-500/40 p-2 bg-app-card text-app-text outline-none focus:ring-2 focus:ring-rose-500"
                 />
               </div>
             </div>
             <div>
-              <label className="block text-[11px] font-medium text-stone-600 mb-1">Descripción del Encuentro</label>
+              <label className="block text-[11px] font-medium text-app-muted mb-1">Descripción del Encuentro</label>
               <input
                 type="text"
                 value={descripcionCatequesis}
                 onChange={(e) => setDescripcionCatequesis(e.target.value)}
                 placeholder="Ej: Encuentro de Formación y Catequesis"
-                className="w-full text-xs rounded-lg border border-rose-300 p-2 bg-white outline-none focus:ring-1 focus:ring-rose-500"
+                className="w-full text-xs rounded-lg border border-rose-500/40 p-2 bg-app-card text-app-text outline-none focus:ring-1 focus:ring-rose-500"
               />
             </div>
           </div>

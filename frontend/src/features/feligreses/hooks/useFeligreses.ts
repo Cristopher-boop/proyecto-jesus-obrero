@@ -16,7 +16,7 @@ export interface CreateFeligresPayload {
   email?:           string;
 }
 
-export function useFeligreses(search?: string, skip = 0, limit = 50) {
+export function useFeligreses(search?: string, conHijos?: boolean, skip = 0, limit = 50) {
   const [data,    setData]    = useState<FeligresListResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState<string | null>(null);
@@ -27,6 +27,7 @@ export function useFeligreses(search?: string, skip = 0, limit = 50) {
     try {
       const params = new URLSearchParams();
       if (search) params.append('search', search);
+      if (conHijos !== undefined) params.append('con_hijos', String(conHijos));
       params.append('skip',  String(skip));
       params.append('limit', String(limit));
       const res = await apiClient.get<FeligresListResponse>(`/feligreses/?${params}`);
@@ -36,7 +37,7 @@ export function useFeligreses(search?: string, skip = 0, limit = 50) {
     } finally {
       setLoading(false);
     }
-  }, [search, skip, limit]);
+  }, [search, conHijos, skip, limit]);
 
   useEffect(() => { fetch(); }, [fetch]);
 

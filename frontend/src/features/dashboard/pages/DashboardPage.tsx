@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Users,
   QrCode,
@@ -20,12 +20,15 @@ import Badge from '@/components/ui/Badge';
 import Alert from '@/components/ui/Alert';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
+import Pagination from '@/components/ui/Pagination';
 
 export const DashboardPage: React.FC = () => {
   const { season, seasonInfo, setSeason } = useLiturgicalTheme();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCapilla, setFilterCapilla] = useState('TODAS');
   const [showAlert, setShowAlert] = useState(true);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
 
   // Muestra de datos representativos de la Parroquia Jesús Obrero
   const stats = [
@@ -110,6 +113,56 @@ export const DashboardPage: React.FC = () => {
       asistenciaHora: '09:52 AM',
       docBautizo: 'APROBADO',
     },
+    {
+      id: 6,
+      nombre: 'Camila Ticona Gutierrez',
+      grupo: 'San Pablo (2do Año)',
+      capilla: 'Jesús Obrero',
+      horario: 'Dom 10:00 - 12:45',
+      asistencia: 'PUNTUAL',
+      asistenciaHora: '09:44 AM',
+      docBautizo: 'APROBADO',
+    },
+    {
+      id: 7,
+      nombre: 'Diego Huanca Limachi',
+      grupo: 'San Andrés (1er Año)',
+      capilla: 'Jesús Obrero',
+      horario: 'Dom 10:00 - 12:45',
+      asistencia: 'DURANTE_MISA',
+      asistenciaHora: '10:12 AM',
+      docBautizo: 'PENDIENTE',
+    },
+    {
+      id: 8,
+      nombre: 'Sofia Alvarez Torrez',
+      grupo: 'Confirmación 1er Año',
+      capilla: 'San Martín de Porras',
+      horario: 'Sáb 15:00 - 17:30',
+      asistencia: 'PUNTUAL',
+      asistenciaHora: '14:50 PM',
+      docBautizo: 'APROBADO',
+    },
+    {
+      id: 9,
+      nombre: 'Andrés Mamani Callisaya',
+      grupo: 'San Pedro (2do Año)',
+      capilla: 'Jesús Obrero',
+      horario: 'Dom 10:00 - 12:45',
+      asistencia: 'SOLO_CATEQUESIS',
+      asistenciaHora: '11:40 AM',
+      docBautizo: 'OBSERVADO',
+    },
+    {
+      id: 10,
+      nombre: 'Mariana Calle Flores',
+      grupo: 'Comunión 2do Año',
+      capilla: 'Señor de la Santa Cruz',
+      horario: 'Dom 08:00 - 10:30',
+      asistencia: 'PUNTUAL',
+      asistenciaHora: '07:55 AM',
+      docBautizo: 'APROBADO',
+    },
   ];
 
   const getAsistenciaBadge = (status: string) => {
@@ -147,6 +200,12 @@ export const DashboardPage: React.FC = () => {
     return matchesSearch && matchesCapilla;
   });
 
+  const totalItems = filteredCatecumenos.length;
+  const paginatedCatecumenos = useMemo(() => {
+    const start = (page - 1) * pageSize;
+    return filteredCatecumenos.slice(start, start + pageSize);
+  }, [filteredCatecumenos, page, pageSize]);
+
   return (
     <div className="space-y-6 animate-fadeIn">
       {/* 1. Banner de Tiempo Litúrgico Activo */}
@@ -168,8 +227,8 @@ export const DashboardPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="flex items-center gap-2 bg-black/20 p-2 rounded-xl backdrop-blur-xs border border-white/10 flex-wrap">
-            <span className="text-xs font-medium text-white/70 px-2 flex items-center gap-1">
+          <div className="flex items-center gap-2 bg-white/15 p-2 rounded-xl backdrop-blur-xs border border-white/20 flex-wrap">
+            <span className="text-xs font-medium text-white/80 px-2 flex items-center gap-1">
               <Flame className="w-3.5 h-3.5 text-lit-accent" /> Probar tema:
             </span>
             {(['ordinario', 'cuaresma', 'pentecostes', 'pascua'] as LiturgicalSeason[]).map((key) => (
@@ -178,7 +237,7 @@ export const DashboardPage: React.FC = () => {
                 onClick={() => setSeason(key)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                   season === key
-                    ? 'bg-white text-stone-900 shadow-sm scale-105'
+                    ? 'bg-white text-lit-primary-dark shadow-sm scale-105'
                     : 'text-white/80 hover:text-white hover:bg-white/10'
                 }`}
               >
@@ -237,11 +296,11 @@ export const DashboardPage: React.FC = () => {
         >
           <div className="space-y-4">
             {/* Barra de progreso múltiple */}
-            <div className="w-full h-5 bg-stone-100 rounded-full overflow-hidden flex shadow-inner">
+            <div className="w-full h-5 bg-app-bg border border-app-border rounded-full overflow-hidden flex shadow-inner">
               <div style={{ width: '65%' }} className="bg-lit-primary h-full transition-all" title="Puntual (65%)" />
               <div style={{ width: '20%' }} className="bg-lit-accent h-full transition-all" title="Durante la Misa (20%)" />
-              <div style={{ width: '8%' }} className="bg-amber-400 h-full transition-all" title="Solo Catequesis (8%)" />
-              <div style={{ width: '7%' }} className="bg-rose-400 h-full transition-all" title="Faltas (7%)" />
+              <div style={{ width: '8%' }} className="bg-semantic-warning h-full transition-all" title="Solo Catequesis (8%)" />
+              <div style={{ width: '7%' }} className="bg-semantic-error h-full transition-all" title="Faltas (7%)" />
             </div>
 
             {/* Leyenda del gráfico */}
@@ -264,9 +323,9 @@ export const DashboardPage: React.FC = () => {
                 <p className="text-[10px] text-app-muted">10:00 a 11:30 AM</p>
               </div>
 
-              <div className="p-2.5 rounded-lg bg-amber-50 border border-amber-200">
-                <div className="flex items-center gap-1.5 font-bold text-amber-800">
-                  <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />
+              <div className="p-2.5 rounded-lg bg-semantic-warning-bg border border-semantic-warning-border">
+                <div className="flex items-center gap-1.5 font-bold text-semantic-warning-text">
+                  <span className="w-2.5 h-2.5 rounded-full bg-semantic-warning" />
                   <span>Solo Catequesis</span>
                 </div>
                 <p className="text-lg font-black text-app-text mt-1">19</p>
@@ -275,7 +334,7 @@ export const DashboardPage: React.FC = () => {
 
               <div className="p-2.5 rounded-lg bg-semantic-error-bg border border-semantic-error-border">
                 <div className="flex items-center gap-1.5 font-bold text-semantic-error-text">
-                  <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-semantic-error" />
                   <span>Faltas</span>
                 </div>
                 <p className="text-lg font-black text-app-text mt-1">19</p>
@@ -294,7 +353,7 @@ export const DashboardPage: React.FC = () => {
                 ].map((grp, i) => (
                   <div key={i} className="flex items-center justify-between text-xs gap-3">
                     <span className="w-32 font-medium text-app-text truncate">{grp.name}</span>
-                    <div className="flex-1 h-2 bg-stone-100 rounded-full overflow-hidden">
+                    <div className="flex-1 h-2 bg-app-bg border border-app-border rounded-full overflow-hidden">
                       <div
                         className="h-full bg-lit-primary rounded-full transition-all"
                         style={{ width: `${grp.rate}%` }}
@@ -368,7 +427,10 @@ export const DashboardPage: React.FC = () => {
             <Input
               placeholder="Buscar por nombre o grupo..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setPage(1);
+              }}
               leftIcon={<Search className="w-4 h-4" />}
             />
           </div>
@@ -378,7 +440,10 @@ export const DashboardPage: React.FC = () => {
               size="sm"
               leftIcon={<Filter className="w-3.5 h-3.5 text-app-muted" />}
               value={filterCapilla}
-              onChange={(val) => setFilterCapilla(val)}
+              onChange={(val) => {
+                setFilterCapilla(val);
+                setPage(1);
+              }}
               options={[
                 { value: 'TODAS', label: 'Todas las Capillas' },
                 { value: 'Jesús Obrero', label: 'Jesús Obrero (Principal)' },
@@ -392,7 +457,7 @@ export const DashboardPage: React.FC = () => {
         {/* Tabla Responsiva */}
         <div className="overflow-x-auto rounded-xl border border-app-border/80 shadow-xs">
           <table className="w-full text-left text-xs">
-            <thead className="bg-stone-50 text-app-muted uppercase text-[10px] tracking-wider border-b border-app-border">
+            <thead className="bg-app-bg text-app-muted uppercase text-[10px] tracking-wider border-b border-app-border">
               <tr>
                 <th className="py-3.5 px-4 font-semibold">Catecúmeno</th>
                 <th className="py-3.5 px-4 font-semibold">Grupo y Capilla</th>
@@ -402,9 +467,9 @@ export const DashboardPage: React.FC = () => {
                 <th className="py-3.5 px-4 font-semibold text-right">Acción</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-app-border/60 bg-white">
-              {filteredCatecumenos.length > 0 ? (
-                filteredCatecumenos.map((item) => (
+            <tbody className="divide-y divide-app-border/60 bg-app-card">
+              {paginatedCatecumenos.length > 0 ? (
+                paginatedCatecumenos.map((item) => (
                   <tr key={item.id} className="hover:bg-lit-surface/40 transition-colors group">
                     <td className="py-3.5 px-4">
                       <div className="font-bold text-app-text group-hover:text-lit-primary transition-colors">
@@ -445,6 +510,23 @@ export const DashboardPage: React.FC = () => {
             </tbody>
           </table>
         </div>
+
+        {totalItems > 0 && (
+          <div className="mt-4">
+            <Pagination
+              currentPage={page}
+              totalItems={totalItems}
+              pageSize={pageSize}
+              pageSizeOptions={[5, 10, 20]}
+              onPageChange={setPage}
+              onPageSizeChange={(s) => {
+                setPageSize(s);
+                setPage(1);
+              }}
+              itemLabel="catecúmenos"
+            />
+          </div>
+        )}
       </Card>
     </div>
   );

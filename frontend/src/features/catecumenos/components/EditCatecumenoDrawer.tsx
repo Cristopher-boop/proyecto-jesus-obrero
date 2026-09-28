@@ -91,11 +91,11 @@ export const EditCatecumenoDrawer: React.FC<Props> = ({ catecumeno, onClose, onS
   };
 
   return (
-    <div className="absolute inset-0 bg-white rounded-xl z-10 flex flex-col border border-app-border shadow-xl">
+    <div className="absolute inset-0 bg-app-card rounded-xl z-10 flex flex-col border border-app-border shadow-xl">
       {/* Cabecera */}
       <div className="flex items-center justify-between p-4 border-b border-app-border flex-shrink-0">
         <h3 className="text-sm font-bold text-app-text">✏️ Editar Catecúmeno y Requisitos</h3>
-        <button onClick={onClose} className="w-7 h-7 rounded-lg hover:bg-stone-100 flex items-center justify-center text-app-muted">
+        <button onClick={onClose} className="w-7 h-7 rounded-lg hover:bg-lit-surface flex items-center justify-center text-app-muted transition-colors">
           <X className="w-3.5 h-3.5" />
         </button>
       </div>
@@ -131,12 +131,12 @@ export const EditCatecumenoDrawer: React.FC<Props> = ({ catecumeno, onClose, onS
 
           <div className="space-y-1">
             <label className="text-xs font-semibold text-app-text">Fecha de Nacimiento</label>
-            <input type="date" value={form.fecha_nacimiento as string} onChange={e => fld('fecha_nacimiento', e.target.value)} className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-app-border bg-white outline-none focus:ring-2 focus:ring-lit-primary/30" />
+            <input type="date" value={form.fecha_nacimiento as string} onChange={e => fld('fecha_nacimiento', e.target.value)} className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-app-border bg-app-card text-app-text outline-none focus:ring-2 focus:ring-lit-primary/30" />
           </div>
 
           <div className="space-y-1">
             <label className="text-xs font-semibold text-app-text">Dirección</label>
-            <input value={form.direccion as string} onChange={e => fld('direccion', e.target.value)} placeholder="Zona, calle, número..." className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-app-border bg-white outline-none focus:ring-2 focus:ring-lit-primary/30" />
+            <input value={form.direccion as string} onChange={e => fld('direccion', e.target.value)} placeholder="Zona, calle, número..." className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-app-border bg-app-card text-app-text outline-none focus:ring-2 focus:ring-lit-primary/30" />
           </div>
         </div>
 
@@ -162,9 +162,9 @@ export const EditCatecumenoDrawer: React.FC<Props> = ({ catecumeno, onClose, onS
         </div>
 
         {/* 3. Requisitos de Salida (Graduación / Sacramento) */}
-        <div className="p-3.5 rounded-xl bg-stone-50 border border-app-border space-y-2.5">
+        <div className="p-3.5 rounded-xl bg-app-bg border border-app-border space-y-2.5">
           <div className="flex items-center justify-between">
-            <p className="text-[11px] font-bold text-stone-700 uppercase tracking-wide">
+            <p className="text-[11px] font-bold text-app-text uppercase tracking-wide">
               3. Documentos para Salida / Sacramento
             </p>
             <span className="text-[10px] text-app-muted italic">Solo fotocopias</span>
@@ -182,7 +182,7 @@ export const EditCatecumenoDrawer: React.FC<Props> = ({ catecumeno, onClose, onS
             </label>
 
             {!form.es_bautizado && (
-              <div className="p-2 rounded-lg bg-amber-50 border border-amber-200 text-[10px] text-amber-800 flex items-start gap-1.5">
+              <div className="p-2 rounded-lg bg-semantic-warning-bg border border-semantic-warning-border text-[10px] text-semantic-warning-text flex items-start gap-1.5">
                 <AlertCircle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
                 <span><strong>Aviso pastoral:</strong> Si no está bautizado, debe realizar el sacramento antes de 2º año en la Vigilia Pascual.</span>
               </div>
@@ -242,7 +242,7 @@ export const EditCatecumenoDrawer: React.FC<Props> = ({ catecumeno, onClose, onS
 
           <div className="space-y-1 pt-1">
             <label className="text-xs font-semibold text-app-text">Observaciones</label>
-            <textarea value={form.observaciones as string} onChange={e => fld('observaciones', e.target.value)} rows={2} className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-app-border bg-white resize-none outline-none focus:ring-2 focus:ring-lit-primary/30" />
+            <textarea value={form.observaciones as string} onChange={e => fld('observaciones', e.target.value)} rows={2} className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-app-border bg-app-card text-app-text resize-none outline-none focus:ring-2 focus:ring-lit-primary/30" />
           </div>
         </div>
       </div>

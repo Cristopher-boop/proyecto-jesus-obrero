@@ -150,6 +150,7 @@ async def create_feligres(db: AsyncSession, data: FeligresCreate) -> FeligresRes
 async def list_feligreses(
     db: AsyncSession,
     search: Optional[str] = None,
+    con_hijos: Optional[bool] = None,
     skip: int = 0,
     limit: int = 50,
 ) -> FeligresListResponse:
@@ -182,6 +183,13 @@ async def list_feligreses(
                 func.lower(Usuario.username).like(term),
             )
         )
+
+    if con_hijos is True:
+        hijos_subquery = select(RelacionFamiliar.tutor_persona_id).distinct()
+        query = query.where(Persona.id.in_(hijos_subquery))
+    elif con_hijos is False:
+        hijos_subquery = select(RelacionFamiliar.tutor_persona_id).distinct()
+        query = query.where(~Persona.id.in_(hijos_subquery))
 
     count_q = await db.execute(select(func.count()).select_from(query.subquery()))
     total   = count_q.scalar_one()

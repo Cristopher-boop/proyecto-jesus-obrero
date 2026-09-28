@@ -70,7 +70,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* ── Contenedor del Sidebar ───────────────────────────────────── */}
       <aside
-        className={`fixed md:static inset-y-0 left-0 z-50 bg-white border-r border-app-border flex flex-col justify-between flex-shrink-0 min-h-screen transition-all duration-300 ease-in-out ${
+        className={`fixed md:static inset-y-0 left-0 z-50 bg-app-card border-r border-app-border flex flex-col justify-between flex-shrink-0 min-h-screen transition-all duration-300 ease-in-out ${
           isOpen
             ? 'w-64 translate-x-0 opacity-100 shadow-2xl md:shadow-none'
             : '-translate-x-full md:translate-x-0 md:w-0 md:border-r-0 md:overflow-hidden opacity-0 md:opacity-100'
@@ -95,7 +95,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             {/* Botón Cerrar Sidebar (En móvil y escritorio) */}
             <button
               onClick={onClose}
-              className="p-1.5 rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-colors"
+              className="p-1.5 rounded-xl text-app-muted hover:text-app-text hover:bg-lit-surface transition-colors"
               title="Cerrar Menú"
             >
               <X className="w-5 h-5" />
@@ -126,7 +126,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium transition-all duration-150 group ${
                     isActive
                       ? 'bg-lit-surface text-lit-primary font-bold shadow-xs border-l-4 border-lit-primary'
-                      : 'text-app-text hover:bg-stone-50 hover:text-lit-primary'
+                      : 'text-app-text hover:bg-lit-surface hover:text-lit-primary'
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
@@ -151,7 +151,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </nav>
 
           {/* Pie del Sidebar */}
-          <div className="p-4 border-t border-app-border/70 bg-stone-50/50">
+          <div className="p-4 border-t border-app-border/70 bg-app-bg/50">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-xl bg-lit-primary text-white flex items-center justify-center text-xs font-bold shadow-xs">
                 JO

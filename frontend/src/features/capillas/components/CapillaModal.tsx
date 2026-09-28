@@ -103,7 +103,7 @@ export const CapillaModal: React.FC<CapillaModalProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="fixed inset-0 bg-black/50 backdrop-blur-xs animate-fadeIn" onClick={onClose} />
 
-      <div className="relative bg-white rounded-2xl border border-app-border shadow-2xl max-w-lg w-full p-6 z-10 animate-scaleUp overflow-y-auto max-h-[90vh]">
+      <div className="relative bg-app-card rounded-2xl border border-app-border shadow-2xl max-w-lg w-full p-6 z-10 animate-scaleUp overflow-y-auto max-h-[90vh]">
         {/* Cabecera del Modal */}
         <div className="flex items-start justify-between pb-4 border-b border-app-border">
           <div className="flex items-center gap-3">
@@ -122,7 +122,7 @@ export const CapillaModal: React.FC<CapillaModalProps> = ({
 
           <button
             onClick={onClose}
-            className="p-1.5 rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-colors"
+            className="p-1.5 rounded-xl text-app-muted hover:text-app-text hover:bg-lit-surface transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -194,12 +194,12 @@ export const CapillaModal: React.FC<CapillaModalProps> = ({
               onChange={(e) => setDescripcion(e.target.value)}
               rows={2}
               placeholder="Notas pastorales sobre la comunidad o sector..."
-              className="w-full text-xs rounded-xl border border-app-border p-2.5 outline-none focus:ring-2 focus:ring-lit-primary/30"
+              className="w-full text-xs rounded-xl border border-app-border bg-app-bg text-app-text p-2.5 outline-none focus:ring-2 focus:ring-lit-primary/30"
             />
           </div>
 
           {/* Configuración de Sede Principal y Estado */}
-          <div className="p-3.5 rounded-xl bg-stone-50 border border-app-border space-y-3">
+          <div className="p-3.5 rounded-xl bg-app-bg border border-app-border space-y-3">
             <label className="flex items-start gap-3 cursor-pointer">
               <input
                 type="checkbox"
@@ -209,7 +209,7 @@ export const CapillaModal: React.FC<CapillaModalProps> = ({
               />
               <div>
                 <span className="text-xs font-bold text-app-text flex items-center gap-1.5">
-                  <ShieldCheck className="w-3.5 h-3.5 text-amber-600" />
+                  <ShieldCheck className="w-3.5 h-3.5 text-lit-accent" />
                   Marcar como Sede Central / Parroquial
                 </span>
                 <span className="text-[10px] text-app-muted block mt-0.5 leading-tight">
@@ -227,7 +227,7 @@ export const CapillaModal: React.FC<CapillaModalProps> = ({
                   onChange={(e) => setActivo(e.target.checked)}
                   className="rounded text-lit-primary focus:ring-lit-primary w-4 h-4"
                 />
-                <span className={activo ? 'text-emerald-700 font-bold' : 'text-stone-500 font-medium'}>
+                <span className={activo ? 'text-semantic-success font-bold' : 'text-app-muted font-medium'}>
                   {activo ? 'Activa' : 'Inactiva'}
                 </span>
               </label>

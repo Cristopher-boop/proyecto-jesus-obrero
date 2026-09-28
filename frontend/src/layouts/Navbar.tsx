@@ -15,6 +15,7 @@ import { useLiturgicalTheme, LITURGICAL_SEASONS, LiturgicalSeason } from '@/core
 import { useAuth } from '@/core/context/AuthContext';
 import Badge from '@/components/ui/Badge';
 import { MiniCalendarPopover } from '@/features/calendario/components/MiniCalendarPopover';
+import { ThemeModeToggle } from '@/components/ui/ThemeModeToggle';
 
 export interface NavbarProps {
   onToggleSidebar?: () => void;
@@ -31,7 +32,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const seasonKeys: LiturgicalSeason[] = ['ordinario', 'cuaresma', 'pentecostes', 'pascua'];
 
   return (
-    <header className="h-16 bg-white border-b border-app-border px-3 sm:px-6 flex items-center justify-between sticky top-0 z-30 shadow-xs">
+    <header className="h-16 bg-app-card border-b border-app-border px-3 sm:px-6 flex items-center justify-between sticky top-0 z-30 shadow-xs transition-colors">
       
       {/* ── Izquierda: Botón Menú + Título Parroquia ───────────────────── */}
       <div className="flex items-center gap-2 sm:gap-3">
@@ -65,8 +66,11 @@ export const Navbar: React.FC<NavbarProps> = ({
           }}
         />
 
+        {/* Conmutador de Modo de Color (Claro / Oscuro / Sistema) */}
+        <ThemeModeToggle size="sm" />
+
         {/* Selector de Tiempo Litúrgico en Vivo */}
-        <div className="hidden lg:flex items-center bg-stone-100/80 p-1 rounded-xl border border-app-border gap-1">
+        <div className="hidden lg:flex items-center bg-app-bg p-1 rounded-xl border border-app-border gap-1">
           <span className="text-[11px] font-semibold text-app-muted px-2 flex items-center gap-1">
             <Sparkles className="w-3 h-3 text-lit-accent" /> Liturgia:
           </span>
@@ -80,8 +84,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                 title={`Cambiar a ${item.name} (${item.colorName})`}
                 className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-all duration-150 ${
                   isSelected
-                    ? 'bg-white text-lit-primary shadow-xs font-bold border border-app-border/80'
-                    : 'text-stone-600 hover:text-stone-900 hover:bg-white/50'
+                    ? 'bg-app-card text-lit-primary shadow-xs font-bold border border-app-border'
+                    : 'text-app-muted hover:text-app-text hover:bg-app-card/50'
                 }`}
               >
                 <span>{item.icon}</span>
@@ -93,7 +97,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Notificaciones */}
         <button
-          className="relative p-2 text-stone-500 hover:text-lit-primary hover:bg-lit-surface rounded-xl transition-colors"
+          className="relative p-2 text-app-muted hover:text-lit-primary hover:bg-lit-surface rounded-xl transition-colors"
           title="Notificaciones"
         >
           <Bell className="w-4 h-4" />
@@ -111,7 +115,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           <button
             onClick={logout}
-            className="p-2 text-stone-400 hover:text-semantic-error-text hover:bg-semantic-error-bg rounded-xl transition-colors"
+            className="p-2 text-app-muted hover:text-semantic-error-text hover:bg-semantic-error-bg rounded-xl transition-colors"
             title="Cerrar Sesión"
           >
             <LogOut className="w-4 h-4" />

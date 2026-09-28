@@ -27,7 +27,7 @@ export const Badge: React.FC<BadgeProps> = ({
     warning: 'bg-semantic-warning-bg text-semantic-warning-text border border-semantic-warning-border font-medium',
     error: 'bg-semantic-error-bg text-semantic-error-text border border-semantic-error-border font-medium',
     info: 'bg-semantic-info-bg text-semantic-info-text border border-semantic-info-border font-medium',
-    neutral: 'bg-stone-100 text-stone-700 border border-stone-200 font-medium',
+    neutral: 'bg-app-bg text-app-text border border-app-border font-medium',
   };
 
   return (
