@@ -27,7 +27,8 @@ export const CalendarioPage: React.FC = () => {
   const [selectedStation, setSelectedStation] = useState<LiturgicalStation>(currentActualStation);
   const [viewMode, setViewMode] = useState<ViewMode>('mes');
 
-  const { seasonInfo } = useLiturgicalTheme();
+  const { seasonInfo, resolvedColorMode } = useLiturgicalTheme();
+  const isDark = resolvedColorMode === 'dark';
 
   const handleNextStation = () => {
     const currentIndex = LITURGICAL_STATIONS.findIndex(s => s.id === selectedStation.id);
@@ -46,20 +47,32 @@ export const CalendarioPage: React.FC = () => {
       
       {/* ── Banner Superior Hero: El Año Litúrgico en Jesús Obrero ───────── */}
       <div 
-        className="rounded-3xl p-6 sm:p-10 text-white shadow-2xl relative overflow-hidden transition-all duration-700"
+        className={`rounded-3xl p-6 sm:p-10 shadow-xl relative overflow-hidden transition-all duration-700 ${
+          isDark 
+            ? 'text-white shadow-2xl' 
+            : 'text-app-text bg-app-card border border-app-border shadow-md'
+        }`}
         style={{
-          background: `radial-gradient(ellipse at top right, ${selectedStation.colorHex} 0%, #171513 100%)`
+          background: isDark
+            ? `radial-gradient(ellipse at top right, ${selectedStation.colorHex} 0%, #171513 100%)`
+            : `radial-gradient(ellipse at top right, ${selectedStation.colorHex}18 0%, #FFFFFF 65%, #FAF7F2 100%)`
         }}
       >
         {/* Marca de agua eclesiástica en filigrana */}
-        <div className="absolute right-[-4%] top-[-30%] text-[18rem] opacity-5 font-serif select-none pointer-events-none">
+        <div className={`absolute right-[-4%] top-[-30%] text-[18rem] font-serif select-none pointer-events-none ${
+          isDark ? 'opacity-5 text-white' : 'opacity-[0.03] text-lit-primary'
+        }`}>
           ✝
         </div>
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
           <div className="space-y-3 max-w-2xl">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-semibold text-amber-200">
+              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${
+                isDark
+                  ? 'bg-white/10 backdrop-blur-md border border-white/20 text-amber-200'
+                  : 'bg-lit-surface border border-lit-border text-lit-primary'
+              }`}>
                 <Church className="w-3.5 h-3.5" /> Parroquia Jesús Obrero
               </span>
 
@@ -68,26 +81,42 @@ export const CalendarioPage: React.FC = () => {
               </span>
             </div>
 
-            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight font-serif text-white leading-tight">
+            <h1 className={`text-3xl sm:text-4xl font-extrabold tracking-tight font-serif leading-tight ${
+              isDark ? 'text-white' : 'text-app-text'
+            }`}>
               El Año Litúrgico de la Iglesia
             </h1>
 
-            <p className="text-xs sm:text-sm text-white/80 leading-relaxed">
+            <p className={`text-xs sm:text-sm leading-relaxed ${
+              isDark ? 'text-white/80' : 'text-app-muted'
+            }`}>
               El Año Litúrgico no es un mero recuerdo histórico, sino la actualización viva del Misterio de Cristo en el tiempo: desde la espera anhelante del <strong>Adviento</strong> hasta la soberanía eterna de <strong>Cristo Rey del Universo</strong>.
             </p>
           </div>
 
           {/* Tarjeta rápida del Tiempo Activo */}
-          <div className="bg-white/15 backdrop-blur-md p-5 rounded-2xl border border-white/20 flex flex-col items-center text-center gap-2 min-w-[200px]">
-            <div className="w-12 h-12 rounded-full bg-white/15 border border-white/20 flex items-center justify-center text-2xl shadow-inner animate-pulse">
+          <div className={`p-5 rounded-2xl flex flex-col items-center text-center gap-2 min-w-[200px] transition-all ${
+            isDark
+              ? 'bg-white/15 backdrop-blur-md border border-white/20'
+              : 'bg-app-card/90 backdrop-blur-md border border-app-border shadow-xs'
+          }`}>
+            <div className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl shadow-inner animate-pulse ${
+              isDark
+                ? 'bg-white/15 border border-white/20'
+                : 'bg-lit-surface border border-lit-border text-lit-primary'
+            }`}>
               {seasonInfo.icon}
             </div>
             <div>
-              <p className="text-[10px] uppercase font-bold tracking-widest text-amber-300">
+              <p className="text-[10px] uppercase font-bold tracking-widest text-lit-accent">
                 Tema Vivo Aplicado
               </p>
-              <p className="text-sm font-bold text-white mt-0.5">{seasonInfo.name}</p>
-              <p className="text-[10px] text-white/70">{seasonInfo.colorName}</p>
+              <p className={`text-sm font-bold mt-0.5 ${isDark ? 'text-white' : 'text-app-text'}`}>
+                {seasonInfo.name}
+              </p>
+              <p className={`text-[10px] ${isDark ? 'text-white/70' : 'text-app-muted'}`}>
+                {seasonInfo.colorName}
+              </p>
             </div>
           </div>
         </div>

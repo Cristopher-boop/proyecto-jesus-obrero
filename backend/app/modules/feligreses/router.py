@@ -43,11 +43,12 @@ async def buscar_feligreses(
 @router.get("/", response_model=FeligresListResponse, summary="Listar feligreses")
 async def listar_feligreses(
     search: Optional[str] = Query(None),
+    con_hijos: Optional[bool] = Query(None, description="Filtrar por feligreses con o sin hijos vinculados"),
     skip:  int = Query(0,  ge=0),
     limit: int = Query(50, ge=1, le=200),
     db: AsyncSession = Depends(get_db),
 ):
-    return await service.list_feligreses(db, search=search, skip=skip, limit=limit)
+    return await service.list_feligreses(db, search=search, con_hijos=con_hijos, skip=skip, limit=limit)
 
 
 @router.get("/mi-perfil", response_model=FeligresDetalle, summary="Perfil del feligrés autenticado")

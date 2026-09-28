@@ -5,11 +5,12 @@
  * alerta dinámica de resultado y la tabla en vivo de asistencias marcadas hoy en formato HH:MM.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { QrCode, RefreshCw, CheckCircle2, AlertTriangle, Clock, Calendar } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import Alert from '@/components/ui/Alert';
+import Pagination from '@/components/ui/Pagination';
 import { useAsistenciasHoy, useRegistrarAsistenciaQR } from '../hooks/useAsistenciaQR';
 import { QRScannerWidget } from '../components/QRScannerWidget';
 import type { AsistenciaScanResponse } from '@/types';
@@ -24,6 +25,15 @@ export const AsistenciaPage: React.FC = () => {
   const { escanear, loading: scanning, error: scanError, clearError } = useRegistrarAsistenciaQR();
 
   const [lastScanResult, setLastScanResult] = useState<AsistenciaScanResponse | null>(null);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+  const totalItems = data?.items?.length ?? 0;
+  const paginatedItems = useMemo(() => {
+    if (!data?.items) return [];
+    const start = (page - 1) * pageSize;
+    return data.items.slice(start, start + pageSize);
+  }, [data?.items, page, pageSize]);
 
   const handleScan = async (
     token: string,
@@ -145,7 +155,8 @@ export const AsistenciaPage: React.FC = () => {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-2xl border border-app-border bg-app-card shadow-xs">
+          <>
+            <div className="overflow-x-auto rounded-2xl border border-app-border bg-app-card shadow-xs">
             <table className="w-full min-w-[600px]">
               <thead className="bg-app-bg border-b border-app-border">
                 <tr>
@@ -157,7 +168,7 @@ export const AsistenciaPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-app-border/50">
-                {data?.items.map(item => (
+                {paginatedItems.map(item => (
                   <tr key={item.id} className="hover:bg-lit-surface/40 transition-colors">
                     <td className="px-4 py-3">
                       <span className="text-xs font-mono font-bold text-lit-primary flex items-center gap-1">
@@ -189,6 +200,21 @@ export const AsistenciaPage: React.FC = () => {
               </tbody>
             </table>
           </div>
+
+          {totalItems > 0 && (
+            <Pagination
+              currentPage={page}
+              totalItems={totalItems}
+              pageSize={pageSize}
+              onPageChange={setPage}
+              onPageSizeChange={(s) => {
+                setPageSize(s);
+                setPage(1);
+              }}
+              itemLabel="asistencias"
+            />
+          )}
+        </>
         )}
       </div>
     </div>

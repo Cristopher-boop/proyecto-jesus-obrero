@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Users,
   QrCode,
@@ -20,12 +20,15 @@ import Badge from '@/components/ui/Badge';
 import Alert from '@/components/ui/Alert';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
+import Pagination from '@/components/ui/Pagination';
 
 export const DashboardPage: React.FC = () => {
   const { season, seasonInfo, setSeason } = useLiturgicalTheme();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCapilla, setFilterCapilla] = useState('TODAS');
   const [showAlert, setShowAlert] = useState(true);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
 
   // Muestra de datos representativos de la Parroquia Jesús Obrero
   const stats = [
@@ -110,6 +113,56 @@ export const DashboardPage: React.FC = () => {
       asistenciaHora: '09:52 AM',
       docBautizo: 'APROBADO',
     },
+    {
+      id: 6,
+      nombre: 'Camila Ticona Gutierrez',
+      grupo: 'San Pablo (2do Año)',
+      capilla: 'Jesús Obrero',
+      horario: 'Dom 10:00 - 12:45',
+      asistencia: 'PUNTUAL',
+      asistenciaHora: '09:44 AM',
+      docBautizo: 'APROBADO',
+    },
+    {
+      id: 7,
+      nombre: 'Diego Huanca Limachi',
+      grupo: 'San Andrés (1er Año)',
+      capilla: 'Jesús Obrero',
+      horario: 'Dom 10:00 - 12:45',
+      asistencia: 'DURANTE_MISA',
+      asistenciaHora: '10:12 AM',
+      docBautizo: 'PENDIENTE',
+    },
+    {
+      id: 8,
+      nombre: 'Sofia Alvarez Torrez',
+      grupo: 'Confirmación 1er Año',
+      capilla: 'San Martín de Porras',
+      horario: 'Sáb 15:00 - 17:30',
+      asistencia: 'PUNTUAL',
+      asistenciaHora: '14:50 PM',
+      docBautizo: 'APROBADO',
+    },
+    {
+      id: 9,
+      nombre: 'Andrés Mamani Callisaya',
+      grupo: 'San Pedro (2do Año)',
+      capilla: 'Jesús Obrero',
+      horario: 'Dom 10:00 - 12:45',
+      asistencia: 'SOLO_CATEQUESIS',
+      asistenciaHora: '11:40 AM',
+      docBautizo: 'OBSERVADO',
+    },
+    {
+      id: 10,
+      nombre: 'Mariana Calle Flores',
+      grupo: 'Comunión 2do Año',
+      capilla: 'Señor de la Santa Cruz',
+      horario: 'Dom 08:00 - 10:30',
+      asistencia: 'PUNTUAL',
+      asistenciaHora: '07:55 AM',
+      docBautizo: 'APROBADO',
+    },
   ];
 
   const getAsistenciaBadge = (status: string) => {
@@ -146,6 +199,12 @@ export const DashboardPage: React.FC = () => {
     const matchesCapilla = filterCapilla === 'TODAS' || c.capilla === filterCapilla;
     return matchesSearch && matchesCapilla;
   });
+
+  const totalItems = filteredCatecumenos.length;
+  const paginatedCatecumenos = useMemo(() => {
+    const start = (page - 1) * pageSize;
+    return filteredCatecumenos.slice(start, start + pageSize);
+  }, [filteredCatecumenos, page, pageSize]);
 
   return (
     <div className="space-y-6 animate-fadeIn">
@@ -368,7 +427,10 @@ export const DashboardPage: React.FC = () => {
             <Input
               placeholder="Buscar por nombre o grupo..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setPage(1);
+              }}
               leftIcon={<Search className="w-4 h-4" />}
             />
           </div>
@@ -378,7 +440,10 @@ export const DashboardPage: React.FC = () => {
               size="sm"
               leftIcon={<Filter className="w-3.5 h-3.5 text-app-muted" />}
               value={filterCapilla}
-              onChange={(val) => setFilterCapilla(val)}
+              onChange={(val) => {
+                setFilterCapilla(val);
+                setPage(1);
+              }}
               options={[
                 { value: 'TODAS', label: 'Todas las Capillas' },
                 { value: 'Jesús Obrero', label: 'Jesús Obrero (Principal)' },
@@ -403,8 +468,8 @@ export const DashboardPage: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-app-border/60 bg-app-card">
-              {filteredCatecumenos.length > 0 ? (
-                filteredCatecumenos.map((item) => (
+              {paginatedCatecumenos.length > 0 ? (
+                paginatedCatecumenos.map((item) => (
                   <tr key={item.id} className="hover:bg-lit-surface/40 transition-colors group">
                     <td className="py-3.5 px-4">
                       <div className="font-bold text-app-text group-hover:text-lit-primary transition-colors">
@@ -445,6 +510,23 @@ export const DashboardPage: React.FC = () => {
             </tbody>
           </table>
         </div>
+
+        {totalItems > 0 && (
+          <div className="mt-4">
+            <Pagination
+              currentPage={page}
+              totalItems={totalItems}
+              pageSize={pageSize}
+              pageSizeOptions={[5, 10, 20]}
+              onPageChange={setPage}
+              onPageSizeChange={(s) => {
+                setPageSize(s);
+                setPage(1);
+              }}
+              itemLabel="catecúmenos"
+            />
+          </div>
+        )}
       </Card>
     </div>
   );

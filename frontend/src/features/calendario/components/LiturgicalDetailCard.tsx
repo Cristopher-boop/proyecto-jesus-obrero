@@ -22,7 +22,8 @@ interface Props {
 }
 
 export const LiturgicalDetailCard: React.FC<Props> = ({ station, onNext, onPrev }) => {
-  const { season, setSeason } = useLiturgicalTheme();
+  const { season, setSeason, resolvedColorMode } = useLiturgicalTheme();
+  const isDark = resolvedColorMode === 'dark';
   const isCurrentActiveTheme = season === station.themeId;
 
   return (
@@ -30,64 +31,96 @@ export const LiturgicalDetailCard: React.FC<Props> = ({ station, onNext, onPrev 
       
       {/* ── Cabecera Solemne del Retablo ────────────────────────────── */}
       <div 
-        className="p-6 sm:p-8 text-white relative overflow-hidden transition-all duration-700"
+        className={`p-6 sm:p-8 relative overflow-hidden transition-all duration-700 ${
+          isDark 
+            ? 'text-white' 
+            : 'text-app-text bg-app-card border-b border-app-border'
+        }`}
         style={{
-          background: `linear-gradient(135deg, ${station.colorHex} 0%, #1A1A1A 100%)`
+          background: isDark
+            ? `linear-gradient(135deg, ${station.colorHex} 0%, #1A1A1A 100%)`
+            : `radial-gradient(ellipse at top right, ${station.colorHex}18 0%, #FFFFFF 65%, #FAF7F2 100%)`
         }}
       >
         {/* Marca de agua sacra de fondo */}
-        <div className="absolute right-[-2%] top-[-20%] text-9xl opacity-10 font-serif select-none pointer-events-none">
+        <div className={`absolute right-[-2%] top-[-20%] text-9xl font-serif select-none pointer-events-none ${
+          isDark ? 'opacity-10 text-white' : 'opacity-[0.04] text-lit-primary'
+        }`}>
           ✝
         </div>
 
         <div className="relative z-10 flex flex-col gap-4">
           <div className="flex items-center justify-between flex-wrap gap-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-xs font-semibold">
+            <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold ${
+              isDark 
+                ? 'bg-white/15 backdrop-blur-md border border-white/20' 
+                : 'bg-lit-surface border border-lit-border text-lit-primary'
+            }`}>
               <span className="text-sm">{station.icon}</span>
-              <span className="font-mono tracking-wider uppercase text-amber-200">
+              <span className={`font-mono tracking-wider uppercase ${isDark ? 'text-amber-200' : 'text-lit-accent font-bold'}`}>
                 {station.latinMotto}
               </span>
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="text-xs px-2.5 py-1 rounded-full bg-white/15 border border-white/20 font-medium">
+              <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
+                isDark 
+                  ? 'bg-white/15 border border-white/20 text-white' 
+                  : 'bg-app-card border border-app-border text-app-text shadow-2xs'
+              }`}>
                 {station.approxDates}
               </span>
             </div>
           </div>
 
           <div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight font-serif text-white">
+            <h2 className={`text-2xl sm:text-3xl font-extrabold tracking-tight font-serif ${
+              isDark ? 'text-white' : 'text-app-text'
+            }`}>
               {station.name}
             </h2>
-            <p className="text-sm text-white/85 mt-1 font-medium">
+            <p className={`text-sm mt-1 font-medium ${
+              isDark ? 'text-white/85' : 'text-app-muted'
+            }`}>
               {station.subtitle}
             </p>
           </div>
 
           {/* Cita Bíblica Iluminadora */}
-          <div className="p-3.5 rounded-2xl bg-white/15 backdrop-blur-md border border-white/20 text-xs italic text-amber-100/95 leading-relaxed">
+          <div className={`p-3.5 rounded-2xl text-xs italic leading-relaxed ${
+            isDark 
+              ? 'bg-white/15 backdrop-blur-md border border-white/20 text-amber-100/95' 
+              : 'bg-lit-surface/80 border border-lit-border text-app-text'
+          }`}>
             "{station.scriptureVerse}"
-            <div className="text-[11px] not-italic font-bold text-right text-amber-300 mt-1 font-sans">
+            <div className={`text-[11px] not-italic font-bold text-right mt-1 font-sans ${
+              isDark ? 'text-amber-300' : 'text-lit-accent'
+            }`}>
               — {station.scriptureReference}
             </div>
           </div>
 
           {/* Botón de Aplicación de Tema Vivo */}
           <div className="pt-2 flex items-center justify-between flex-wrap gap-3">
-            <div className="flex items-center gap-2 text-xs text-white/80">
+            <div className={`flex items-center gap-2 text-xs ${isDark ? 'text-white/80' : 'text-app-muted'}`}>
               <span 
                 className="w-4 h-4 rounded-full border border-white shadow-xs inline-block" 
                 style={{ backgroundColor: station.colorHex }}
               />
-              <span className="font-semibold">{station.colorName}</span>
+              <span className="font-semibold text-app-text">{station.colorName}</span>
             </div>
 
             <Button
               variant={isCurrentActiveTheme ? 'ghost' : 'accent'}
               size="sm"
               onClick={() => setSeason(station.themeId)}
-              className={isCurrentActiveTheme ? 'bg-white/20 text-white hover:bg-white/30' : 'shadow-md'}
+              className={
+                isCurrentActiveTheme 
+                  ? isDark 
+                    ? 'bg-white/20 text-white hover:bg-white/30' 
+                    : 'bg-lit-surface text-lit-primary border border-lit-border font-bold'
+                  : 'shadow-md'
+              }
               leftIcon={<Flame className="w-3.5 h-3.5" />}
             >
               {isCurrentActiveTheme ? '✓ Tema Vivo Activo en el Sistema' : 'Vivir este Tiempo (Cambiar Tema)'}

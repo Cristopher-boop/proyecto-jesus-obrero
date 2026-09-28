@@ -11,6 +11,7 @@ import Badge from '@/components/ui/Badge';
 import Input from '@/components/ui/Input';
 import Alert from '@/components/ui/Alert';
 import Select from '@/components/ui/Select';
+import Pagination from '@/components/ui/Pagination';
 import {
   useCatecumenos, useCatecumenoDetalle, useBajaCatecumeno,
   type CatecumenoFilters,
@@ -69,6 +70,10 @@ export const CatecumenosPage: React.FC = () => {
   const [grupoFiltro,       setGrupoFiltro]       = useState<number | ''>('');
   const [estadoFiltro,      setEstadoFiltro]      = useState<EstadoInscripcion | ''>('');
 
+  // Paginación
+  const [page,     setPage]     = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
   const [modalOpen,         setModalOpen]         = useState(false);
   const [selectedId,        setSelectedId]        = useState<number | null>(null);
   const [isClosing,         setIsClosing]         = useState(false);
@@ -95,7 +100,8 @@ export const CatecumenosPage: React.FC = () => {
     grupo_id:   grupoFiltro ? Number(grupoFiltro) : undefined,
     estado:     estadoFiltro || undefined,
     search:     searchDebounce || undefined,
-    skip: 0, limit: 100,
+    skip:       (page - 1) * pageSize,
+    limit:      pageSize,
   };
 
   const { data, loading, error, refetch } = useCatecumenos(filters);
@@ -104,6 +110,7 @@ export const CatecumenosPage: React.FC = () => {
 
   const handleSearch = useCallback((val: string) => {
     setSearch(val);
+    setPage(1);
     const t = setTimeout(() => setSearchDebounce(val), 400);
     return () => clearTimeout(t);
   }, []);
@@ -231,7 +238,10 @@ export const CatecumenosPage: React.FC = () => {
                 variant="filter"
                 leftIcon={<Calendar className="w-3.5 h-3.5 text-app-muted" />}
                 value={gestionFiltro}
-                onChange={val => setGestionFiltro(val as any)}
+                onChange={val => {
+                  setGestionFiltro(val as any);
+                  setPage(1);
+                }}
                 options={[
                   { value: 2026, label: '2026 (Actual)' },
                   { value: 2025, label: '2025 (Histórico)' },
@@ -247,7 +257,10 @@ export const CatecumenosPage: React.FC = () => {
                 size="sm"
                 variant="filter"
                 value={sacramentoFiltro}
-                onChange={val => setSacramentoFiltro(val as any)}
+                onChange={val => {
+                  setSacramentoFiltro(val as any);
+                  setPage(1);
+                }}
                 options={[
                   { value: '', label: 'Todos los sacramentos' },
                   { value: 'PRIMERA_COMUNION', label: 'Primera Comunión' },
@@ -263,7 +276,10 @@ export const CatecumenosPage: React.FC = () => {
                 variant="filter"
                 leftIcon={<Layers className="w-3.5 h-3.5 text-app-muted" />}
                 value={etapaFiltro}
-                onChange={val => setEtapaFiltro(val as any)}
+                onChange={val => {
+                  setEtapaFiltro(val as any);
+                  setPage(1);
+                }}
                 options={[
                   { value: '', label: 'Todas las etapas' },
                   { value: 'PRIMER_ANO', label: 'Primer Año (1º Año)' },
@@ -280,7 +296,10 @@ export const CatecumenosPage: React.FC = () => {
                   variant="filter"
                   leftIcon={<Sparkles className="w-3.5 h-3.5 text-lit-accent" />}
                   value={grupoFiltro}
-                  onChange={val => setGrupoFiltro(val as any)}
+                  onChange={val => {
+                    setGrupoFiltro(val as any);
+                    setPage(1);
+                  }}
                   options={[
                     { value: '', label: 'Todos los subgrupos' },
                     ...gruposData.items.map(g => ({
@@ -306,7 +325,10 @@ export const CatecumenosPage: React.FC = () => {
                 ] as Array<{ val: EstadoInscripcion | ''; label: string }>).map(({ val, label }) => (
                   <button
                     key={val}
-                    onClick={() => setEstadoFiltro(val)}
+                    onClick={() => {
+                      setEstadoFiltro(val);
+                      setPage(1);
+                    }}
                     className={`px-2.5 py-0.5 rounded-md text-xs font-medium transition-all ${
                       estadoFiltro === val
                         ? 'bg-lit-surface shadow-2xs text-lit-primary font-bold'
@@ -329,6 +351,7 @@ export const CatecumenosPage: React.FC = () => {
                   setEstadoFiltro('');
                   setSearch('');
                   setSearchDebounce('');
+                  setPage(1);
                 }}
                 className="text-[11px] font-semibold text-semantic-error hover:underline"
               >
@@ -367,7 +390,8 @@ export const CatecumenosPage: React.FC = () => {
             )}
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-xl border border-app-border bg-app-card shadow-xs">
+          <>
+            <div className="overflow-x-auto rounded-xl border border-app-border bg-app-card shadow-xs">
             <table className="w-full min-w-[760px]">
               <thead className="bg-app-bg border-b border-app-border">
                 <tr>
@@ -513,6 +537,21 @@ export const CatecumenosPage: React.FC = () => {
               </tbody>
             </table>
           </div>
+
+          {data && data.total > 0 && (
+            <Pagination
+              currentPage={page}
+              totalItems={data.total}
+              pageSize={pageSize}
+              onPageChange={setPage}
+              onPageSizeChange={(s) => {
+                setPageSize(s);
+                setPage(1);
+              }}
+              itemLabel="catecúmenos"
+            />
+          )}
+        </>
         )}
       </div>
 
