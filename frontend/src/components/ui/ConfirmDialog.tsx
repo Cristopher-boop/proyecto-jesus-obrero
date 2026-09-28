@@ -35,21 +35,21 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="fixed inset-0 bg-black/50 backdrop-blur-xs animate-fadeIn" onClick={onClose} />
 
-      <div className="relative bg-white rounded-2xl border border-app-border shadow-2xl max-w-md w-full p-6 z-10 animate-scaleUp">
+      <div className="relative bg-app-card rounded-2xl border border-app-border shadow-2xl max-w-md w-full p-6 z-10 animate-scaleUp">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-stone-400 hover:text-stone-700 p-1.5 rounded-xl hover:bg-stone-100 transition-colors"
+          className="absolute top-4 right-4 text-app-muted hover:text-app-text p-1.5 rounded-xl hover:bg-lit-surface transition-colors"
         >
           <X className="w-4 h-4" />
         </button>
 
         <div className="flex items-start gap-4">
-          <div className={`w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 text-xl shadow-xs ${
+          <div className={`w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 text-xl shadow-xs border ${
             variant === 'danger'
-              ? 'bg-rose-100 text-rose-700'
+              ? 'bg-semantic-error-bg text-semantic-error-text border-semantic-error-border'
               : variant === 'warning'
-              ? 'bg-amber-100 text-amber-700'
-              : 'bg-lit-surface text-lit-primary'
+              ? 'bg-semantic-warning-bg text-semantic-warning-text border-semantic-warning-border'
+              : 'bg-lit-surface text-lit-primary border-lit-border'
           }`}>
             <AlertTriangle className="w-5 h-5" />
           </div>

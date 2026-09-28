@@ -69,7 +69,7 @@ export const CrearFeligresModal: React.FC<Props> = ({ isOpen, onClose, onSuccess
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-app-border flex flex-col max-h-[90vh]">
+      <div className="bg-app-card w-full max-w-md rounded-2xl shadow-2xl border border-app-border flex flex-col max-h-[90vh]">
 
         {/* Cabecera */}
         <div className="flex items-center justify-between p-6 border-b border-app-border flex-shrink-0">
@@ -80,7 +80,7 @@ export const CrearFeligresModal: React.FC<Props> = ({ isOpen, onClose, onSuccess
               <p className="text-[11px] text-app-muted">Padre, madre o tutor con acceso al sistema</p>
             </div>
           </div>
-          <button onClick={handleClose} className="w-8 h-8 rounded-lg hover:bg-stone-100 flex items-center justify-center text-app-muted"><X className="w-4 h-4" /></button>
+          <button onClick={handleClose} className="w-8 h-8 rounded-lg hover:bg-lit-surface flex items-center justify-center text-app-muted transition-colors"><X className="w-4 h-4" /></button>
         </div>
 
         <div className="flex-1 overflow-y-auto p-6">
@@ -110,7 +110,7 @@ export const CrearFeligresModal: React.FC<Props> = ({ isOpen, onClose, onSuccess
                 <Input label="Correo Electrónico" type="email" value={form.email ?? ''} onChange={e => fld('email', e.target.value)} placeholder="opcional" />
               </div>
 
-              <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-[11px] text-amber-800 flex items-start gap-2">
+              <div className="p-3 rounded-xl bg-semantic-warning-bg border border-semantic-warning-border text-[11px] text-semantic-warning-text flex items-start gap-2">
                 <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
                 <div>
                   <strong>Credenciales auto-generadas:</strong> El sistema creará el nombre de usuario y la contraseña temporal. Anótalas cuando aparezcan para entregárselas al padre/tutor.
@@ -138,21 +138,21 @@ export const CrearFeligresModal: React.FC<Props> = ({ isOpen, onClose, onSuccess
                   { label: 'Usuario', value: created.username, key: 'user' as const },
                   { label: 'Contraseña Temporal', value: created.temp_password, key: 'pass' as const },
                 ]).map(({ label, value, key }) => (
-                  <div key={key} className="flex items-center justify-between p-2.5 rounded-lg bg-white border border-app-border">
+                  <div key={key} className="flex items-center justify-between p-2.5 rounded-lg bg-app-card border border-app-border">
                     <div>
                       <p className="text-[10px] text-app-muted">{label}</p>
                       <p className="text-sm font-mono font-bold text-app-text">{value}</p>
                     </div>
                     <button
                       onClick={() => handleCopy(value, key)}
-                      className="w-7 h-7 rounded-lg hover:bg-stone-100 flex items-center justify-center text-app-muted transition-colors"
+                      className="w-7 h-7 rounded-lg hover:bg-lit-surface flex items-center justify-center text-app-muted transition-colors"
                     >
                       {copied === key ? <CheckCheck className="w-3.5 h-3.5 text-semantic-success" /> : <Copy className="w-3.5 h-3.5" />}
                     </button>
                   </div>
                 ))}
 
-                <p className="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-2 py-1.5">
+                <p className="text-[10px] text-semantic-warning-text bg-semantic-warning-bg border border-semantic-warning-border rounded-lg px-2 py-1.5">
                   ⚠️ La contraseña no se vuelve a mostrar. El feligrés puede cambiarla desde su perfil.
                 </p>
               </div>

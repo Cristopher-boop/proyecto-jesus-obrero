@@ -168,8 +168,8 @@ export const DashboardPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="flex items-center gap-2 bg-black/20 p-2 rounded-xl backdrop-blur-xs border border-white/10 flex-wrap">
-            <span className="text-xs font-medium text-white/70 px-2 flex items-center gap-1">
+          <div className="flex items-center gap-2 bg-white/15 p-2 rounded-xl backdrop-blur-xs border border-white/20 flex-wrap">
+            <span className="text-xs font-medium text-white/80 px-2 flex items-center gap-1">
               <Flame className="w-3.5 h-3.5 text-lit-accent" /> Probar tema:
             </span>
             {(['ordinario', 'cuaresma', 'pentecostes', 'pascua'] as LiturgicalSeason[]).map((key) => (
@@ -178,7 +178,7 @@ export const DashboardPage: React.FC = () => {
                 onClick={() => setSeason(key)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                   season === key
-                    ? 'bg-white text-stone-900 shadow-sm scale-105'
+                    ? 'bg-white text-lit-primary-dark shadow-sm scale-105'
                     : 'text-white/80 hover:text-white hover:bg-white/10'
                 }`}
               >
@@ -237,11 +237,11 @@ export const DashboardPage: React.FC = () => {
         >
           <div className="space-y-4">
             {/* Barra de progreso múltiple */}
-            <div className="w-full h-5 bg-stone-100 rounded-full overflow-hidden flex shadow-inner">
+            <div className="w-full h-5 bg-app-bg border border-app-border rounded-full overflow-hidden flex shadow-inner">
               <div style={{ width: '65%' }} className="bg-lit-primary h-full transition-all" title="Puntual (65%)" />
               <div style={{ width: '20%' }} className="bg-lit-accent h-full transition-all" title="Durante la Misa (20%)" />
-              <div style={{ width: '8%' }} className="bg-amber-400 h-full transition-all" title="Solo Catequesis (8%)" />
-              <div style={{ width: '7%' }} className="bg-rose-400 h-full transition-all" title="Faltas (7%)" />
+              <div style={{ width: '8%' }} className="bg-semantic-warning h-full transition-all" title="Solo Catequesis (8%)" />
+              <div style={{ width: '7%' }} className="bg-semantic-error h-full transition-all" title="Faltas (7%)" />
             </div>
 
             {/* Leyenda del gráfico */}
@@ -264,9 +264,9 @@ export const DashboardPage: React.FC = () => {
                 <p className="text-[10px] text-app-muted">10:00 a 11:30 AM</p>
               </div>
 
-              <div className="p-2.5 rounded-lg bg-amber-50 border border-amber-200">
-                <div className="flex items-center gap-1.5 font-bold text-amber-800">
-                  <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />
+              <div className="p-2.5 rounded-lg bg-semantic-warning-bg border border-semantic-warning-border">
+                <div className="flex items-center gap-1.5 font-bold text-semantic-warning-text">
+                  <span className="w-2.5 h-2.5 rounded-full bg-semantic-warning" />
                   <span>Solo Catequesis</span>
                 </div>
                 <p className="text-lg font-black text-app-text mt-1">19</p>
@@ -275,7 +275,7 @@ export const DashboardPage: React.FC = () => {
 
               <div className="p-2.5 rounded-lg bg-semantic-error-bg border border-semantic-error-border">
                 <div className="flex items-center gap-1.5 font-bold text-semantic-error-text">
-                  <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-semantic-error" />
                   <span>Faltas</span>
                 </div>
                 <p className="text-lg font-black text-app-text mt-1">19</p>
@@ -294,7 +294,7 @@ export const DashboardPage: React.FC = () => {
                 ].map((grp, i) => (
                   <div key={i} className="flex items-center justify-between text-xs gap-3">
                     <span className="w-32 font-medium text-app-text truncate">{grp.name}</span>
-                    <div className="flex-1 h-2 bg-stone-100 rounded-full overflow-hidden">
+                    <div className="flex-1 h-2 bg-app-bg border border-app-border rounded-full overflow-hidden">
                       <div
                         className="h-full bg-lit-primary rounded-full transition-all"
                         style={{ width: `${grp.rate}%` }}
@@ -392,7 +392,7 @@ export const DashboardPage: React.FC = () => {
         {/* Tabla Responsiva */}
         <div className="overflow-x-auto rounded-xl border border-app-border/80 shadow-xs">
           <table className="w-full text-left text-xs">
-            <thead className="bg-stone-50 text-app-muted uppercase text-[10px] tracking-wider border-b border-app-border">
+            <thead className="bg-app-bg text-app-muted uppercase text-[10px] tracking-wider border-b border-app-border">
               <tr>
                 <th className="py-3.5 px-4 font-semibold">Catecúmeno</th>
                 <th className="py-3.5 px-4 font-semibold">Grupo y Capilla</th>
@@ -402,7 +402,7 @@ export const DashboardPage: React.FC = () => {
                 <th className="py-3.5 px-4 font-semibold text-right">Acción</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-app-border/60 bg-white">
+            <tbody className="divide-y divide-app-border/60 bg-app-card">
               {filteredCatecumenos.length > 0 ? (
                 filteredCatecumenos.map((item) => (
                   <tr key={item.id} className="hover:bg-lit-surface/40 transition-colors group">

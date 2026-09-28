@@ -79,22 +79,22 @@ export const AsistenciaPage: React.FC = () => {
         <div
           className={`p-5 rounded-2xl border shadow-lg transition-all duration-300 animate-fadeIn ${
             lastScanResult.ya_registrado
-              ? 'bg-amber-50 border-amber-300 text-amber-900'
-              : 'bg-emerald-50 border-emerald-300 text-emerald-950'
+              ? 'bg-semantic-warning-bg border-semantic-warning-border text-semantic-warning-text'
+              : 'bg-semantic-success-bg border-semantic-success-border text-semantic-success-text'
           }`}
         >
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-3">
               <div
                 className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0 shadow-sm ${
-                  lastScanResult.ya_registrado ? 'bg-amber-200 text-amber-800' : 'bg-emerald-600 text-white'
+                  lastScanResult.ya_registrado ? 'bg-semantic-warning text-white' : 'bg-semantic-success text-white'
                 }`}
               >
                 {lastScanResult.ya_registrado ? <AlertTriangle className="w-6 h-6" /> : <CheckCircle2 className="w-6 h-6" />}
               </div>
 
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/70 border border-current">
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-app-card/70 border border-current">
                   {lastScanResult.ya_registrado ? 'Aviso de Asistencia Registrada' : 'Marcación Exitosa'}
                 </span>
                 <h3 className="text-base font-extrabold mt-1">{lastScanResult.nombre_completo}</h3>
@@ -137,7 +137,7 @@ export const AsistenciaPage: React.FC = () => {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-lit-primary" />
           </div>
         ) : data?.items.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-app-border p-12 text-center space-y-2">
+          <div className="bg-app-card rounded-2xl border border-app-border p-12 text-center space-y-2">
             <div className="text-5xl">📋</div>
             <h4 className="text-sm font-bold text-app-text">Aún no hay asistencias registradas hoy</h4>
             <p className="text-xs text-app-muted max-w-sm mx-auto">
@@ -145,9 +145,9 @@ export const AsistenciaPage: React.FC = () => {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-2xl border border-app-border bg-white shadow-xs">
+          <div className="overflow-x-auto rounded-2xl border border-app-border bg-app-card shadow-xs">
             <table className="w-full min-w-[600px]">
-              <thead className="bg-stone-50 border-b border-app-border">
+              <thead className="bg-app-bg border-b border-app-border">
                 <tr>
                   {['Hora', 'Catecúmeno', 'Sacramento', 'Estado', 'Momento / Observación'].map(h => (
                     <th key={h} className="px-4 py-3 text-left text-[10px] font-bold text-app-muted uppercase tracking-wider">
@@ -180,7 +180,7 @@ export const AsistenciaPage: React.FC = () => {
                       </Badge>
                     </td>
                     <td className="px-4 py-3">
-                      <span className="text-xs text-stone-600">
+                      <span className="text-xs text-app-muted">
                         {item.observacion || 'Puntual (Antes de la Misa)'}
                       </span>
                     </td>

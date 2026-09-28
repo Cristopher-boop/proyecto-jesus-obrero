@@ -20,6 +20,7 @@ import Badge from '@/components/ui/Badge';
 import Card from '@/components/ui/Card';
 import Alert from '@/components/ui/Alert';
 import { QRGafete } from '@/features/catecumenos/components/QRGafete';
+import { ThemeModeToggle } from '@/components/ui/ThemeModeToggle';
 import type { FeligresDetalle, CatecumenoDetalle } from '@/types';
 
 export const FeligresPortalPage: React.FC = () => {
@@ -62,7 +63,7 @@ export const FeligresPortalPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-app-bg text-app-text flex flex-col">
       {/* ── Navbar del Portal Feligrés ──────────────────────────────── */}
-      <header className="bg-white border-b border-app-border shadow-xs px-6 py-4 flex items-center justify-between sticky top-0 z-30">
+      <header className="bg-app-card border-b border-app-border shadow-xs px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-30 transition-colors">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-lit-surface border border-lit-border flex items-center justify-center text-xl shadow-xs">
             ⛪
@@ -76,14 +77,17 @@ export const FeligresPortalPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 sm:gap-4">
+          {/* Conmutador de modo claro / oscuro / sistema */}
+          <ThemeModeToggle size="sm" />
+
           {/* Badge Litúrgico */}
           <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full bg-lit-surface border border-lit-border text-xs font-semibold text-lit-primary">
             <span>{seasonInfo.icon}</span>
             <span>{seasonInfo.name}</span>
           </div>
 
-          <div className="flex items-center gap-3 pl-3 border-l border-app-border">
+          <div className="flex items-center gap-2 sm:gap-3 pl-2 sm:pl-3 border-l border-app-border">
             <div className="text-right hidden md:block">
               <p className="text-xs font-bold text-app-text">{user?.nombres || user?.username}</p>
               <p className="text-[10px] text-app-muted font-mono">Feligrés</p>
@@ -92,7 +96,7 @@ export const FeligresPortalPage: React.FC = () => {
               variant="ghost"
               size="sm"
               onClick={logout}
-              leftIcon={<LogOut className="w-4 h-4 text-semantic-error" />}
+              leftIcon={<LogOut className="w-4 h-4 text-semantic-error-text" />}
             >
               Cerrar Sesión
             </Button>
@@ -104,7 +108,7 @@ export const FeligresPortalPage: React.FC = () => {
       <main className="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-8 space-y-6">
 
         {/* Banner de bienvenida */}
-        <div className="rounded-2xl p-6 bg-gradient-to-r from-lit-primary via-lit-primary-dark to-stone-900 text-white shadow-lg space-y-2 relative overflow-hidden">
+        <div className="rounded-2xl p-6 bg-gradient-to-r from-lit-primary via-lit-primary-dark to-lit-primary text-white shadow-lg space-y-2 relative overflow-hidden">
           <div className="absolute right-[-5%] top-[-20%] text-9xl opacity-10 font-serif select-none pointer-events-none">
             ✝
           </div>
@@ -153,7 +157,7 @@ export const FeligresPortalPage: React.FC = () => {
                   )}
                   <div>
                     <p className="text-[10px] text-app-muted">Nombre de Usuario</p>
-                    <code className="bg-stone-100 px-2 py-0.5 rounded text-stone-700 font-mono font-bold">{perfil.username}</code>
+                    <code className="bg-app-bg border border-app-border px-2 py-0.5 rounded text-app-text font-mono font-bold">{perfil.username}</code>
                   </div>
                 </div>
 
@@ -217,7 +221,7 @@ export const FeligresPortalPage: React.FC = () => {
 
                           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                             {/* Cuadernillo */}
-                            <div className="p-3 rounded-lg bg-white border border-app-border flex items-center justify-between gap-2">
+                            <div className="p-3 rounded-lg bg-app-card border border-app-border flex items-center justify-between gap-2 shadow-2xs">
                               <div className="flex items-center gap-2">
                                 <BookCheck className="w-4 h-4 text-lit-primary flex-shrink-0" />
                                 <div>
@@ -225,15 +229,15 @@ export const FeligresPortalPage: React.FC = () => {
                                   <p className="text-[10px] text-app-muted">Asistencia</p>
                                 </div>
                               </div>
-                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                                insc?.cuadernillo_comprado ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                                insc?.cuadernillo_comprado ? 'bg-semantic-success-bg text-semantic-success-text border-semantic-success-border' : 'bg-semantic-warning-bg text-semantic-warning-text border-semantic-warning-border'
                               }`}>
                                 {insc?.cuadernillo_comprado ? 'Entregado ✓' : 'Falta ⚠️'}
                               </span>
                             </div>
 
                             {/* Libro */}
-                            <div className="p-3 rounded-lg bg-white border border-app-border flex items-center justify-between gap-2">
+                            <div className="p-3 rounded-lg bg-app-card border border-app-border flex items-center justify-between gap-2 shadow-2xs">
                               <div className="flex items-center gap-2">
                                 <BookOpen className="w-4 h-4 text-lit-primary flex-shrink-0" />
                                 <div>
@@ -241,15 +245,15 @@ export const FeligresPortalPage: React.FC = () => {
                                   <p className="text-[10px] text-app-muted">Catequesis</p>
                                 </div>
                               </div>
-                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                                insc?.libro_comprado ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                                insc?.libro_comprado ? 'bg-semantic-success-bg text-semantic-success-text border-semantic-success-border' : 'bg-semantic-warning-bg text-semantic-warning-text border-semantic-warning-border'
                               }`}>
                                 {insc?.libro_comprado ? 'Entregado ✓' : 'Falta ⚠️'}
                               </span>
                             </div>
 
                             {/* Cuota inicial 20 Bs */}
-                            <div className="p-3 rounded-lg bg-white border border-app-border flex items-center justify-between gap-2">
+                            <div className="p-3 rounded-lg bg-app-card border border-app-border flex items-center justify-between gap-2 shadow-2xs">
                               <div className="flex items-center gap-2">
                                 <DollarSign className="w-4 h-4 text-lit-primary flex-shrink-0" />
                                 <div>
@@ -257,8 +261,8 @@ export const FeligresPortalPage: React.FC = () => {
                                   <p className="text-[10px] text-app-muted">Aporte 20 Bs</p>
                                 </div>
                               </div>
-                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                                insc?.pago_cuota_inicial ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                                insc?.pago_cuota_inicial ? 'bg-semantic-success-bg text-semantic-success-text border-semantic-success-border' : 'bg-semantic-warning-bg text-semantic-warning-text border-semantic-warning-border'
                               }`}>
                                 {insc?.pago_cuota_inicial ? 'Pagado ✓' : 'Pendiente ⚠️'}
                               </span>
@@ -267,36 +271,36 @@ export const FeligresPortalPage: React.FC = () => {
                         </div>
 
                         {/* 2. Documentación Requerida para Salida / Celebración del Sacramento */}
-                        <div className="p-4 rounded-xl bg-stone-50 border border-app-border space-y-3">
+                        <div className="p-4 rounded-xl bg-app-bg border border-app-border space-y-3">
                           <div className="flex items-center justify-between flex-wrap gap-1">
-                            <p className="text-xs font-bold text-stone-800 uppercase tracking-wide flex items-center gap-1.5">
-                              <FileText className="w-4 h-4 text-stone-600" /> 2. Documentos para el Sacramento (Salida)
+                            <p className="text-xs font-bold text-app-text uppercase tracking-wide flex items-center gap-1.5">
+                              <FileText className="w-4 h-4 text-lit-primary" /> 2. Documentos para el Sacramento (Salida)
                             </p>
-                            <span className="text-[10px] font-semibold text-stone-600 bg-stone-200/70 px-2 py-0.5 rounded-full">
+                            <span className="text-[10px] font-semibold text-app-muted bg-app-card border border-app-border px-2 py-0.5 rounded-full">
                               📄 Solo Fotocopias (Nada original)
                             </span>
                           </div>
 
                           <div className="space-y-2 text-xs">
                             {/* 1. Formulario */}
-                            <div className="flex items-center justify-between p-2.5 rounded-lg bg-white border border-app-border">
+                            <div className="flex items-center justify-between p-2.5 rounded-lg bg-app-card border border-app-border shadow-2xs">
                               <span className="font-semibold text-app-text">1. Formulario de Inscripción firmado</span>
-                              <span className={`text-[10px] font-bold ${insc?.doc_formulario_inscripcion ? 'text-emerald-700' : 'text-amber-700'}`}>
+                              <span className={`text-[10px] font-bold ${insc?.doc_formulario_inscripcion ? 'text-semantic-success-text' : 'text-semantic-warning-text'}`}>
                                 {insc?.doc_formulario_inscripcion ? 'Presentado ✓' : 'Pendiente ⚠️'}
                               </span>
                             </div>
 
                             {/* 2. Certificado de Bautismo */}
-                            <div className="p-2.5 rounded-lg bg-white border border-app-border space-y-1.5">
+                            <div className="p-2.5 rounded-lg bg-app-card border border-app-border space-y-1.5 shadow-2xs">
                               <div className="flex items-center justify-between">
                                 <span className="font-semibold text-app-text">2. Certificado de Bautismo / Fe de Bautizo</span>
-                                <span className={`text-[10px] font-bold ${insc?.doc_fe_bautismo ? 'text-emerald-700' : 'text-amber-700'}`}>
+                                <span className={`text-[10px] font-bold ${insc?.doc_fe_bautismo ? 'text-semantic-success-text' : 'text-semantic-warning-text'}`}>
                                   {insc?.doc_fe_bautismo ? 'Presentado ✓' : 'Pendiente ⚠️'}
                                 </span>
                               </div>
                               {det && !det.es_bautizado && (
-                                <div className="p-2 rounded-md bg-amber-50 border border-amber-200 text-[10px] text-amber-800 flex items-start gap-1.5">
-                                  <AlertCircle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-amber-600" />
+                                <div className="p-2 rounded-md bg-semantic-warning-bg border border-semantic-warning-border text-[10px] text-semantic-warning-text flex items-start gap-1.5">
+                                  <AlertCircle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-semantic-warning-text" />
                                   <span>
                                     <strong>Aviso pastoral importante:</strong> Si tu hijo/a aún no ha realizado su Bautismo, debe recibirlo antes de 2º año en la Vigilia Pascual.
                                   </span>
@@ -305,35 +309,35 @@ export const FeligresPortalPage: React.FC = () => {
                             </div>
 
                             {/* 3. Certificado de Nacimiento */}
-                            <div className="flex items-center justify-between p-2.5 rounded-lg bg-white border border-app-border">
+                            <div className="flex items-center justify-between p-2.5 rounded-lg bg-app-card border border-app-border shadow-2xs">
                               <span className="font-semibold text-app-text">3. Certificado de Nacimiento</span>
-                              <span className={`text-[10px] font-bold ${insc?.doc_cert_nacimiento ? 'text-emerald-700' : 'text-amber-700'}`}>
+                              <span className={`text-[10px] font-bold ${insc?.doc_cert_nacimiento ? 'text-semantic-success-text' : 'text-semantic-warning-text'}`}>
                                 {insc?.doc_cert_nacimiento ? 'Presentado ✓' : 'Pendiente ⚠️'}
                               </span>
                             </div>
 
                             {/* 4. Certificado de Matrimonio Religioso o Compromiso */}
-                            <div className="flex items-center justify-between p-2.5 rounded-lg bg-white border border-app-border">
+                            <div className="flex items-center justify-between p-2.5 rounded-lg bg-app-card border border-app-border shadow-2xs">
                               <span className="font-semibold text-app-text">4. Certificado de Matrimonio Religioso o Compromiso de Matrimonio</span>
-                              <span className={`text-[10px] font-bold ${insc?.doc_cert_matrimonio_padres ? 'text-emerald-700' : 'text-amber-700'}`}>
+                              <span className={`text-[10px] font-bold ${insc?.doc_cert_matrimonio_padres ? 'text-semantic-success-text' : 'text-semantic-warning-text'}`}>
                                 {insc?.doc_cert_matrimonio_padres ? 'Presentado ✓' : 'Pendiente ⚠️'}
                               </span>
                             </div>
 
                             {/* 5. Fotocopias de CIs */}
-                            <div className="p-2.5 rounded-lg bg-white border border-app-border space-y-1.5">
+                            <div className="p-2.5 rounded-lg bg-app-card border border-app-border space-y-1.5 shadow-2xs">
                               <span className="font-semibold text-app-text block">5. Fotocopias de Cédulas de Identidad (CIs):</span>
                               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[10px] pt-1">
-                                <div className={`p-1.5 rounded border text-center font-bold ${insc?.doc_ci_nino ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-stone-50 border-stone-200 text-stone-600'}`}>
+                                <div className={`p-1.5 rounded border text-center font-bold ${insc?.doc_ci_nino ? 'bg-semantic-success-bg border-semantic-success-border text-semantic-success-text' : 'bg-app-bg border-app-border text-app-muted'}`}>
                                   CI Catecúmeno {insc?.doc_ci_nino ? '✓' : '⚠️'}
                                 </div>
-                                <div className={`p-1.5 rounded border text-center font-bold ${insc?.doc_ci_padre ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-stone-50 border-stone-200 text-stone-600'}`}>
+                                <div className={`p-1.5 rounded border text-center font-bold ${insc?.doc_ci_padre ? 'bg-semantic-success-bg border-semantic-success-border text-semantic-success-text' : 'bg-app-bg border-app-border text-app-muted'}`}>
                                   CI Padre {insc?.doc_ci_padre ? '✓' : '⚠️'}
                                 </div>
-                                <div className={`p-1.5 rounded border text-center font-bold ${insc?.doc_ci_madre ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-stone-50 border-stone-200 text-stone-600'}`}>
+                                <div className={`p-1.5 rounded border text-center font-bold ${insc?.doc_ci_madre ? 'bg-semantic-success-bg border-semantic-success-border text-semantic-success-text' : 'bg-app-bg border-app-border text-app-muted'}`}>
                                   CI Madre {insc?.doc_ci_madre ? '✓' : '⚠️'}
                                 </div>
-                                <div className={`p-1.5 rounded border text-center font-bold ${insc?.doc_ci_tutor ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-stone-50 border-stone-200 text-stone-600'}`}>
+                                <div className={`p-1.5 rounded border text-center font-bold ${insc?.doc_ci_tutor ? 'bg-semantic-success-bg border-semantic-success-border text-semantic-success-text' : 'bg-app-bg border-app-border text-app-muted'}`}>
                                   CI Tutor {insc?.doc_ci_tutor ? '✓' : '⚠️'}
                                 </div>
                               </div>
@@ -368,14 +372,14 @@ export const FeligresPortalPage: React.FC = () => {
               {/* Modal de Gafete QR del hijo seleccionado */}
               {selectedChild && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">
-                  <div className="bg-white rounded-2xl p-6 max-w-md w-full space-y-4 shadow-2xl border border-app-border animate-slide-in-right">
+                  <div className="bg-app-card rounded-2xl p-6 max-w-md w-full space-y-4 shadow-2xl border border-app-border animate-slide-in-right">
                     <div className="flex items-center justify-between">
                       <h4 className="text-sm font-bold text-app-text flex items-center gap-2">
                         <QrCode className="w-4 h-4 text-lit-primary" /> Gafete Oficial de Asistencia
                       </h4>
                       <button
                         onClick={() => setSelectedChild(null)}
-                        className="w-7 h-7 rounded-lg hover:bg-stone-100 flex items-center justify-center text-app-muted"
+                        className="w-7 h-7 rounded-lg hover:bg-lit-surface flex items-center justify-center text-app-muted transition-colors"
                       >
                         ✕
                       </button>

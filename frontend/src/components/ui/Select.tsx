@@ -115,10 +115,10 @@ export function Select<T extends string | number = string>({
   // Variantes temáticas
   const variantStyles = {
     default: error
-      ? 'bg-white border-semantic-error-border text-semantic-error-text focus:ring-semantic-error-border/30'
-      : 'bg-white border-app-border text-app-text hover:border-stone-400 focus:ring-lit-primary/20',
-    filter: 'bg-stone-50 border-stone-200 text-app-text hover:bg-stone-100 hover:border-stone-300 focus:ring-lit-primary/20',
-    dark: 'bg-stone-800 border-stone-700 text-white hover:bg-stone-750 hover:border-stone-600 focus:ring-lit-accent/40',
+      ? 'bg-app-card border-semantic-error-border text-semantic-error-text focus:ring-semantic-error-border/30'
+      : 'bg-app-card border-app-border text-app-text hover:border-lit-accent focus:ring-lit-primary/20',
+    filter: 'bg-app-bg border-app-border text-app-text hover:bg-lit-surface hover:border-lit-border focus:ring-lit-primary/20',
+    dark: 'bg-app-card border-app-border text-app-text hover:border-lit-accent focus:ring-lit-accent/40',
   };
 
   return (
@@ -144,12 +144,12 @@ export function Select<T extends string | number = string>({
         className={`w-full flex items-center justify-between gap-2 border font-medium transition-all outline-none focus:ring-2 select-none shadow-2xs ${
           sizeStyles[size]
         } ${variantStyles[variant]} ${
-          disabled ? 'opacity-50 cursor-not-allowed bg-stone-100' : 'cursor-pointer'
+          disabled ? 'opacity-50 cursor-not-allowed bg-app-bg' : 'cursor-pointer'
         } ${buttonClassName}`}
       >
         <div className="flex items-center gap-2 truncate min-w-0">
           {leftIcon && (
-            <span className={`flex-shrink-0 ${variant === 'dark' ? 'text-stone-400' : 'text-stone-500'}`}>
+            <span className="flex-shrink-0 text-app-muted">
               {leftIcon}
             </span>
           )}
@@ -158,7 +158,7 @@ export function Select<T extends string | number = string>({
           )}
           <span className="truncate">
             {selectedOption ? selectedOption.label : (
-              <span className={variant === 'dark' ? 'text-stone-400' : 'text-app-muted'}>
+              <span className="text-app-muted">
                 {placeholder}
               </span>
             )}
@@ -169,9 +169,7 @@ export function Select<T extends string | number = string>({
         </div>
 
         <ChevronDown
-          className={`w-4 h-4 flex-shrink-0 transition-transform duration-200 ${
-            variant === 'dark' ? 'text-stone-400' : 'text-stone-500'
-          } ${isOpen ? 'rotate-180' : ''}`}
+          className={`w-4 h-4 flex-shrink-0 transition-transform duration-200 text-app-muted ${isOpen ? 'rotate-180' : ''}`}
         />
       </button>
 
@@ -179,11 +177,7 @@ export function Select<T extends string | number = string>({
       {isOpen && (
         <div
           role="listbox"
-          className={`absolute left-0 right-0 mt-1 max-h-60 overflow-y-auto rounded-xl border shadow-xl z-50 animate-scale-in py-1 ${
-            variant === 'dark'
-              ? 'bg-stone-900 border-stone-700 text-stone-200'
-              : 'bg-white border-app-border text-app-text'
-          } ${menuClassName}`}
+          className={`absolute left-0 right-0 mt-1 max-h-60 overflow-y-auto rounded-xl border shadow-xl z-50 animate-scale-in py-1 bg-app-card border-app-border text-app-text ${menuClassName}`}
         >
           {options.length === 0 ? (
             <div className="py-2.5 px-3 text-xs text-app-muted text-center">
@@ -202,12 +196,8 @@ export function Select<T extends string | number = string>({
                     option.disabled
                       ? 'opacity-40 cursor-not-allowed'
                       : isSelected
-                      ? variant === 'dark'
-                        ? 'bg-stone-800 text-white font-bold'
-                        : 'bg-lit-surface text-lit-primary font-bold'
-                      : variant === 'dark'
-                      ? 'hover:bg-stone-800/80 hover:text-white'
-                      : 'hover:bg-stone-50 hover:text-app-text'
+                      ? 'bg-lit-surface text-lit-primary font-bold'
+                      : 'hover:bg-lit-surface hover:text-app-text'
                   }`}
                 >
                   <div className="flex items-center gap-2 truncate min-w-0">
@@ -229,9 +219,7 @@ export function Select<T extends string | number = string>({
 
                   {isSelected && (
                     <Check
-                      className={`w-3.5 h-3.5 flex-shrink-0 ${
-                        variant === 'dark' ? 'text-lit-accent' : 'text-lit-primary'
-                      }`}
+                      className="w-3.5 h-3.5 flex-shrink-0 text-lit-primary"
                     />
                   )}
                 </div>

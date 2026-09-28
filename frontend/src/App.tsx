@@ -17,10 +17,10 @@ function MainContent() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-stone-100 flex items-center justify-center">
+      <div className="min-h-screen bg-app-bg flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-lit-primary mx-auto"></div>
-          <p className="mt-4 text-stone-600 font-semibold text-sm">Cargando Parroquia Jesús Obrero...</p>
+          <p className="mt-4 text-app-muted font-semibold text-sm">Cargando Parroquia Jesús Obrero...</p>
         </div>
       </div>
     );
@@ -44,7 +44,7 @@ function MainContent() {
       {activeTab === 'calendario'  && <CalendarioPage />}
       {activeTab === 'capillas'    && <CapillasPage />}
       {!['dashboard', 'asistencia', 'catecumenos', 'feligreses', 'calendario', 'capillas'].includes(activeTab) && (
-        <div className="bg-white p-12 rounded-2xl border border-app-border text-center shadow-xs">
+        <div className="bg-app-card p-12 rounded-2xl border border-app-border text-center shadow-xs">
           <span className="text-4xl">🚧</span>
           <h3 className="text-lg font-bold text-app-text mt-3">Módulo en Desarrollo</h3>
           <p className="text-xs text-app-muted mt-1">Esta sección se conectará en los próximos pasos.</p>

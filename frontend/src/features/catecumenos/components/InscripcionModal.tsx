@@ -211,7 +211,7 @@ export const InscripcionModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-app-border flex flex-col max-h-[90vh]">
+      <div className="bg-app-card w-full max-w-lg rounded-2xl shadow-2xl border border-app-border flex flex-col max-h-[90vh]">
 
         {/* Cabecera */}
         <div className="flex items-center justify-between p-6 border-b border-app-border flex-shrink-0">
@@ -222,7 +222,7 @@ export const InscripcionModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }
               <p className="text-[11px] text-app-muted">Primera Comunión · Jesús Obrero</p>
             </div>
           </div>
-          <button onClick={handleClose} className="w-8 h-8 rounded-lg hover:bg-stone-100 flex items-center justify-center text-app-muted"><X className="w-4 h-4" /></button>
+          <button onClick={handleClose} className="w-8 h-8 rounded-lg hover:bg-lit-surface flex items-center justify-center text-app-muted transition-colors"><X className="w-4 h-4" /></button>
         </div>
 
         {/* Stepper */}
@@ -234,12 +234,12 @@ export const InscripcionModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }
             return (
               <React.Fragment key={s.id}>
                 <div className="flex items-center gap-1.5">
-                  <div className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${isDone ? 'bg-lit-primary text-white' : isActive ? 'bg-lit-surface border-2 border-lit-primary text-lit-primary' : 'bg-stone-100 text-app-muted'}`}>
+                  <div className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${isDone ? 'bg-lit-primary text-white' : isActive ? 'bg-lit-surface border-2 border-lit-primary text-lit-primary' : 'bg-app-bg border border-app-border text-app-muted'}`}>
                     {isDone ? <CheckCircle2 className="w-4 h-4" /> : <Icon className="w-3.5 h-3.5" />}
                   </div>
-                  <span className={`text-[11px] font-medium hidden sm:block ${isActive ? 'text-lit-primary' : isDone ? 'text-lit-primary/70' : 'text-app-muted'}`}>{s.label}</span>
+                  <span className={`text-[11px] font-medium hidden sm:block ${isActive ? 'text-lit-primary font-bold' : isDone ? 'text-lit-primary/70' : 'text-app-muted'}`}>{s.label}</span>
                 </div>
-                {i < steps.length - 1 && <div className={`flex-1 h-px ${step > s.id ? 'bg-lit-primary/40' : 'bg-stone-200'}`} />}
+                {i < steps.length - 1 && <div className={`flex-1 h-px ${step > s.id ? 'bg-lit-primary/40' : 'bg-app-border'}`} />}
               </React.Fragment>
             );
           })}
@@ -264,7 +264,7 @@ export const InscripcionModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-app-text">Fecha de Nacimiento *</label>
                   <input type="date" value={nino.fecha_nacimiento} onChange={e => nF('fecha_nacimiento', e.target.value)}
-                    className={`w-full px-3 py-2 text-sm rounded-lg border bg-white outline-none focus:ring-2 focus:ring-lit-primary/30 ${errors.fecha_nacimiento ? 'border-semantic-error' : 'border-app-border'}`} />
+                    className={`w-full px-3 py-2 text-sm rounded-lg border bg-app-card text-app-text outline-none focus:ring-2 focus:ring-lit-primary/30 ${errors.fecha_nacimiento ? 'border-semantic-error' : 'border-app-border'}`} />
                   {errors.fecha_nacimiento && <p className="text-[11px] text-semantic-error">{errors.fecha_nacimiento}</p>}
                 </div>
                 <Select
@@ -304,13 +304,13 @@ export const InscripcionModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }
               </div>
 
               {/* Estado Sacramental */}
-              <div className="p-3 rounded-xl bg-stone-50 border border-app-border space-y-2">
+              <div className="p-3 rounded-xl bg-app-bg border border-app-border space-y-2">
                 <label className="flex items-center gap-2.5 cursor-pointer group">
                   <input type="checkbox" checked={nino.es_bautizado} onChange={e => nF('es_bautizado', e.target.checked)} className="w-4 h-4 rounded accent-lit-primary" />
                   <span className="text-xs text-app-text font-medium group-hover:text-lit-primary transition-colors">¿Está bautizado/a en la Iglesia Católica?</span>
                 </label>
                 {!nino.es_bautizado && (
-                  <p className="text-[10px] text-amber-700 bg-amber-50 p-2 rounded-lg border border-amber-200">
+                  <p className="text-[10px] text-semantic-warning-text bg-semantic-warning-bg p-2 rounded-lg border border-semantic-warning-border">
                     ℹ️ Si aún no está bautizado/a, deberá realizar el sacramento del Bautismo antes de segundo año en la Vigilia Pascual.
                   </p>
                 )}
@@ -318,7 +318,7 @@ export const InscripcionModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }
 
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-app-text">Observaciones</label>
-                <textarea value={nino.observaciones} onChange={e => nF('observaciones', e.target.value)} rows={2} placeholder="Alergias, necesidades especiales..." className="w-full px-3 py-2 text-sm rounded-lg border border-app-border bg-white resize-none outline-none focus:ring-2 focus:ring-lit-primary/30" />
+                <textarea value={nino.observaciones} onChange={e => nF('observaciones', e.target.value)} rows={2} placeholder="Alergias, necesidades especiales..." className="w-full px-3 py-2 text-sm rounded-lg border border-app-border bg-app-card text-app-text resize-none outline-none focus:ring-2 focus:ring-lit-primary/30" />
               </div>
             </div>
           )}
@@ -336,9 +336,9 @@ export const InscripcionModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }
                 <p className="text-xs text-app-muted italic text-center py-4">Ningún tutor añadido. Puedes inscribir al niño ahora y vincular tutores después.</p>
               )}
               {tutores.map(t => (
-                <div key={t.id} className="flex items-start justify-between p-3 rounded-xl bg-stone-50 border border-app-border">
+                <div key={t.id} className="flex items-start justify-between p-3 rounded-xl bg-app-bg border border-app-border">
                   <div className="flex items-start gap-2">
-                    <div className={`w-7 h-7 rounded-full flex items-center justify-center text-sm flex-shrink-0 ${t.tipo === 'vinculado' ? 'bg-lit-primary text-white' : 'bg-stone-200 text-stone-600'}`}>
+                    <div className={`w-7 h-7 rounded-full flex items-center justify-center text-sm flex-shrink-0 ${t.tipo === 'vinculado' ? 'bg-lit-primary text-white' : 'bg-app-card border border-app-border text-app-muted'}`}>
                       {t.tipo === 'vinculado' ? <UserCheck className="w-3.5 h-3.5" /> : <Users className="w-3.5 h-3.5" />}
                     </div>
                     <div>
@@ -360,7 +360,7 @@ export const InscripcionModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }
                       </div>
                     </div>
                   </div>
-                  <button onClick={() => handleRemoveTutor(t.id)} className="w-6 h-6 rounded hover:bg-red-50 flex items-center justify-center text-red-400 hover:text-red-600 flex-shrink-0">
+                  <button onClick={() => handleRemoveTutor(t.id)} className="w-6 h-6 rounded hover:bg-semantic-error-bg flex items-center justify-center text-semantic-error/70 hover:text-semantic-error flex-shrink-0 transition-colors">
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -383,16 +383,16 @@ export const InscripcionModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }
                 <div className="p-4 rounded-xl border border-lit-border bg-lit-surface/50 space-y-3">
                   <p className="text-xs font-bold text-lit-primary">Datos del tutor</p>
                   <div className="grid grid-cols-2 gap-2">
-                    <input placeholder="Nombre(s) *" value={nuevoTutor.nombres ?? ''} onChange={e => setNuevoTutor(p => ({ ...p, nombres: e.target.value }))} className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-app-border bg-white outline-none focus:ring-2 focus:ring-lit-primary/30" />
-                    <input placeholder="Primer Apellido *" value={nuevoTutor.primer_apellido ?? ''} onChange={e => setNuevoTutor(p => ({ ...p, primer_apellido: e.target.value }))} className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-app-border bg-white outline-none focus:ring-2 focus:ring-lit-primary/30" />
-                    <input placeholder="Segundo Apellido" value={nuevoTutor.segundo_apellido ?? ''} onChange={e => setNuevoTutor(p => ({ ...p, segundo_apellido: e.target.value }))} className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-app-border bg-white outline-none focus:ring-2 focus:ring-lit-primary/30" />
-                    <input placeholder="Teléfono" type="tel" value={nuevoTutor.telefono_principal ?? ''} onChange={e => setNuevoTutor(p => ({ ...p, telefono_principal: e.target.value }))} className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-app-border bg-white outline-none focus:ring-2 focus:ring-lit-primary/30" />
+                    <input placeholder="Nombre(s) *" value={nuevoTutor.nombres ?? ''} onChange={e => setNuevoTutor(p => ({ ...p, nombres: e.target.value }))} className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-app-border bg-app-card text-app-text outline-none focus:ring-2 focus:ring-lit-primary/30" />
+                    <input placeholder="Primer Apellido *" value={nuevoTutor.primer_apellido ?? ''} onChange={e => setNuevoTutor(p => ({ ...p, primer_apellido: e.target.value }))} className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-app-border bg-app-card text-app-text outline-none focus:ring-2 focus:ring-lit-primary/30" />
+                    <input placeholder="Segundo Apellido" value={nuevoTutor.segundo_apellido ?? ''} onChange={e => setNuevoTutor(p => ({ ...p, segundo_apellido: e.target.value }))} className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-app-border bg-app-card text-app-text outline-none focus:ring-2 focus:ring-lit-primary/30" />
+                    <input placeholder="Teléfono" type="tel" value={nuevoTutor.telefono_principal ?? ''} onChange={e => setNuevoTutor(p => ({ ...p, telefono_principal: e.target.value }))} className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-app-border bg-app-card text-app-text outline-none focus:ring-2 focus:ring-lit-primary/30" />
                   </div>
                   {/* Parentesco */}
                   <div className="flex gap-1.5 flex-wrap">
                     {(['PAPA', 'MAMA', 'TUTOR_LEGAL', 'OTRO'] as Parentesco[]).map(p => (
                       <button key={p} type="button" onClick={() => setNuevoTutor(prev => ({ ...prev, parentesco: p }))}
-                        className={`px-2.5 py-1 rounded-lg text-[11px] font-medium border transition-all ${nuevoTutor.parentesco === p ? 'bg-lit-surface border-lit-primary text-lit-primary font-bold' : 'bg-white border-app-border text-app-muted'}`}>
+                        className={`px-2.5 py-1 rounded-lg text-[11px] font-medium border transition-all ${nuevoTutor.parentesco === p ? 'bg-lit-surface border-lit-primary text-lit-primary font-bold' : 'bg-app-card border-app-border text-app-muted'}`}>
                         {PARENTESCO_LABEL[p]}
                       </button>
                     ))}
@@ -411,7 +411,7 @@ export const InscripcionModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }
                   <div className="relative">
                     <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-app-muted" />
                     <input placeholder="Nombre, apellido o CI..." value={busquedaQ} onChange={e => handleSearchFeligres(e.target.value)}
-                      className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-app-border bg-white outline-none focus:ring-2 focus:ring-lit-primary/30" />
+                      className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-app-border bg-app-card text-app-text outline-none focus:ring-2 focus:ring-lit-primary/30" />
                   </div>
                   {buscando && <p className="text-[11px] text-app-muted text-center">Buscando...</p>}
                   {busquedaRes.length > 0 && (
@@ -443,7 +443,7 @@ export const InscripcionModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }
               <p className="text-xs text-app-muted font-semibold uppercase tracking-wide">Resumen de la inscripción</p>
               {apiError && <Alert variant="error" title="Error al inscribir">{apiError}</Alert>}
 
-              <div className="p-4 rounded-xl bg-stone-50 border border-app-border space-y-2">
+              <div className="p-4 rounded-xl bg-app-bg border border-app-border space-y-2">
                 <div className="flex items-center gap-2 mb-2"><Baby className="w-4 h-4 text-lit-primary" /><p className="text-xs font-bold text-lit-primary uppercase tracking-wide">Catecúmeno</p></div>
                 <p className="text-sm font-bold text-app-text">{[nino.nombres, nino.primer_apellido, nino.segundo_apellido].filter(Boolean).join(' ')}</p>
                 {nino.fecha_nacimiento && <p className="text-xs text-app-muted">Nació: {new Date(nino.fecha_nacimiento + 'T12:00:00').toLocaleDateString('es-BO', { day: '2-digit', month: 'long', year: 'numeric' })}</p>}
@@ -452,9 +452,9 @@ export const InscripcionModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }
                 <div className="pt-2 border-t border-app-border space-y-1">
                   <p className="text-[10px] font-bold text-app-muted uppercase">Requisitos de Ingreso:</p>
                   <div className="flex flex-wrap gap-1.5">
-                    {nino.cuadernillo_comprado ? <span className="px-2 py-0.5 bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] rounded-full font-semibold">✓ Cuadernillo</span> : <span className="px-2 py-0.5 bg-stone-100 text-stone-500 text-[10px] rounded-full">Cuadernillo pendiente</span>}
-                    {nino.libro_comprado ? <span className="px-2 py-0.5 bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] rounded-full font-semibold">✓ Libro</span> : <span className="px-2 py-0.5 bg-stone-100 text-stone-500 text-[10px] rounded-full">Libro pendiente</span>}
-                    {nino.pago_cuota_inicial ? <span className="px-2 py-0.5 bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] rounded-full font-semibold">✓ Cuota 20 Bs</span> : <span className="px-2 py-0.5 bg-stone-100 text-stone-500 text-[10px] rounded-full">Cuota 20 Bs pendiente</span>}
+                    {nino.cuadernillo_comprado ? <span className="px-2 py-0.5 bg-semantic-success-bg border border-semantic-success-border text-semantic-success-text text-[10px] rounded-full font-semibold">✓ Cuadernillo</span> : <span className="px-2 py-0.5 bg-app-card border border-app-border text-app-muted text-[10px] rounded-full">Cuadernillo pendiente</span>}
+                    {nino.libro_comprado ? <span className="px-2 py-0.5 bg-semantic-success-bg border border-semantic-success-border text-semantic-success-text text-[10px] rounded-full font-semibold">✓ Libro</span> : <span className="px-2 py-0.5 bg-app-card border border-app-border text-app-muted text-[10px] rounded-full">Libro pendiente</span>}
+                    {nino.pago_cuota_inicial ? <span className="px-2 py-0.5 bg-semantic-success-bg border border-semantic-success-border text-semantic-success-text text-[10px] rounded-full font-semibold">✓ Cuota 20 Bs</span> : <span className="px-2 py-0.5 bg-app-card border border-app-border text-app-muted text-[10px] rounded-full">Cuota 20 Bs pendiente</span>}
                   </div>
                 </div>
 
@@ -464,7 +464,7 @@ export const InscripcionModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }
               </div>
 
               {tutores.length > 0 && (
-                <div className="p-4 rounded-xl bg-stone-50 border border-app-border space-y-2">
+                <div className="p-4 rounded-xl bg-app-bg border border-app-border space-y-2">
                   <div className="flex items-center gap-2 mb-2"><Users className="w-4 h-4 text-lit-primary" /><p className="text-xs font-bold text-lit-primary uppercase tracking-wide">Tutores ({tutores.length})</p></div>
                   {tutores.map(t => (
                     <div key={t.id} className="flex items-center gap-2">
@@ -478,7 +478,7 @@ export const InscripcionModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }
                 </div>
               )}
 
-              <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-[11px] text-amber-800">
+              <div className="p-3 rounded-xl bg-semantic-warning-bg border border-semantic-warning-border text-[11px] text-semantic-warning-text">
                 🆔 Se generará un <strong>código QR único</strong> al confirmar. Podrás imprimirlo como gafete desde el panel de detalle.
               </div>
             </div>

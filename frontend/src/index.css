@@ -85,11 +85,75 @@
     --alert-info-text: 215 65% 30%;
   }
 
+  /* 🌙 TEMA OSCURO (Activado cuando document.documentElement tiene clase .dark o data-mode="dark") */
+  html.dark, .dark {
+    --bg-app: 24 10% 10%;                /* Stone 900 eclesiástico cálido (#1C1917) */
+    --bg-card: 24 9% 14%;                /* Stone 850 cálido (#262220) */
+    --text-main: 40 20% 96%;             /* Marfil cálido suave no estridente (#FAF8F5) */
+    --text-muted: 25 8% 65%;             /* Stone 400 legible (#A8A29E) */
+    --border-subtle: 24 8% 22%;          /* Stone 700 sutil y sobrio (#383431) */
+
+    /* Alertas funcionales en modo oscuro (fondos oscuros descansados y textos nítidos) */
+    --alert-success-bg: 142 45% 12%;
+    --alert-success-border: 142 35% 24%;
+    --alert-success-text: 142 60% 75%;
+
+    --alert-warning-bg: 40 45% 12%;
+    --alert-warning-border: 40 40% 24%;
+    --alert-warning-text: 40 80% 75%;
+
+    --alert-error-bg: 0 45% 12%;
+    --alert-error-border: 0 35% 25%;
+    --alert-error-text: 0 75% 75%;
+
+    --alert-info-bg: 215 45% 12%;
+    --alert-info-border: 215 35% 25%;
+    --alert-info-text: 215 75% 75%;
+  }
+
+  /* Adaptación de superficies litúrgicas en TEMA OSCURO */
+  html.dark, html.dark[data-theme="ordinario"] {
+    --lit-primary: 152 45% 42%;
+    --lit-primary-dark: 153 45% 30%;
+    --lit-primary-light: 150 45% 52%;
+    --lit-surface: 153 32% 14%;
+    --lit-border: 150 20% 24%;
+    --lit-accent-light: 42 30% 18%;
+  }
+
+  html.dark[data-theme="cuaresma"] {
+    --lit-primary: 314 42% 52%;
+    --lit-primary-dark: 312 42% 40%;
+    --lit-primary-light: 315 45% 62%;
+    --lit-surface: 314 28% 15%;
+    --lit-border: 315 18% 24%;
+    --lit-accent-light: 42 30% 18%;
+  }
+
+  html.dark[data-theme="pentecostes"] {
+    --lit-primary: 354 58% 52%;
+    --lit-primary-dark: 354 60% 40%;
+    --lit-primary-light: 353 60% 62%;
+    --lit-surface: 354 32% 15%;
+    --lit-border: 350 20% 24%;
+    --lit-accent-light: 42 30% 18%;
+  }
+
+  html.dark[data-theme="pascua"] {
+    --lit-primary: 40 55% 50%;
+    --lit-primary-dark: 39 55% 38%;
+    --lit-primary-light: 40 60% 60%;
+    --lit-surface: 39 32% 15%;
+    --lit-border: 40 22% 25%;
+    --lit-accent-light: 42 30% 18%;
+  }
+
   body {
     background-color: hsl(var(--bg-app));
     color: hsl(var(--text-main));
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
 }
 

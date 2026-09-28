@@ -288,30 +288,30 @@ export const CapillasPage: React.FC = () => {
       {error && <Alert variant="error" title="Error">{error}</Alert>}
 
       {/* Banner Informativo */}
-      <div className="p-4 rounded-2xl bg-stone-900 text-white border border-stone-800 shadow-md relative overflow-hidden">
+      <div className="p-4 rounded-2xl bg-lit-surface text-app-text border border-lit-border shadow-xs relative overflow-hidden transition-colors">
         <div className="absolute top-0 right-0 w-64 h-64 bg-lit-accent/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="space-y-1">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-lit-accent flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5" /> Protocolo de Evaluación Automática
+            <span className="text-[10px] font-bold uppercase tracking-wider text-lit-primary flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-lit-accent" /> Protocolo de Evaluación Automática
             </span>
-            <h3 className="text-sm font-bold text-white">
+            <h3 className="text-sm font-bold text-lit-primary font-serif">
               Criterio Unificado de Asistencia Parroquial
             </h3>
-            <p className="text-xs text-stone-300 max-w-2xl leading-relaxed">
+            <p className="text-xs text-app-muted max-w-2xl leading-relaxed">
               Cada capilla define sus franjas cronológicas:
-              <strong className="text-emerald-400"> Puntual</strong> (antes de la misa),
-              <strong className="text-amber-300"> Durante la Misa</strong> (presente en celebración),
-              <strong className="text-rose-400"> Durante Catequesis</strong> (atraso registrado) o
-              <strong className="text-stone-400"> Fuera de Horario</strong> (falta).
+              <strong className="text-semantic-success-text"> Puntual</strong> (antes de la misa),
+              <strong className="text-semantic-warning-text"> Durante la Misa</strong> (presente en celebración),
+              <strong className="text-semantic-error-text"> Durante Catequesis</strong> (atraso registrado) o
+              <strong className="text-app-muted"> Fuera de Horario</strong> (falta).
             </p>
           </div>
 
-          <div className="flex-shrink-0 bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10 text-center">
-            <span className="text-xs font-mono font-bold text-lit-accent block">
+          <div className="flex-shrink-0 bg-app-card px-4 py-2 rounded-xl border border-app-border text-center shadow-2xs">
+            <span className="text-xs font-mono font-bold text-lit-primary block">
               {data?.total ?? 0} Capillas
             </span>
-            <span className="text-[10px] text-stone-300">Registradas</span>
+            <span className="text-[10px] text-app-muted">Registradas</span>
           </div>
         </div>
       </div>
@@ -322,7 +322,7 @@ export const CapillasPage: React.FC = () => {
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-lit-primary" />
         </div>
       ) : data?.items.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-app-border p-12 text-center space-y-3 shadow-xs">
+        <div className="bg-app-card rounded-2xl border border-app-border p-12 text-center space-y-3 shadow-xs">
           <span className="text-4xl block">⛪</span>
           <h3 className="text-base font-bold text-app-text">No hay capillas registradas</h3>
           <p className="text-xs text-app-muted max-w-sm mx-auto">
@@ -337,18 +337,18 @@ export const CapillasPage: React.FC = () => {
           {data?.items.map((capilla) => (
             <div
               key={capilla.id}
-              className={`rounded-2xl border transition-all duration-200 bg-white overflow-hidden shadow-xs hover:shadow-md flex flex-col justify-between ${
+              className={`rounded-2xl border transition-all duration-200 bg-app-card overflow-hidden shadow-xs hover:shadow-md flex flex-col justify-between ${
                 capilla.es_sede_principal
                   ? 'border-lit-primary/40 ring-1 ring-lit-primary/20'
                   : 'border-app-border'
               }`}
             >
               {/* Cabecera de la Tarjeta */}
-              <div className="p-5 border-b border-app-border/60 bg-stone-50/50">
+              <div className="p-5 border-b border-app-border/60 bg-lit-surface/30">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-start gap-3">
                     <div className={`w-10 h-10 rounded-2xl flex items-center justify-center text-xl flex-shrink-0 shadow-xs ${
-                      capilla.es_sede_principal ? 'bg-lit-primary text-white' : 'bg-stone-200 text-stone-700'
+                      capilla.es_sede_principal ? 'bg-lit-primary text-white' : 'bg-app-bg text-app-text border border-app-border'
                     }`}>
                       {capilla.es_sede_principal ? '🏛️' : '⛪'}
                     </div>
@@ -371,7 +371,7 @@ export const CapillasPage: React.FC = () => {
                         )}
                       </div>
                       <p className="text-xs text-app-muted mt-1 flex items-center gap-1.5">
-                        <MapPin className="w-3.5 h-3.5 text-stone-400 flex-shrink-0" />
+                        <MapPin className="w-3.5 h-3.5 text-app-muted flex-shrink-0" />
                         <span className="truncate">{capilla.direccion || 'Sin dirección registrada'}</span>
                       </p>
                     </div>
@@ -381,7 +381,7 @@ export const CapillasPage: React.FC = () => {
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => handleOpenEditarCapilla(capilla)}
-                      className="p-1.5 rounded-lg text-stone-500 hover:text-lit-primary hover:bg-stone-100 transition-colors"
+                      className="p-1.5 rounded-lg text-app-muted hover:text-lit-primary hover:bg-lit-surface transition-colors"
                       title="Editar Capilla"
                     >
                       <Edit2 className="w-3.5 h-3.5" />
@@ -389,7 +389,7 @@ export const CapillasPage: React.FC = () => {
                     {!capilla.es_sede_principal && (
                       <button
                         onClick={() => handleOpenEliminarCapilla(capilla)}
-                        className="p-1.5 rounded-lg text-stone-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                        className="p-1.5 rounded-lg text-app-muted hover:text-semantic-error hover:bg-semantic-error-bg transition-colors"
                         title="Eliminar Capilla"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -414,7 +414,7 @@ export const CapillasPage: React.FC = () => {
                 </div>
 
                 {capilla.horarios.length === 0 ? (
-                  <div className="py-6 text-center text-xs text-app-muted bg-stone-50 rounded-xl border border-dashed border-app-border">
+                  <div className="py-6 text-center text-xs text-app-muted bg-app-bg rounded-xl border border-dashed border-app-border">
                     <p>No hay horarios registrados para esta capilla.</p>
                     <button
                       onClick={() => handleOpenNuevoHorario(capilla)}
@@ -427,7 +427,7 @@ export const CapillasPage: React.FC = () => {
                   capilla.horarios.map((h) => (
                     <div
                       key={h.id}
-                      className="p-4 rounded-xl border border-app-border bg-stone-50/70 space-y-3 hover:bg-stone-50 transition-colors relative group"
+                      className="p-4 rounded-xl border border-app-border bg-app-bg/70 space-y-3 hover:bg-app-bg transition-colors relative group"
                     >
                       {/* Cabecera del Horario */}
                       <div className="flex items-center justify-between">
@@ -444,14 +444,14 @@ export const CapillasPage: React.FC = () => {
                         <div className="flex items-center gap-1">
                           <button
                             onClick={() => handleOpenEditarHorario(capilla, h)}
-                            className="p-1 text-stone-400 hover:text-lit-primary hover:bg-white rounded transition-colors"
+                            className="p-1 text-app-muted hover:text-lit-primary hover:bg-lit-surface rounded transition-colors"
                             title="Editar Horario"
                           >
                             <Edit2 className="w-3.5 h-3.5" />
                           </button>
                           <button
                             onClick={() => handleOpenEliminarHorario(capilla.id, h)}
-                            className="p-1 text-stone-400 hover:text-rose-600 hover:bg-white rounded transition-colors"
+                            className="p-1 text-app-muted hover:text-semantic-error hover:bg-semantic-error-bg rounded transition-colors"
                             title="Eliminar Horario"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -462,43 +462,43 @@ export const CapillasPage: React.FC = () => {
                       {/* Timeline Visual de 3 Fases */}
                       <div className="grid grid-cols-3 gap-2">
                         {/* 1. Puntual */}
-                        <div className="p-2 rounded-lg border border-emerald-200 bg-emerald-50/80 flex flex-col justify-between gap-1">
+                        <div className="p-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 flex flex-col justify-between gap-1">
                           <div className="flex items-center justify-between">
-                            <span className="text-[9px] font-bold text-emerald-900 uppercase">1. Puntual</span>
+                            <span className="text-[9px] font-bold text-emerald-950 dark:text-emerald-200 uppercase">1. Puntual</span>
                             <Badge variant="success" size="sm">PRESENTE</Badge>
                           </div>
-                          <span className="text-xs font-mono font-bold text-emerald-950">
+                          <span className="text-xs font-mono font-bold text-emerald-950 dark:text-emerald-100">
                             {formatTime(h.hora_inicio_puntual)} - {formatTime(h.hora_fin_puntual)}
                           </span>
-                          <span className="text-[9px] text-emerald-700 leading-tight">
+                          <span className="text-[9px] text-emerald-700 dark:text-emerald-300 leading-tight">
                             Antes del inicio
                           </span>
                         </div>
 
                         {/* 2. Durante Misa */}
-                        <div className="p-2 rounded-lg border border-amber-200 bg-amber-50/80 flex flex-col justify-between gap-1">
+                        <div className="p-2 rounded-lg border border-amber-500/30 bg-amber-500/10 flex flex-col justify-between gap-1">
                           <div className="flex items-center justify-between">
-                            <span className="text-[9px] font-bold text-amber-900 uppercase">2. En Misa</span>
+                            <span className="text-[9px] font-bold text-amber-950 dark:text-amber-200 uppercase">2. En Misa</span>
                             <Badge variant="warning" size="sm">PRESENTE</Badge>
                           </div>
-                          <span className="text-xs font-mono font-bold text-amber-950">
+                          <span className="text-xs font-mono font-bold text-amber-950 dark:text-amber-100">
                             {formatTime(h.hora_inicio_misa)} - {formatTime(h.hora_fin_misa)}
                           </span>
-                          <span className="text-[9px] text-amber-700 leading-tight truncate">
+                          <span className="text-[9px] text-amber-700 dark:text-amber-300 leading-tight truncate">
                             {h.descripcion_misa || 'Celebración'}
                           </span>
                         </div>
 
                         {/* 3. Catequesis */}
-                        <div className="p-2 rounded-lg border border-rose-200 bg-rose-50/80 flex flex-col justify-between gap-1">
+                        <div className="p-2 rounded-lg border border-rose-500/30 bg-rose-500/10 flex flex-col justify-between gap-1">
                           <div className="flex items-center justify-between">
-                            <span className="text-[9px] font-bold text-rose-900 uppercase">3. Catequesis</span>
+                            <span className="text-[9px] font-bold text-rose-950 dark:text-rose-200 uppercase">3. Catequesis</span>
                             <Badge variant="error" size="sm">ATRASO</Badge>
                           </div>
-                          <span className="text-xs font-mono font-bold text-rose-950">
+                          <span className="text-xs font-mono font-bold text-rose-950 dark:text-rose-100">
                             {formatTime(h.hora_inicio_catequesis)} - {formatTime(h.hora_fin_catequesis)}
                           </span>
-                          <span className="text-[9px] text-rose-700 leading-tight truncate">
+                          <span className="text-[9px] text-rose-700 dark:text-rose-300 leading-tight truncate">
                             {h.descripcion_catequesis || 'Encuentro'}
                           </span>
                         </div>
@@ -513,7 +513,7 @@ export const CapillasPage: React.FC = () => {
                     <div className="flex items-center justify-between flex-wrap gap-2">
                       <div>
                         <span className="text-xs font-bold text-app-text flex items-center gap-1.5 font-serif">
-                          <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                          <Sparkles className="w-3.5 h-3.5 text-lit-accent" />
                           Subgrupos de Catequesis · Gestión 2026 (2do Año)
                         </span>
                         <p className="text-[10px] text-app-muted mt-0.5 leading-tight">
@@ -524,7 +524,7 @@ export const CapillasPage: React.FC = () => {
                       <button
                         onClick={handleAutoAgrupar}
                         disabled={isAutoAgrupando}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold text-amber-900 bg-amber-100 hover:bg-amber-200 border border-amber-300 transition-colors shadow-2xs disabled:opacity-50"
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold text-amber-900 dark:text-amber-200 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 transition-colors shadow-2xs disabled:opacity-50"
                         title="Re-balancear catecúmenos por fecha de nacimiento"
                       >
                         <Shuffle className={`w-3 h-3 ${isAutoAgrupando ? 'animate-spin' : ''}`} />
@@ -537,19 +537,19 @@ export const CapillasPage: React.FC = () => {
                       {gruposJO?.items.map((g) => (
                         <div
                           key={g.id}
-                          className="p-3 rounded-xl border border-amber-200/80 bg-amber-50/40 hover:bg-amber-50/70 transition-colors flex items-center justify-between"
+                          className="p-3 rounded-xl border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/15 transition-colors flex items-center justify-between"
                         >
                           <div className="space-y-0.5">
                             <div className="flex items-center gap-1.5">
-                              <span className="text-xs font-bold text-amber-950 font-serif">
+                              <span className="text-xs font-bold text-amber-950 dark:text-amber-200 font-serif">
                                 {g.nombre_santo || g.nombre}
                               </span>
-                              <span className="text-[9px] font-mono text-stone-500 bg-white/80 px-1 rounded border border-amber-200">
+                              <span className="text-[9px] font-mono text-app-muted bg-app-card px-1 rounded border border-amber-500/30">
                                 {g.codigo}
                               </span>
                             </div>
-                            <p className="text-[10px] text-stone-600">
-                              <strong className="text-amber-900">{g.total_catecumenos}</strong> catecúmenos
+                            <p className="text-[10px] text-app-muted">
+                              <strong className="text-amber-900 dark:text-amber-300">{g.total_catecumenos}</strong> catecúmenos
                               {g.edad_minima !== undefined && g.edad_maxima !== undefined && (
                                 <span> · {g.edad_minima === g.edad_maxima ? `${g.edad_minima} años` : `${g.edad_minima}-${g.edad_maxima} años`}</span>
                               )}
@@ -558,7 +558,7 @@ export const CapillasPage: React.FC = () => {
 
                           <button
                             onClick={() => handleOpenAsignarSanto(g.id, g.nombre_santo || g.nombre)}
-                            className="p-1.5 rounded-lg text-amber-800 hover:bg-white border border-transparent hover:border-amber-200 transition-all text-[10px] font-semibold"
+                            className="p-1.5 rounded-lg text-amber-800 dark:text-amber-200 hover:bg-lit-surface border border-transparent hover:border-lit-border transition-all text-[10px] font-semibold"
                             title="Renombrar o asignar Santo"
                           >
                             <Edit2 className="w-3 h-3" />
@@ -571,12 +571,12 @@ export const CapillasPage: React.FC = () => {
               </div>
 
               {/* Pie de la Tarjeta */}
-              <div className="p-3.5 px-5 bg-stone-50/70 border-t border-app-border/70 flex items-center justify-between">
+              <div className="p-3.5 px-5 bg-lit-surface/20 border-t border-app-border/70 flex items-center justify-between">
                 <span className="text-[11px] text-app-muted flex items-center gap-1 font-mono">
                   Código: <strong>{capilla.codigo}</strong>
                 </span>
                 <span className="text-xs font-bold text-lit-primary flex items-center gap-1">
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                  <ShieldCheck className="w-3.5 h-3.5 text-semantic-success" />
                   {capilla.activo ? 'Operativa' : 'Inactiva'}
                 </span>
               </div>
@@ -621,9 +621,9 @@ export const CapillasPage: React.FC = () => {
       {/* Modal para Asignar Nombre Patronal de Santo */}
       {asignarSantoModal.isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-fade-in">
-          <div className="bg-white rounded-2xl shadow-xl border border-app-border p-6 max-w-sm w-full space-y-4 animate-scale-in">
+          <div className="bg-app-card rounded-2xl shadow-xl border border-app-border p-6 max-w-sm w-full space-y-4 animate-scale-in">
             <div className="flex items-center gap-2.5">
-              <span className="p-2 rounded-xl bg-amber-100 text-amber-900 text-lg">✨</span>
+              <span className="p-2 rounded-xl bg-lit-surface text-lit-primary text-lg border border-lit-border">✨</span>
               <div>
                 <h3 className="text-sm font-bold text-app-text font-serif">Asignar Nombre de Santo</h3>
                 <p className="text-xs text-app-muted">Subgrupo Parroquia Jesús Obrero</p>
@@ -631,7 +631,7 @@ export const CapillasPage: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-stone-700 mb-1.5">
+              <label className="block text-xs font-bold text-app-text mb-1.5">
                 Nombre Patronal de Santo:
               </label>
               <input
@@ -639,7 +639,7 @@ export const CapillasPage: React.FC = () => {
                 value={nuevoNombreSanto}
                 onChange={e => setNuevoNombreSanto(e.target.value)}
                 placeholder="Ej: Juan Don Bosco, San Nicolás..."
-                className="w-full text-xs px-3 py-2 rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-lit-primary"
+                className="w-full text-xs px-3 py-2 rounded-xl border border-app-border bg-app-card text-app-text focus:outline-none focus:ring-2 focus:ring-lit-primary"
                 autoFocus
               />
             </div>

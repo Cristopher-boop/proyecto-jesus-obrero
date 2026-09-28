@@ -26,7 +26,7 @@ export const LiturgicalDetailCard: React.FC<Props> = ({ station, onNext, onPrev 
   const isCurrentActiveTheme = season === station.themeId;
 
   return (
-    <div className="bg-white rounded-3xl border border-app-border shadow-xl overflow-hidden flex flex-col transition-all duration-500">
+    <div className="bg-app-card rounded-3xl border border-app-border shadow-xl overflow-hidden flex flex-col transition-all duration-500">
       
       {/* ── Cabecera Solemne del Retablo ────────────────────────────── */}
       <div 
@@ -50,7 +50,7 @@ export const LiturgicalDetailCard: React.FC<Props> = ({ station, onNext, onPrev 
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="text-xs px-2.5 py-1 rounded-full bg-black/30 border border-white/20 font-medium">
+              <span className="text-xs px-2.5 py-1 rounded-full bg-white/15 border border-white/20 font-medium">
                 {station.approxDates}
               </span>
             </div>
@@ -66,7 +66,7 @@ export const LiturgicalDetailCard: React.FC<Props> = ({ station, onNext, onPrev 
           </div>
 
           {/* Cita Bíblica Iluminadora */}
-          <div className="p-3.5 rounded-2xl bg-black/25 backdrop-blur-md border border-white/15 text-xs italic text-amber-100/95 leading-relaxed">
+          <div className="p-3.5 rounded-2xl bg-white/15 backdrop-blur-md border border-white/20 text-xs italic text-amber-100/95 leading-relaxed">
             "{station.scriptureVerse}"
             <div className="text-[11px] not-italic font-bold text-right text-amber-300 mt-1 font-sans">
               — {station.scriptureReference}
@@ -111,9 +111,9 @@ export const LiturgicalDetailCard: React.FC<Props> = ({ station, onNext, onPrev 
 
         {/* ── Desglose Especial de Semana Santa y Triduo Pascual (Si aplica) ── */}
         {station.holyWeekDays && (
-          <div className="p-5 rounded-2xl bg-stone-50 border border-app-border space-y-3">
+          <div className="p-5 rounded-2xl bg-app-bg border border-app-border space-y-3">
             <div className="flex items-center justify-between">
-              <h3 className="text-xs font-extrabold text-stone-900 uppercase tracking-wider flex items-center gap-2">
+              <h3 className="text-xs font-extrabold text-app-text uppercase tracking-wider flex items-center gap-2">
                 <Cross className="w-4 h-4 text-[#721C24]" /> Días Santos del Triduo Pascual
               </h3>
               <Badge variant="warning" size="sm">Culmen de la Redención</Badge>
@@ -122,8 +122,8 @@ export const LiturgicalDetailCard: React.FC<Props> = ({ station, onNext, onPrev 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {station.holyWeekDays.map((hDay, idx) => (
                 <div 
-                  key={idx}
-                  className="p-3.5 rounded-xl bg-white border border-app-border/80 shadow-xs space-y-1.5 hover:border-lit-primary/40 transition-colors"
+                  key={idx} 
+                  className="p-3.5 rounded-xl bg-app-card border border-app-border/80 shadow-xs space-y-1.5 hover:border-lit-primary/40 transition-colors"
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-app-text flex items-center gap-1.5">
@@ -144,7 +144,7 @@ export const LiturgicalDetailCard: React.FC<Props> = ({ station, onNext, onPrev 
                   <p className="text-[11px] text-app-muted leading-tight">
                     {hDay.significance}
                   </p>
-                  <p className="text-[10px] italic text-stone-500 pt-1 border-t border-stone-100">
+                  <p className="text-[10px] italic text-app-muted pt-1 border-t border-app-border">
                     "{hDay.keyGospel}"
                   </p>
                 </div>
@@ -175,19 +175,19 @@ export const LiturgicalDetailCard: React.FC<Props> = ({ station, onNext, onPrev 
         </div>
 
         {/* Himno Tradicional & Canto Litúrgico */}
-        <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-500/10 via-stone-50 to-transparent border border-amber-200/70 space-y-2">
+        <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 space-y-2">
           <div className="flex items-center justify-between">
-            <h3 className="text-xs font-bold text-amber-900 uppercase tracking-wider flex items-center gap-2">
+            <h3 className="text-xs font-bold text-amber-900 dark:text-amber-300 uppercase tracking-wider flex items-center gap-2">
               <Music className="w-4 h-4 text-lit-accent" /> Canto e Himno Principal
             </h3>
-            <span className="text-[10px] font-mono text-amber-800 bg-amber-100/80 px-2 py-0.5 rounded">
+            <span className="text-[10px] font-mono text-amber-800 dark:text-amber-200 bg-amber-500/20 px-2 py-0.5 rounded">
               {station.keyHymn.latinTitle}
             </span>
           </div>
           <p className="text-xs font-bold text-app-text">
             {station.keyHymn.title}
           </p>
-          <p className="text-[11px] text-stone-600 italic">
+          <p className="text-[11px] text-app-muted italic">
             {station.keyHymn.meaning}
           </p>
         </div>
@@ -210,7 +210,7 @@ export const LiturgicalDetailCard: React.FC<Props> = ({ station, onNext, onPrev 
       </div>
 
       {/* ── Pie con Navegación Entre Estaciones ───────────────────────── */}
-      <div className="p-4 bg-stone-50 border-t border-app-border flex items-center justify-between gap-3">
+      <div className="p-4 bg-app-bg border-t border-app-border flex items-center justify-between gap-3">
         <Button variant="ghost" size="sm" onClick={onPrev}>
           ← Anterior
         </Button>

@@ -82,9 +82,8 @@ export const LiturgicalWheel: React.FC<Props> = ({ selectedStation, onSelectStat
           <defs>
             {/* Gradiente radial de fondo sagrado */}
             <radialGradient id="centerGlow" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.9" />
-              <stop offset="70%" stopColor="#FAF9F6" stopOpacity="0.95" />
-              <stop offset="100%" stopColor="#E7E5E4" stopOpacity="1" />
+              <stop offset="0%" stopColor="currentColor" className="text-app-card" stopOpacity="0.95" />
+              <stop offset="100%" stopColor="currentColor" className="text-app-bg" stopOpacity="1" />
             </radialGradient>
 
             {/* Filtro de sombra dorada */}
@@ -111,9 +110,9 @@ export const LiturgicalWheel: React.FC<Props> = ({ selectedStation, onSelectStat
             cy={center}
             r={radius + 3}
             fill="none"
-            stroke="#E7E5E4"
+            stroke="currentColor"
             strokeWidth="1"
-            className="opacity-75"
+            className="text-app-border opacity-75"
           />
 
           {/* Sectores de las Estaciones Litúrgicas */}
@@ -148,8 +147,7 @@ export const LiturgicalWheel: React.FC<Props> = ({ selectedStation, onSelectStat
                     cx="0"
                     cy="0"
                     r={isSelected ? "14" : "12"}
-                    fill="#FFFFFF"
-                    className="shadow-sm"
+                    className="fill-app-card shadow-sm"
                     stroke={isSelected ? '#C5A059' : 'transparent'}
                     strokeWidth="2"
                   />
@@ -217,7 +215,7 @@ export const LiturgicalWheel: React.FC<Props> = ({ selectedStation, onSelectStat
               x="0"
               y="14"
               textAnchor="middle"
-              className="text-xs font-extrabold fill-stone-900 font-serif"
+              className="text-xs font-extrabold fill-app-text font-serif"
             >
               {selectedStation.name.length > 16 
                 ? selectedStation.name.slice(0, 15) + '…' 
@@ -228,7 +226,7 @@ export const LiturgicalWheel: React.FC<Props> = ({ selectedStation, onSelectStat
               x="0"
               y="30"
               textAnchor="middle"
-              className="text-[9px] font-medium fill-stone-500 max-w-[120px]"
+              className="text-[9px] font-medium fill-app-muted max-w-[120px]"
             >
               {selectedStation.colorName.split(' ')[0]}
             </text>

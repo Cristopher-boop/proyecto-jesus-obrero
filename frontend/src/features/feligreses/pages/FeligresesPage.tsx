@@ -100,9 +100,9 @@ export const FeligresesPage: React.FC = () => {
             {!searchDebounce && <Button variant="primary" size="sm" className="mt-4" leftIcon={<UserPlus className="w-3.5 h-3.5" />} onClick={() => setModalOpen(true)}>Crear primera cuenta</Button>}
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-xl border border-app-border bg-white shadow-xs">
+          <div className="overflow-x-auto rounded-xl border border-app-border bg-app-card shadow-xs">
             <table className="w-full min-w-[600px]">
-              <thead className="bg-stone-50 border-b border-app-border">
+              <thead className="bg-app-bg border-b border-app-border">
                 <tr>
                   {['Feligrés', 'CI / Teléfono', 'Usuario', 'Hijos vinculados', 'Registro'].map(h => (
                     <th key={h} className="px-4 py-3 text-left text-[10px] font-bold text-app-muted uppercase tracking-wider">{h}</th>
@@ -124,7 +124,7 @@ export const FeligresesPage: React.FC = () => {
                         {item.telefono && <p className="text-[10px] text-app-muted flex items-center gap-1"><Phone className="w-3 h-3" />{item.telefono}</p>}
                       </td>
                       <td className="px-4 py-3">
-                        <code className="text-xs bg-stone-100 px-2 py-0.5 rounded font-mono text-stone-700">{item.username}</code>
+                        <code className="text-xs bg-app-bg border border-app-border px-2 py-0.5 rounded font-mono text-app-text">{item.username}</code>
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1.5">
@@ -152,7 +152,7 @@ export const FeligresesPage: React.FC = () => {
         <div className={`w-80 flex-shrink-0 flex flex-col gap-4 ${isClosing ? 'animate-slide-out-right' : 'animate-slide-in-right'}`}>
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-bold text-app-text flex items-center gap-2"><UserCheck className="w-4 h-4 text-lit-primary" /> Detalle</h3>
-            <button onClick={handleClosePanel} className="w-7 h-7 rounded-lg hover:bg-stone-100 flex items-center justify-center text-app-muted"><X className="w-3.5 h-3.5" /></button>
+            <button onClick={handleClosePanel} className="w-7 h-7 rounded-lg hover:bg-lit-surface flex items-center justify-center text-app-muted transition-colors"><X className="w-3.5 h-3.5" /></button>
           </div>
 
           {detalleLoading ? (
@@ -178,7 +178,7 @@ export const FeligresesPage: React.FC = () => {
                 {detalle.hijos.length === 0 ? (
                   <p className="text-xs text-app-muted italic">Ningún catecúmeno vinculado aún.</p>
                 ) : detalle.hijos.map(h => (
-                  <div key={h.persona_id} className="p-3 rounded-lg border border-app-border bg-white space-y-1">
+                  <div key={h.persona_id} className="p-3 rounded-lg border border-app-border bg-app-card space-y-1">
                     <p className="text-xs font-semibold text-app-text">{h.nombres} {h.primer_apellido}</p>
                     <div className="flex items-center gap-2">
                       <Badge variant={h.estado === 'ACTIVO' ? 'success' : h.estado === 'BAJA' ? 'warning' : 'neutral'} size="sm">

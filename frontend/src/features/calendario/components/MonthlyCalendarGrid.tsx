@@ -57,7 +57,7 @@ export const MonthlyCalendarGrid: React.FC = () => {
   };
 
   return (
-    <div className="bg-white rounded-3xl border border-app-border p-4 sm:p-8 shadow-sm space-y-6">
+    <div className="bg-app-card rounded-3xl border border-app-border p-4 sm:p-8 shadow-sm space-y-6">
       
       {/* ── Cabecera y Controles del Mes ──────────────────────────────── */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -78,17 +78,17 @@ export const MonthlyCalendarGrid: React.FC = () => {
             Hoy
           </Button>
 
-          <div className="flex items-center bg-stone-100 p-1 rounded-xl border border-app-border">
+          <div className="flex items-center bg-app-bg p-1 rounded-xl border border-app-border">
             <button
               onClick={handlePrevMonth}
-              className="p-1.5 rounded-lg hover:bg-white text-app-muted hover:text-app-text transition-colors"
+              className="p-1.5 rounded-lg hover:bg-lit-surface text-app-muted hover:text-app-text transition-colors"
               title="Mes Anterior"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
               onClick={handleNextMonth}
-              className="p-1.5 rounded-lg hover:bg-white text-app-muted hover:text-app-text transition-colors"
+              className="p-1.5 rounded-lg hover:bg-lit-surface text-app-muted hover:text-app-text transition-colors"
               title="Mes Siguiente"
             >
               <ChevronRight className="w-4 h-4" />
@@ -115,7 +115,7 @@ export const MonthlyCalendarGrid: React.FC = () => {
       </div>
 
       {/* ── Leyenda de Colores Litúrgicos ─────────────────────────────── */}
-      <div className="flex items-center gap-3 text-xs text-app-muted flex-wrap bg-stone-50 p-3 rounded-2xl border border-app-border">
+      <div className="flex items-center gap-3 text-xs text-app-muted flex-wrap bg-app-bg p-3 rounded-2xl border border-app-border">
         <span className="font-bold text-app-text flex items-center gap-1">
           <Sparkles className="w-3 h-3 text-lit-accent" /> Tiempos Litúrgicos:
         </span>
@@ -140,12 +140,12 @@ export const MonthlyCalendarGrid: React.FC = () => {
       {/* ── Cuadrícula del Calendario Mensual ─────────────────────────── */}
       <div className="border border-app-border rounded-2xl overflow-hidden shadow-xs">
         {/* Cabecera de Días de la Semana */}
-        <div className="grid grid-cols-7 bg-stone-100/90 text-center border-b border-app-border">
+        <div className="grid grid-cols-7 bg-app-bg text-center border-b border-app-border">
           {DAY_NAMES_ES.map((dName, i) => (
             <div
               key={i}
               className={`py-3 text-xs font-bold ${
-                i === 0 ? 'text-rose-700' : 'text-stone-700'
+                i === 0 ? 'text-semantic-error' : 'text-app-text'
               }`}
             >
               {dName}
@@ -154,7 +154,7 @@ export const MonthlyCalendarGrid: React.FC = () => {
         </div>
 
         {/* Celdas de Días */}
-        <div className="grid grid-cols-7 divide-x divide-y divide-app-border/80 bg-stone-50/30">
+        <div className="grid grid-cols-7 divide-x divide-y divide-app-border/80 bg-app-bg/30">
           {monthDays.map((day, index) => {
             const dayEvents = filterEvents(day.events);
             const isSelected = selectedDay?.date.toDateString() === day.date.toDateString();
@@ -164,7 +164,7 @@ export const MonthlyCalendarGrid: React.FC = () => {
                 key={index}
                 onClick={() => setSelectedDay(day)}
                 className={`min-h-[90px] sm:min-h-[110px] p-2 sm:p-2.5 flex flex-col justify-between transition-all duration-200 cursor-pointer relative group ${
-                  day.isCurrentMonth ? 'bg-white hover:bg-lit-surface/40' : 'bg-stone-50/60 opacity-40'
+                  day.isCurrentMonth ? 'bg-app-card hover:bg-lit-surface/40' : 'bg-app-bg/60 opacity-40'
                 } ${day.isToday ? 'ring-2 ring-lit-primary z-10' : ''} ${
                   isSelected ? 'bg-lit-surface ring-2 ring-lit-accent shadow-sm' : ''
                 }`}
@@ -217,7 +217,7 @@ export const MonthlyCalendarGrid: React.FC = () => {
 
                 {/* Pie de celda con nombre del tiempo si está vacío */}
                 {dayEvents.length === 0 && (
-                  <p className="text-[8px] text-stone-400 truncate opacity-0 group-hover:opacity-100 transition-opacity">
+                  <p className="text-[8px] text-app-muted truncate opacity-0 group-hover:opacity-100 transition-opacity">
                     {day.seasonName}
                   </p>
                 )}
@@ -229,10 +229,10 @@ export const MonthlyCalendarGrid: React.FC = () => {
 
       {/* ── Modal / Detalle del Día Seleccionado ──────────────────────── */}
       {selectedDay && (
-        <div className="p-6 rounded-3xl bg-stone-50 border border-lit-primary/30 shadow-md space-y-4 animate-fadeIn relative">
+        <div className="p-6 rounded-3xl bg-lit-surface/50 border border-lit-border shadow-md space-y-4 animate-fadeIn relative">
           <button
             onClick={() => setSelectedDay(null)}
-            className="absolute top-5 right-5 p-1.5 rounded-full hover:bg-stone-200 text-stone-500"
+            className="absolute top-5 right-5 p-1.5 rounded-full hover:bg-lit-surface text-app-muted transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -270,7 +270,7 @@ export const MonthlyCalendarGrid: React.FC = () => {
                 {selectedDay.events.map(ev => (
                   <div
                     key={ev.id}
-                    className="p-4 rounded-2xl bg-white border border-app-border shadow-xs space-y-2"
+                    className="p-4 rounded-2xl bg-app-card border border-app-border shadow-xs space-y-2"
                   >
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-extrabold text-app-text">{ev.title}</span>
@@ -293,7 +293,7 @@ export const MonthlyCalendarGrid: React.FC = () => {
               </div>
             </div>
           ) : (
-            <div className="p-4 rounded-2xl bg-white border border-app-border text-xs text-app-muted">
+            <div className="p-4 rounded-2xl bg-app-card border border-app-border text-xs text-app-muted">
               Día ferial del {selectedDay.seasonName}. Misa comunitaria y formación según el horario habitual de la parroquia.
             </div>
           )}

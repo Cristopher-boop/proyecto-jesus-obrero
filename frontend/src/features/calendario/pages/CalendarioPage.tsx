@@ -78,7 +78,7 @@ export const CalendarioPage: React.FC = () => {
           </div>
 
           {/* Tarjeta rápida del Tiempo Activo */}
-          <div className="bg-black/35 backdrop-blur-md p-5 rounded-2xl border border-white/15 flex flex-col items-center text-center gap-2 min-w-[200px]">
+          <div className="bg-white/15 backdrop-blur-md p-5 rounded-2xl border border-white/20 flex flex-col items-center text-center gap-2 min-w-[200px]">
             <div className="w-12 h-12 rounded-full bg-white/15 border border-white/20 flex items-center justify-center text-2xl shadow-inner animate-pulse">
               {seasonInfo.icon}
             </div>
@@ -95,12 +95,12 @@ export const CalendarioPage: React.FC = () => {
 
       {/* ── Selector de Modos de Visualización ────────────────────────── */}
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <div className="flex items-center bg-stone-100 p-1 rounded-2xl gap-1">
+        <div className="flex items-center bg-app-card border border-app-border p-1 rounded-2xl gap-1">
           <button
             onClick={() => setViewMode('mes')}
             className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all ${
               viewMode === 'mes'
-                ? 'bg-white shadow-xs text-lit-primary'
+                ? 'bg-lit-surface shadow-xs text-lit-primary'
                 : 'text-app-muted hover:text-app-text'
             }`}
           >
@@ -112,7 +112,7 @@ export const CalendarioPage: React.FC = () => {
             onClick={() => setViewMode('rueda')}
             className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all ${
               viewMode === 'rueda'
-                ? 'bg-white shadow-xs text-lit-primary'
+                ? 'bg-lit-surface shadow-xs text-lit-primary'
                 : 'text-app-muted hover:text-app-text'
             }`}
           >
@@ -124,7 +124,7 @@ export const CalendarioPage: React.FC = () => {
             onClick={() => setViewMode('cuadricula')}
             className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all ${
               viewMode === 'cuadricula'
-                ? 'bg-white shadow-xs text-lit-primary'
+                ? 'bg-lit-surface shadow-xs text-lit-primary'
                 : 'text-app-muted hover:text-app-text'
             }`}
           >
@@ -148,7 +148,7 @@ export const CalendarioPage: React.FC = () => {
       {viewMode === 'rueda' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Lado Izquierdo: Rueda Litúrgica Interactiva */}
-          <div className="lg:col-span-5 bg-white rounded-3xl border border-app-border p-6 shadow-sm flex flex-col items-center justify-center sticky top-24">
+          <div className="lg:col-span-5 bg-app-card rounded-3xl border border-app-border p-6 shadow-sm flex flex-col items-center justify-center sticky top-24">
             <div className="text-center mb-2">
               <span className="text-[10px] font-bold uppercase tracking-widest text-lit-primary bg-lit-surface px-3 py-1 rounded-full border border-lit-border">
                 Ciclo Perenne de Salvación
@@ -187,13 +187,13 @@ export const CalendarioPage: React.FC = () => {
                   setSelectedStation(st);
                   setViewMode('rueda');
                 }}
-                className={`bg-white rounded-3xl border p-6 shadow-sm hover:shadow-md cursor-pointer transition-all duration-300 flex flex-col justify-between space-y-4 group ${
+                className={`bg-app-card rounded-3xl border p-6 shadow-sm hover:shadow-md cursor-pointer transition-all duration-300 flex flex-col justify-between space-y-4 group ${
                   isSelected ? 'border-lit-primary ring-2 ring-lit-primary/20' : 'border-app-border hover:border-lit-primary/40'
                 }`}
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <div className="w-10 h-10 rounded-2xl bg-stone-50 border border-stone-200 flex items-center justify-center text-xl shadow-xs group-hover:scale-110 transition-transform">
+                    <div className="w-10 h-10 rounded-2xl bg-app-bg border border-app-border flex items-center justify-center text-xl shadow-xs group-hover:scale-110 transition-transform">
                       {st.icon}
                     </div>
                     <span 
@@ -213,7 +213,7 @@ export const CalendarioPage: React.FC = () => {
                     </p>
                   </div>
 
-                  <p className="text-xs text-stone-600 line-clamp-3 leading-relaxed">
+                  <p className="text-xs text-app-muted line-clamp-3 leading-relaxed">
                     {st.theologicalSummary}
                   </p>
                 </div>
@@ -235,9 +235,9 @@ export const CalendarioPage: React.FC = () => {
       />
 
       {/* ── Guía Didáctica de los Colores Litúrgicos ───────────────────── */}
-      <div className="bg-stone-50 rounded-3xl border border-app-border p-6 sm:p-8 space-y-6">
+      <div className="bg-app-card rounded-3xl border border-app-border p-6 sm:p-8 space-y-6">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-white border border-stone-200 flex items-center justify-center text-xl shadow-xs">
+          <div className="w-10 h-10 rounded-2xl bg-app-bg border border-app-border flex items-center justify-center text-xl shadow-xs">
             🎨
           </div>
           <div>
@@ -257,28 +257,28 @@ export const CalendarioPage: React.FC = () => {
               meaning: 'Pureza, Gozo Pascual y Máxima Solemnidad',
               usages: 'Navidad, Pascua, Corpus Christi, Santísima Trinidad y Cristo Rey.',
               badgeColor: '#C5A059',
-              bgClass: 'bg-amber-50/80 border-amber-200 text-amber-950'
+              bgClass: 'bg-amber-500/10 border-amber-500/30 text-amber-900 dark:text-amber-200'
             },
             {
               name: 'Verde Sacro',
               meaning: 'Esperanza, Vida y Crecimiento en el Discipulado',
               usages: 'Tiempo Ordinario durante las semanas cotidianas del año.',
               badgeColor: '#1E4D38',
-              bgClass: 'bg-emerald-50/80 border-emerald-200 text-emerald-950'
+              bgClass: 'bg-emerald-500/10 border-emerald-500/30 text-emerald-900 dark:text-emerald-200'
             },
             {
               name: 'Morado Penitencial',
               meaning: 'Conversión, Ayuno, Espera y Purificación',
               usages: 'Adviento, Cuaresma y Celebraciones de Reconciliación.',
               badgeColor: '#4A2040',
-              bgClass: 'bg-purple-50/80 border-purple-200 text-purple-950'
+              bgClass: 'bg-purple-500/10 border-purple-500/30 text-purple-900 dark:text-purple-200'
             },
             {
               name: 'Rojo Carmesí',
               meaning: 'Fuego del Espíritu Santo, Pasión de Cristo y Mártires',
               usages: 'Domingo de Ramos, Viernes Santo, Pentecostés y apóstoles.',
               badgeColor: '#721C24',
-              bgClass: 'bg-rose-50/80 border-rose-200 text-rose-950'
+              bgClass: 'bg-rose-500/10 border-rose-500/30 text-rose-900 dark:text-rose-200'
             },
           ].map((col, idx) => (
             <div key={idx} className={`p-4 rounded-2xl border ${col.bgClass} space-y-2`}>

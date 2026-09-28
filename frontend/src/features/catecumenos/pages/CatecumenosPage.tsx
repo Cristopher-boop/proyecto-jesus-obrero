@@ -212,7 +212,7 @@ export const CatecumenosPage: React.FC = () => {
         </div>
 
         {/* Filtros Avanzados: Gestión, Sacramento, Etapa, Subgrupo y Estado */}
-        <div className="p-3.5 rounded-2xl bg-white border border-app-border shadow-xs space-y-3">
+        <div className="p-3.5 rounded-2xl bg-app-card border border-app-border shadow-xs space-y-3">
           <div className="flex items-center gap-3 flex-wrap">
             {/* Buscador de texto */}
             <div className="flex-1 min-w-[220px]">
@@ -220,7 +220,7 @@ export const CatecumenosPage: React.FC = () => {
                 placeholder="Buscar por nombre, apellido o CI..."
                 value={search}
                 onChange={e => handleSearch(e.target.value)}
-                leftIcon={<Search className="w-3.5 h-3.5 text-stone-400" />}
+                leftIcon={<Search className="w-3.5 h-3.5 text-app-muted" />}
               />
             </div>
 
@@ -229,7 +229,7 @@ export const CatecumenosPage: React.FC = () => {
               <Select
                 size="sm"
                 variant="filter"
-                leftIcon={<Calendar className="w-3.5 h-3.5 text-stone-400" />}
+                leftIcon={<Calendar className="w-3.5 h-3.5 text-app-muted" />}
                 value={gestionFiltro}
                 onChange={val => setGestionFiltro(val as any)}
                 options={[
@@ -261,7 +261,7 @@ export const CatecumenosPage: React.FC = () => {
               <Select
                 size="sm"
                 variant="filter"
-                leftIcon={<Layers className="w-3.5 h-3.5 text-stone-400" />}
+                leftIcon={<Layers className="w-3.5 h-3.5 text-app-muted" />}
                 value={etapaFiltro}
                 onChange={val => setEtapaFiltro(val as any)}
                 options={[
@@ -278,7 +278,7 @@ export const CatecumenosPage: React.FC = () => {
                 <Select
                   size="sm"
                   variant="filter"
-                  leftIcon={<Sparkles className="w-3.5 h-3.5 text-amber-500" />}
+                  leftIcon={<Sparkles className="w-3.5 h-3.5 text-lit-accent" />}
                   value={grupoFiltro}
                   onChange={val => setGrupoFiltro(val as any)}
                   options={[
@@ -297,7 +297,7 @@ export const CatecumenosPage: React.FC = () => {
           <div className="flex items-center justify-between pt-1 border-t border-app-border/40 text-xs">
             <div className="flex items-center gap-1.5">
               <span className="text-[11px] font-bold text-app-muted uppercase tracking-wider">Estado:</span>
-              <div className="flex items-center gap-1 bg-stone-100 p-0.5 rounded-lg">
+              <div className="flex items-center gap-1 bg-app-bg border border-app-border p-0.5 rounded-lg">
                 {([
                   { val: '', label: 'Todos' },
                   { val: 'ACTIVO', label: 'Activos' },
@@ -309,7 +309,7 @@ export const CatecumenosPage: React.FC = () => {
                     onClick={() => setEstadoFiltro(val)}
                     className={`px-2.5 py-0.5 rounded-md text-xs font-medium transition-all ${
                       estadoFiltro === val
-                        ? 'bg-white shadow-2xs text-lit-primary font-bold'
+                        ? 'bg-lit-surface shadow-2xs text-lit-primary font-bold'
                         : 'text-app-muted hover:text-app-text'
                     }`}
                   >
@@ -330,7 +330,7 @@ export const CatecumenosPage: React.FC = () => {
                   setSearch('');
                   setSearchDebounce('');
                 }}
-                className="text-[11px] font-semibold text-rose-600 hover:underline"
+                className="text-[11px] font-semibold text-semantic-error hover:underline"
               >
                 Limpiar filtros
               </button>
@@ -346,7 +346,7 @@ export const CatecumenosPage: React.FC = () => {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-lit-primary" />
           </div>
         ) : data && data.items.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center bg-white rounded-2xl border border-app-border">
+          <div className="flex flex-col items-center justify-center py-16 text-center bg-app-card rounded-2xl border border-app-border">
             <div className="text-5xl mb-3">🕊️</div>
             <h3 className="text-base font-bold text-app-text">No se encontraron catecúmenos</h3>
             <p className="text-xs text-app-muted mt-1 max-w-xs">
@@ -367,9 +367,9 @@ export const CatecumenosPage: React.FC = () => {
             )}
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-xl border border-app-border bg-white shadow-xs">
+          <div className="overflow-x-auto rounded-xl border border-app-border bg-app-card shadow-xs">
             <table className="w-full min-w-[760px]">
-              <thead className="bg-stone-50 border-b border-app-border">
+              <thead className="bg-app-bg border-b border-app-border">
                 <tr>
                   {['Catecúmeno / Subgrupo', 'Etapa & Sacramento', 'Edad / Bautismo', 'Tutor / Tel.', 'Requisitos Ingreso', 'Expediente Digital', 'Estado', ''].map(h => (
                     <th key={h} className="px-4 py-3 text-left text-[10px] font-bold text-app-muted uppercase tracking-wider">{h}</th>
@@ -419,7 +419,7 @@ export const CatecumenosPage: React.FC = () => {
                       {/* Etapa y Sacramento */}
                       <td className="px-4 py-3">
                         <div className="flex flex-col gap-0.5">
-                          <span className="text-xs font-semibold text-stone-800">
+                          <span className="text-xs font-semibold text-app-text">
                             {item.etapa ? ETAPA_LABEL[item.etapa] : '1º Año'}
                           </span>
                           <span className="text-[10px] text-app-muted">
@@ -469,14 +469,14 @@ export const CatecumenosPage: React.FC = () => {
                           className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all ${
                             cSalida >= 5
                               ? 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100'
-                              : 'bg-stone-50 text-stone-700 border-stone-200 hover:bg-stone-100 hover:border-lit-border'
+                              : 'bg-app-bg text-app-text border-app-border hover:bg-lit-surface hover:border-lit-border'
                           }`}
                           title="Gestionar y subir documentos adjuntos"
                         >
                           <FolderOpen className="w-3.5 h-3.5 text-lit-primary" />
                           <span>{cSalida}/8 docs</span>
                           {(item.total_documentos_subidos ?? 0) > 0 && (
-                            <span className="text-[10px] font-bold bg-white/80 px-1 rounded shadow-2xs">
+                            <span className="text-[10px] font-bold bg-app-card px-1 rounded shadow-2xs text-app-text">
                               {item.total_documentos_subidos} arch.
                             </span>
                           )}
@@ -528,13 +528,13 @@ export const CatecumenosPage: React.FC = () => {
           />
 
           <div
-            className={`fixed inset-y-0 right-0 z-50 w-full sm:w-96 bg-white shadow-2xl p-4 overflow-y-auto border-l border-app-border flex flex-col gap-3 2xl:relative 2xl:inset-auto 2xl:z-auto 2xl:w-80 2xl:shadow-none 2xl:border-none 2xl:p-0 2xl:bg-transparent 2xl:flex-shrink-0 ${
+            className={`fixed inset-y-0 right-0 z-50 w-full sm:w-96 bg-app-card shadow-2xl p-4 overflow-y-auto border-l border-app-border flex flex-col gap-3 2xl:relative 2xl:inset-auto 2xl:z-auto 2xl:w-80 2xl:shadow-none 2xl:border-none 2xl:p-0 2xl:bg-transparent 2xl:flex-shrink-0 ${
               isClosing ? 'animate-slide-out-right' : 'animate-slide-in-right'
             }`}
           >
           {/* Pestañas del panel */}
           <div className="flex items-center justify-between">
-            <div className="flex items-center bg-stone-100 p-0.5 rounded-lg gap-0.5">
+            <div className="flex items-center bg-app-bg border border-app-border p-0.5 rounded-lg gap-0.5">
               {([
                 { id: 'ficha',  label: '📋 Ficha',   icon: ClipboardList },
                 { id: 'editar', label: '✏️ Editar',   icon: Edit3         },
@@ -545,7 +545,7 @@ export const CatecumenosPage: React.FC = () => {
                   onClick={() => { setPanelTab(tab.id); setBajaConfirm(false); }}
                   className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all ${
                     panelTab === tab.id
-                      ? 'bg-white shadow-xs text-lit-primary font-semibold'
+                      ? 'bg-lit-surface shadow-xs text-lit-primary font-semibold'
                       : 'text-app-muted hover:text-app-text'
                   }`}
                 >
@@ -555,7 +555,7 @@ export const CatecumenosPage: React.FC = () => {
             </div>
             <button
               onClick={handleClosePanel}
-              className="w-7 h-7 rounded-lg hover:bg-stone-100 flex items-center justify-center text-app-muted"
+              className="w-7 h-7 rounded-lg hover:bg-lit-surface flex items-center justify-center text-app-muted transition-colors"
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -571,15 +571,15 @@ export const CatecumenosPage: React.FC = () => {
               {panelTab === 'ficha' && (
                 <div className="space-y-4">
                   {/* Datos básicos */}
-                  <div className="p-4 rounded-xl border border-app-border bg-white space-y-2">
+                  <div className="p-4 rounded-xl border border-app-border bg-app-card space-y-2">
                     <div className="flex items-center justify-between">
                       <p className="text-xs font-bold text-lit-primary uppercase tracking-wide">Catecúmeno</p>
                       {detalle.inscripcion.grupo_nombre ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-900 dark:text-amber-200 border border-amber-500/20">
                           ✨ {detalle.inscripcion.grupo_nombre}
                         </span>
                       ) : (
-                        <span className="text-[10px] text-stone-400 italic">Sin subgrupo</span>
+                        <span className="text-[10px] text-app-muted italic">Sin subgrupo</span>
                       )}
                     </div>
                     <p className="text-sm font-bold text-app-text">
@@ -606,21 +606,21 @@ export const CatecumenosPage: React.FC = () => {
                     </div>
 
                     <div className="space-y-1.5 text-xs">
-                      <div className="flex items-center justify-between p-2 rounded-lg bg-white border border-app-border">
+                      <div className="flex items-center justify-between p-2 rounded-lg bg-app-card border border-app-border">
                         <span className="flex items-center gap-1.5"><BookCheck className="w-3.5 h-3.5 text-lit-primary" /> Cuadernillo Asistencia</span>
                         <Badge variant={detalle.inscripcion.cuadernillo_comprado ? 'success' : 'neutral'} size="sm">
                           {detalle.inscripcion.cuadernillo_comprado ? 'Comprado ✓' : 'Pendiente'}
                         </Badge>
                       </div>
 
-                      <div className="flex items-center justify-between p-2 rounded-lg bg-white border border-app-border">
+                      <div className="flex items-center justify-between p-2 rounded-lg bg-app-card border border-app-border">
                         <span className="flex items-center gap-1.5"><BookOpen className="w-3.5 h-3.5 text-lit-primary" /> Libro Oficial</span>
                         <Badge variant={detalle.inscripcion.libro_comprado ? 'success' : 'neutral'} size="sm">
                           {detalle.inscripcion.libro_comprado ? 'Comprado ✓' : 'Pendiente'}
                         </Badge>
                       </div>
 
-                      <div className="flex items-center justify-between p-2 rounded-lg bg-white border border-app-border">
+                      <div className="flex items-center justify-between p-2 rounded-lg bg-app-card border border-app-border">
                         <span className="flex items-center gap-1.5"><DollarSign className="w-3.5 h-3.5 text-lit-primary" /> Cuota Inicial (20 Bs)</span>
                         <Badge variant={detalle.inscripcion.pago_cuota_inicial ? 'success' : 'neutral'} size="sm">
                           {detalle.inscripcion.pago_cuota_inicial ? 'Pagado ✓' : 'Pendiente'}
@@ -630,10 +630,10 @@ export const CatecumenosPage: React.FC = () => {
                   </div>
 
                   {/* 2. Requisitos de Salida / Expediente Digital */}
-                  <div className="p-4 rounded-xl border border-app-border bg-white space-y-2.5">
+                  <div className="p-4 rounded-xl border border-app-border bg-app-card space-y-2.5">
                     <div className="flex items-center justify-between">
-                      <p className="text-xs font-bold text-stone-700 uppercase tracking-wide flex items-center gap-1.5">
-                        <FileText className="w-3.5 h-3.5 text-stone-600" /> Documentos del Sacramento
+                      <p className="text-xs font-bold text-app-text uppercase tracking-wide flex items-center gap-1.5">
+                        <FileText className="w-3.5 h-3.5 text-lit-primary" /> Documentos del Sacramento
                       </p>
                       <span className="text-[9px] text-app-muted italic">8 Requisitos</span>
                     </div>
@@ -641,7 +641,7 @@ export const CatecumenosPage: React.FC = () => {
                     {/* Botón CTA al Expediente Digital */}
                     <button
                       onClick={() => handleOpenDocsModal(detalle.persona_id, nombreCompleto(detalle))}
-                      className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-stone-900 text-white hover:bg-stone-800 text-xs font-bold transition-all shadow-xs"
+                      className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-lit-primary text-white hover:bg-lit-primary-dark text-xs font-bold transition-all shadow-xs"
                     >
                       <FolderOpen className="w-3.5 h-3.5 text-lit-accent" />
                       Administrar Expediente Digital
@@ -650,20 +650,20 @@ export const CatecumenosPage: React.FC = () => {
                     <div className="space-y-1.5 text-[11px] pt-1">
                       <div className="flex items-center justify-between py-1 border-b border-app-border/40">
                         <span>1. Formulario de Inscripción</span>
-                        <span className={`font-bold ${detalle.inscripcion.doc_formulario_inscripcion ? 'text-semantic-success' : 'text-stone-400'}`}>
+                        <span className={`font-bold ${detalle.inscripcion.doc_formulario_inscripcion ? 'text-semantic-success' : 'text-app-muted'}`}>
                           {detalle.inscripcion.doc_formulario_inscripcion ? 'Entregado ✓' : 'Pendiente'}
                         </span>
                       </div>
 
                       <div className="flex items-center justify-between py-1 border-b border-app-border/40">
                         <span>2. Certificado de Bautismo</span>
-                        <span className={`font-bold ${detalle.inscripcion.doc_fe_bautismo ? 'text-semantic-success' : 'text-stone-400'}`}>
+                        <span className={`font-bold ${detalle.inscripcion.doc_fe_bautismo ? 'text-semantic-success' : 'text-app-muted'}`}>
                           {detalle.inscripcion.doc_fe_bautismo ? 'Entregado ✓' : 'Pendiente'}
                         </span>
                       </div>
 
                       {!detalle.es_bautizado && (
-                        <div className="p-2 rounded-lg bg-amber-50 border border-amber-200 text-[10px] text-amber-800 flex items-start gap-1.5">
+                        <div className="p-2 rounded-lg bg-semantic-warning-bg border border-semantic-warning-border text-[10px] text-semantic-warning-text flex items-start gap-1.5">
                           <AlertCircle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
                           <span><strong>Bautismo:</strong> Debe realizarse antes de 2º año en la Vigilia Pascual.</span>
                         </div>
@@ -671,14 +671,14 @@ export const CatecumenosPage: React.FC = () => {
 
                       <div className="flex items-center justify-between py-1 border-b border-app-border/40">
                         <span>3. Certificado de Nacimiento</span>
-                        <span className={`font-bold ${detalle.inscripcion.doc_cert_nacimiento ? 'text-semantic-success' : 'text-stone-400'}`}>
+                        <span className={`font-bold ${detalle.inscripcion.doc_cert_nacimiento ? 'text-semantic-success' : 'text-app-muted'}`}>
                           {detalle.inscripcion.doc_cert_nacimiento ? 'Entregado ✓' : 'Pendiente'}
                         </span>
                       </div>
 
                       <div className="flex items-center justify-between py-1 border-b border-app-border/40">
                         <span>4. Certificado Matrimonio / Compromiso</span>
-                        <span className={`font-bold ${detalle.inscripcion.doc_cert_matrimonio_padres ? 'text-semantic-success' : 'text-stone-400'}`}>
+                        <span className={`font-bold ${detalle.inscripcion.doc_cert_matrimonio_padres ? 'text-semantic-success' : 'text-app-muted'}`}>
                           {detalle.inscripcion.doc_cert_matrimonio_padres ? 'Entregado ✓' : 'Pendiente'}
                         </span>
                       </div>
@@ -686,16 +686,16 @@ export const CatecumenosPage: React.FC = () => {
                       <div className="pt-1 text-[10px] space-y-1">
                         <p className="font-semibold text-app-muted">Fotocopias CIs:</p>
                         <div className="grid grid-cols-2 gap-1 text-[10px]">
-                          <span className={detalle.inscripcion.doc_ci_nino ? 'text-semantic-success font-semibold' : 'text-stone-400'}>
+                          <span className={detalle.inscripcion.doc_ci_nino ? 'text-semantic-success font-semibold' : 'text-app-muted'}>
                             • CI Niño {detalle.inscripcion.doc_ci_nino ? '✓' : '✗'}
                           </span>
-                          <span className={detalle.inscripcion.doc_ci_padre ? 'text-semantic-success font-semibold' : 'text-stone-400'}>
+                          <span className={detalle.inscripcion.doc_ci_padre ? 'text-semantic-success font-semibold' : 'text-app-muted'}>
                             • CI Padre {detalle.inscripcion.doc_ci_padre ? '✓' : '✗'}
                           </span>
-                          <span className={detalle.inscripcion.doc_ci_madre ? 'text-semantic-success font-semibold' : 'text-stone-400'}>
+                          <span className={detalle.inscripcion.doc_ci_madre ? 'text-semantic-success font-semibold' : 'text-app-muted'}>
                             • CI Madre {detalle.inscripcion.doc_ci_madre ? '✓' : '✗'}
                           </span>
-                          <span className={detalle.inscripcion.doc_ci_tutor ? 'text-semantic-success font-semibold' : 'text-stone-400'}>
+                          <span className={detalle.inscripcion.doc_ci_tutor ? 'text-semantic-success font-semibold' : 'text-app-muted'}>
                             • CI Tutor {detalle.inscripcion.doc_ci_tutor ? '✓' : '✗'}
                           </span>
                         </div>
@@ -705,7 +705,7 @@ export const CatecumenosPage: React.FC = () => {
 
                   {/* Tutores */}
                   {detalle.tutores.length > 0 && (
-                    <div className="p-4 rounded-xl border border-app-border bg-white space-y-2">
+                    <div className="p-4 rounded-xl border border-app-border bg-app-card space-y-2">
                       <p className="text-xs font-bold text-lit-primary uppercase tracking-wide">Tutores ({detalle.tutores.length})</p>
                       {detalle.tutores.map((t, i) => (
                         <div key={i} className="flex items-start gap-2">
@@ -720,7 +720,7 @@ export const CatecumenosPage: React.FC = () => {
                   )}
 
                   {/* Estado de inscripción */}
-                  <div className="p-4 rounded-xl border border-app-border bg-white space-y-3">
+                  <div className="p-4 rounded-xl border border-app-border bg-app-card space-y-3">
                     <div className="flex items-center justify-between">
                       <p className="text-xs font-bold text-lit-primary uppercase tracking-wide">Estado</p>
                       <Badge variant={ESTADO_CONFIG[detalle.inscripcion.estado].variant} size="sm">
@@ -730,17 +730,17 @@ export const CatecumenosPage: React.FC = () => {
 
                     {/* Baja / Reactivar */}
                     {detalle.inscripcion.estado === 'ACTIVO' && !bajaConfirm && (
-                      <button onClick={() => setBajaConfirm(true)} className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg border border-red-200 text-red-600 text-xs font-medium hover:bg-red-50 transition-colors">
+                      <button onClick={() => setBajaConfirm(true)} className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg border border-semantic-error/40 text-semantic-error text-xs font-medium hover:bg-semantic-error-bg transition-colors">
                         <UserX className="w-3.5 h-3.5" /> Dar de Baja
                       </button>
                     )}
                     {bajaConfirm && (
-                      <div className="p-3 rounded-lg bg-red-50 border border-red-200 space-y-2">
-                        <p className="text-xs text-red-700 font-medium">¿Confirmas la baja? El registro se conserva.</p>
+                      <div className="p-3 rounded-lg bg-semantic-error-bg border border-semantic-error-border space-y-2">
+                        <p className="text-xs text-semantic-error-text font-medium">¿Confirmas la baja? El registro se conserva.</p>
                         <div className="flex gap-2">
                           <Button variant="ghost" size="sm" className="flex-1" onClick={() => setBajaConfirm(false)}>Cancelar</Button>
                           <button onClick={handleDarBaja} disabled={bajaLoading}
-                            className="flex-1 px-3 py-1.5 rounded-lg bg-red-600 text-white text-xs font-bold hover:bg-red-700 transition-colors disabled:opacity-50">
+                            className="flex-1 px-3 py-1.5 rounded-lg bg-semantic-error text-white text-xs font-bold hover:opacity-90 transition-opacity disabled:opacity-50">
                             {bajaLoading ? 'Procesando...' : 'Confirmar Baja'}
                           </button>
                         </div>

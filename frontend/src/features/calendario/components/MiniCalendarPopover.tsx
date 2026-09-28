@@ -86,7 +86,7 @@ export const MiniCalendarPopover: React.FC<Props> = ({ onOpenFullCalendar }) => 
         className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all duration-200 ${
           isOpen
             ? 'bg-lit-surface border-lit-primary text-lit-primary shadow-xs'
-            : 'bg-white hover:bg-stone-50 border-app-border text-app-text hover:border-lit-primary/50'
+            : 'bg-app-card hover:bg-lit-surface border-app-border text-app-text hover:border-lit-primary/50'
         }`}
         title="Ver Calendario Litúrgico Rápido"
       >
@@ -103,7 +103,7 @@ export const MiniCalendarPopover: React.FC<Props> = ({ onOpenFullCalendar }) => 
 
       {/* Popover / Menú Desplegable */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-3xl border border-app-border shadow-2xl z-50 p-5 space-y-4 animate-fadeIn">
+        <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-app-card rounded-3xl border border-app-border shadow-2xl z-50 p-5 space-y-4 animate-fadeIn">
           
           {/* Cabecera del Popover */}
           <div className="flex items-center justify-between pb-3 border-b border-app-border">
@@ -122,13 +122,13 @@ export const MiniCalendarPopover: React.FC<Props> = ({ onOpenFullCalendar }) => 
             <div className="flex items-center gap-1">
               <button
                 onClick={handlePrevMonth}
-                className="w-7 h-7 rounded-lg hover:bg-stone-100 flex items-center justify-center text-app-muted"
+                className="w-7 h-7 rounded-lg hover:bg-lit-surface flex items-center justify-center text-app-muted transition-colors"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
               <button
                 onClick={handleNextMonth}
-                className="w-7 h-7 rounded-lg hover:bg-stone-100 flex items-center justify-center text-app-muted"
+                className="w-7 h-7 rounded-lg hover:bg-lit-surface flex items-center justify-center text-app-muted transition-colors"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
@@ -140,7 +140,7 @@ export const MiniCalendarPopover: React.FC<Props> = ({ onOpenFullCalendar }) => 
             {/* Días de la semana */}
             <div className="grid grid-cols-7 gap-1 text-center mb-1">
               {DAY_NAMES_ES.map((d, i) => (
-                <span key={i} className="text-[10px] font-bold text-stone-400">
+                <span key={i} className="text-[10px] font-bold text-app-muted">
                   {d[0]}
                 </span>
               ))}
@@ -157,8 +157,8 @@ export const MiniCalendarPopover: React.FC<Props> = ({ onOpenFullCalendar }) => 
                       day.isToday
                         ? 'bg-lit-primary text-white font-extrabold shadow-xs'
                         : day.isCurrentMonth
-                        ? 'text-app-text hover:bg-stone-100 font-medium'
-                        : 'text-stone-300'
+                        ? 'text-app-text hover:bg-lit-surface font-medium'
+                        : 'text-app-muted/40'
                     }`}
                   >
                     <span>{day.dayNumber}</span>
@@ -186,7 +186,7 @@ export const MiniCalendarPopover: React.FC<Props> = ({ onOpenFullCalendar }) => 
                 {upcomingEvents.map(ev => (
                   <div
                     key={ev.id}
-                    className="p-2 rounded-xl bg-stone-50 border border-app-border/60 flex items-start justify-between gap-2"
+                    className="p-2 rounded-xl bg-app-bg border border-app-border/60 flex items-start justify-between gap-2"
                   >
                     <div>
                       <p className="text-[11px] font-bold text-app-text leading-tight">{ev.title}</p>
