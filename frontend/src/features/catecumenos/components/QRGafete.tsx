@@ -3,11 +3,7 @@
  *
  * Diseño tipo carnet/gafete parroquial con código QR, nombre completo,
  * tipo de sacramento y branding institucional.
- * Se imprime en tamaño aproximado 9 × 6 cm (similar a una tarjeta de crédito apaisada).
- *
- * Uso:
- *   import QRGafete from '@/features/catecumenos/components/QRGafete';
- *   <QRGafete catecumeno={detalle} />
+ * Se imprime en tamaño estándar 9 × 6 cm (apaisado, tamaño carnet).
  */
 
 import React, { useRef } from 'react';
@@ -38,12 +34,23 @@ export const QRGafete: React.FC<QRGafeteProps> = ({ catecumeno }) => {
   ].filter(Boolean).join(' ');
 
   const qrValue = `PARROQUIA-JO:${inscripcion.token_qr}`;
+  const sacramentoLabel = TIPO_LABEL[inscripcion.tipo_sacramento] ?? inscripcion.tipo_sacramento;
+  const primaryColor = seasonInfo?.badgeBg || '#1E4D38';
+
+  const fechaNacFormatted = catecumeno.fecha_nacimiento
+    ? new Date(catecumeno.fecha_nacimiento + 'T12:00:00').toLocaleDateString('es-BO', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+      })
+    : null;
+
+  const gestionYear = new Date(inscripcion.fecha_inscripcion + 'T12:00:00').getFullYear() || 2026;
 
   const handlePrint = () => {
-    const content = printRef.current;
-    if (!content) return;
+    const qrSvg = printRef.current?.querySelector('svg')?.outerHTML || '';
 
-    const printWindow = window.open('', '_blank', 'width=900,height=600');
+    const printWindow = window.open('', '_blank', 'width=950,height=750');
     if (!printWindow) return;
 
     printWindow.document.write(`
@@ -54,29 +61,54 @@ export const QRGafete: React.FC<QRGafeteProps> = ({ catecumeno }) => {
         <title>Gafete — ${nombreCompleto}</title>
         <style>
           @page {
-            size: 9cm 6cm;
+            size: letter;
+            margin: 12mm;
+          }
+          * {
+            box-sizing: border-box;
             margin: 0;
+            padding: 0;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-adjust: exact !important;
           }
-          * { box-sizing: border-box; margin: 0; padding: 0; }
           body {
-            width: 9cm;
-            height: 6cm;
             font-family: 'Georgia', 'Times New Roman', serif;
-            background: #fff;
+            background: #ffffff;
             display: flex;
-            align-items: stretch;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding-top: 15px;
           }
-
-          /* Franja lateral izquierda — color litúrgico */
+          .guide-text {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 12px;
+            text-align: center;
+          }
+          .gafete-card {
+            width: 90mm;
+            height: 60mm;
+            border: 1.5px dashed #b0b0b0;
+            border-radius: 10px;
+            overflow: hidden;
+            display: flex;
+            background: #ffffff;
+            page-break-inside: avoid;
+            box-shadow: none;
+          }
           .sidebar {
-            width: 1.1cm;
-            background: #1E4D38;
+            width: 12mm;
+            background-color: ${primaryColor} !important;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             gap: 6px;
-            padding: 8px 0;
+            padding: 6px 2px;
+            flex-shrink: 0;
           }
           .sidebar .cross {
             font-size: 18px;
@@ -86,140 +118,178 @@ export const QRGafete: React.FC<QRGafeteProps> = ({ catecumeno }) => {
           .sidebar .vertical-text {
             writing-mode: vertical-rl;
             text-orientation: mixed;
-            font-size: 5.5px;
-            color: rgba(255,255,255,0.7);
-            letter-spacing: 1.5px;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 6.5px;
+            font-weight: bold;
+            color: rgba(255, 255, 255, 0.85);
+            letter-spacing: 2px;
             text-transform: uppercase;
-            font-family: Arial, sans-serif;
           }
-
-          /* Cuerpo principal */
-          .body {
+          .main-content {
             flex: 1;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            padding: 8px 10px 6px 10px;
+            padding: 8px 12px 6px 12px;
+            background: #ffffff;
           }
-
-          /* Cabecera */
           .header {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: space-between;
-            border-bottom: 0.5px solid #ddd;
-            padding-bottom: 5px;
-            margin-bottom: 5px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 4px;
           }
-          .header .parish-name {
-            font-size: 7px;
+          .header .parish-title {
+            font-size: 9.5px;
             font-weight: bold;
-            color: #1E4D38;
-            letter-spacing: 0.3px;
-            line-height: 1.3;
+            color: ${primaryColor};
+            line-height: 1.2;
           }
-          .header .diocese {
-            font-size: 5.5px;
-            color: #888;
+          .header .diocese-text {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 7px;
+            color: #777;
             margin-top: 1px;
           }
-          .header .icon {
+          .header .church-icon {
             font-size: 18px;
+            line-height: 1;
           }
-
-          /* Bloque central */
-          .center {
+          .center-row {
             display: flex;
             align-items: center;
             gap: 10px;
             flex: 1;
+            padding: 3px 0;
           }
-          .qr-block {
-            border: 1.5px solid #1E4D38;
-            border-radius: 4px;
+          .qr-wrapper {
+            border: 1.5px solid ${primaryColor};
+            border-radius: 6px;
             padding: 3px;
-            background: #fff;
+            background: #ffffff;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
           }
-          .info {
+          .qr-wrapper svg {
+            width: 66px !important;
+            height: 66px !important;
+            display: block;
+          }
+          .info-col {
             flex: 1;
+            min-width: 0;
           }
-          .sacramento-badge {
+          .badge-sacramento {
             display: inline-block;
-            background: #1E4D38;
-            color: #fff;
-            font-size: 5.5px;
-            padding: 1.5px 6px;
-            border-radius: 20px;
-            font-family: Arial, sans-serif;
+            background-color: ${primaryColor} !important;
+            color: #ffffff !important;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 6.5px;
             font-weight: bold;
             letter-spacing: 0.5px;
             text-transform: uppercase;
-            margin-bottom: 4px;
+            padding: 2px 7px;
+            border-radius: 12px;
+            margin-bottom: 3.5px;
           }
-          .nombre {
-            font-size: 10px;
+          .student-name {
+            font-size: 10.5px;
             font-weight: bold;
-            color: #1a1a1a;
-            line-height: 1.2;
-            margin-bottom: 4px;
+            color: #111;
+            line-height: 1.25;
+            margin-bottom: 3px;
           }
-          .bautizado {
-            font-size: 5.5px;
+          .birth-info {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 7px;
             color: #666;
-            font-family: Arial, sans-serif;
+            margin-bottom: 2.5px;
+          }
+          .bautismo-tag {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 6.5px;
+            color: #555;
             display: flex;
             align-items: center;
-            gap: 3px;
+            gap: 4px;
           }
-          .bautizado .dot {
+          .gold-circle {
             width: 5px;
             height: 5px;
             border-radius: 50%;
-            background: #C5A059;
+            background-color: #C5A059 !important;
             display: inline-block;
+            flex-shrink: 0;
           }
-
-          /* Pie */
-          .footer {
-            border-top: 0.5px solid #eee;
-            padding-top: 5px;
+          .gold-divider {
+            height: 1.8px;
+            background: linear-gradient(to right, #C5A059, #E8D5A3, #C5A059) !important;
+            border-radius: 1px;
+            margin-bottom: 3px;
+          }
+          .footer-row {
             display: flex;
             align-items: center;
             justify-content: space-between;
-          }
-          .token {
-            font-family: 'Courier New', monospace;
-            font-size: 5px;
-            color: #bbb;
-          }
-          .year {
-            font-size: 5.5px;
-            color: #aaa;
-            font-family: Arial, sans-serif;
-          }
-          .gold-bar {
-            height: 2px;
-            background: linear-gradient(to right, #C5A059, #E8D5A3, #C5A059);
-            margin-top: 5px;
-            border-radius: 1px;
-          }
-
-          @media print {
-            .no-print { display: none !important; }
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 6.5px;
+            color: #888;
           }
         </style>
       </head>
       <body>
-        ${content.innerHTML}
+        <div class="guide-text">
+          ✂️ <strong>Gafete Oficial de Asistencia</strong> · Imprime en hoja tamaño carta, recorta por la línea punteada (9 × 6 cm) y plastifica.
+        </div>
+        <div class="gafete-card">
+          <div class="sidebar">
+            <span class="cross">✝</span>
+            <span class="vertical-text">Jesús Obrero</span>
+          </div>
+          <div class="main-content">
+            <div class="header">
+              <div>
+                <div class="parish-title">Parroquia Jesús Obrero</div>
+                <div class="diocese-text">Diócesis de El Alto · Bolivia</div>
+              </div>
+              <div class="church-icon">⛪</div>
+            </div>
+            <div class="center-row">
+              <div class="qr-wrapper">
+                ${qrSvg}
+              </div>
+              <div class="info-col">
+                <div class="badge-sacramento">${sacramentoLabel}</div>
+                <div class="student-name">${nombreCompleto}</div>
+                ${fechaNacFormatted ? `<div class="birth-info">F. Nac.: ${fechaNacFormatted}</div>` : ''}
+                <div class="bautismo-tag">
+                  <span class="gold-circle"></span>
+                  <span>${catecumeno.es_bautizado ? 'Bautizado/a ✓' : 'Sin registro de Bautismo'}</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <div class="gold-divider"></div>
+              <div class="footer-row">
+                <div>Gafete Oficial de Asistencia</div>
+                <div>${seasonInfo?.icon || '🌿'} ${gestionYear}</div>
+              </div>
+            </div>
+          </div>
+        </div>
       </body>
       </html>
     `);
+
     printWindow.document.close();
     printWindow.focus();
     setTimeout(() => {
       printWindow.print();
       printWindow.close();
-    }, 350);
+    }, 450);
   };
 
   return (
@@ -227,18 +297,18 @@ export const QRGafete: React.FC<QRGafeteProps> = ({ catecumeno }) => {
       {/* Vista previa del gafete */}
       <div
         ref={printRef}
-        className="flex border border-gray-200 rounded-xl overflow-hidden shadow-md"
+        className="flex border border-gray-200 rounded-xl overflow-hidden shadow-md mx-auto"
         style={{ width: '340px', height: '226px', fontFamily: 'Georgia, serif' }}
       >
         {/* Franja lateral litúrgica */}
         <div
           className="flex flex-col items-center justify-center gap-1.5 py-2 px-1 flex-shrink-0"
-          style={{ width: '42px', backgroundColor: 'var(--lit-primary, #1E4D38)' }}
+          style={{ width: '42px', backgroundColor: primaryColor }}
         >
           <span className="text-xl" style={{ color: '#C5A059' }}>✝</span>
           <span
-            className="text-white/60 font-sans tracking-widest"
-            style={{ writingMode: 'vertical-rl', fontSize: '6px', textTransform: 'uppercase' }}
+            className="text-white/80 font-sans tracking-widest font-bold"
+            style={{ writingMode: 'vertical-rl', fontSize: '6.5px', textTransform: 'uppercase' }}
           >
             Jesús Obrero
           </span>
@@ -249,7 +319,7 @@ export const QRGafete: React.FC<QRGafeteProps> = ({ catecumeno }) => {
           {/* Cabecera */}
           <div className="flex items-start justify-between border-b border-gray-100 pb-2">
             <div>
-              <p className="font-bold text-[9px] leading-tight" style={{ color: '#1E4D38' }}>
+              <p className="font-bold text-[9.5px] leading-tight" style={{ color: primaryColor }}>
                 Parroquia Jesús Obrero
               </p>
               <p className="text-[7px] text-gray-400 font-sans mt-0.5">
@@ -263,12 +333,12 @@ export const QRGafete: React.FC<QRGafeteProps> = ({ catecumeno }) => {
           <div className="flex items-center gap-3 flex-1 py-2">
             {/* QR */}
             <div
-              className="rounded-md p-1 flex-shrink-0"
-              style={{ border: '1.5px solid #1E4D38' }}
+              className="rounded-md p-1 flex-shrink-0 flex items-center justify-center bg-white"
+              style={{ border: `1.5px solid ${primaryColor}` }}
             >
               <QRCodeSVG
                 value={qrValue}
-                size={72}
+                size={70}
                 bgColor="#FFFFFF"
                 fgColor="#1a1a1a"
                 level="M"
@@ -280,23 +350,23 @@ export const QRGafete: React.FC<QRGafeteProps> = ({ catecumeno }) => {
               <span
                 className="inline-block font-sans font-bold text-white rounded-full mb-1.5"
                 style={{
-                  backgroundColor: 'var(--lit-primary, #1E4D38)',
+                  backgroundColor: primaryColor,
                   fontSize: '6.5px',
                   padding: '2px 7px',
                   letterSpacing: '0.5px',
                   textTransform: 'uppercase',
                 }}
               >
-                {TIPO_LABEL[inscripcion.tipo_sacramento] ?? inscripcion.tipo_sacramento}
+                {sacramentoLabel}
               </span>
 
               <p className="font-bold leading-tight text-gray-900" style={{ fontSize: '10.5px' }}>
                 {nombreCompleto}
               </p>
 
-              {catecumeno.fecha_nacimiento && (
+              {fechaNacFormatted && (
                 <p className="font-sans text-gray-500 mt-0.5" style={{ fontSize: '6.5px' }}>
-                  F. Nac.: {new Date(catecumeno.fecha_nacimiento + 'T12:00:00').toLocaleDateString('es-BO', { day: '2-digit', month: 'short', year: 'numeric' })}
+                  F. Nac.: {fechaNacFormatted}
                 </p>
               )}
 
@@ -320,7 +390,7 @@ export const QRGafete: React.FC<QRGafeteProps> = ({ catecumeno }) => {
                 Gafete Oficial de Asistencia
               </p>
               <p className="font-sans text-gray-400" style={{ fontSize: '6px' }}>
-                {seasonInfo.icon} {new Date(inscripcion.fecha_inscripcion + 'T12:00:00').getFullYear()}
+                {seasonInfo?.icon || '🌿'} {gestionYear}
               </p>
             </div>
           </div>
