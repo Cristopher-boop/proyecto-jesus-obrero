@@ -21,7 +21,7 @@ export const Card: React.FC<CardProps> = ({
 }) => {
   return (
     <div
-      className={`bg-white rounded-xl border ${
+      className={`bg-app-card rounded-xl border ${
         accentBorder ? 'border-lit-accent/50' : 'border-app-border'
       } shadow-ecclesiastical transition-all duration-200 ${
         hoverEffect ? 'hover:shadow-md hover:border-lit-primary/30' : ''
