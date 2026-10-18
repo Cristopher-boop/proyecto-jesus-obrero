@@ -20,6 +20,7 @@ from app.modules.asistencias.schemas import (
     AsistenciaDetalleItem, AsistenciaDetalleFechaResponse,
 )
 from app.modules.capillas_grupos.service import evaluar_horario_marcado
+from app.core.timezone import today_bolivia, time_bolivia, now_bolivia
 from fastapi import HTTPException, status
 
 
@@ -70,7 +71,7 @@ async def registrar_asistencia_qr(
 
     persona = inscripcion.persona
     nombre_completo = f"{persona.nombres} {persona.primer_apellido} {persona.segundo_apellido or ''}".strip()
-    hoy = date.today()
+    hoy = today_bolivia()
 
     # 2 — Verificar si ya existe asistencia registrada en la fecha de hoy
     result_asistencia = await db.execute(
@@ -95,12 +96,12 @@ async def registrar_asistencia_qr(
             ya_registrado=True,
         )
 
-    # 3 — Determinar la hora efectiva de marcación
+    # 3 — Determinar la hora efectiva de marcación (Hora Oficial de Bolivia UTC-4)
     if hora_simulada:
         partes = hora_simulada.strip().split(":")
         ahora_hora = time(int(partes[0]), int(partes[1]))
     else:
-        ahora_hora = datetime.now().time()
+        ahora_hora = time_bolivia()
 
     # 4 — Evaluación automática de horario si no se forzó un estado manual
     target_capilla_id = capilla_id or inscripcion.capilla_id
@@ -144,8 +145,8 @@ async def registrar_asistencia_qr(
 
 
 async def listar_asistencias_hoy(db: AsyncSession) -> AsistenciaListResponse:
-    """Retorna la lista de todas las asistencias registradas en la fecha actual."""
-    hoy = date.today()
+    """Retorna la lista de todas las asistencias registradas en la fecha actual (Bolivia)."""
+    hoy = today_bolivia()
     result = await db.execute(
         select(Asistencia)
         .where(Asistencia.fecha == hoy)
@@ -200,7 +201,7 @@ async def get_asistencias_heatmap(
     del año formativo pastoral, computando asistencias, atrasos y asignando
     automáticamente FALTA para catecúmenos que no hayan registrado asistencia en domingos pasados.
     """
-    hoy = date.today()
+    hoy = today_bolivia()
 
     # 1. Obtener Capilla
     capilla_res = await db.execute(select(Capilla).where(Capilla.id == capilla_id))
@@ -286,7 +287,7 @@ async def get_asistencias_heatmap(
                     # Regla obligatoria: si no tiene asistencia en un domingo pasado de Jesús Obrero, es FALTA
                     if es_pasado:
                         faltas += 1
-                    elif es_hoy and datetime.now().time() > time(13, 0):
+                    elif es_hoy and time_bolivia() > time(13, 0):
                         faltas += 1
 
             asistieron = presentes + atrasos
@@ -384,7 +385,7 @@ async def get_asistencias_detalle_fecha(
     Para catecúmenos sin registro en un domingo de Jesús Obrero:
     asigna automáticamente estado FALTA con hora '—' y observación de inasistencia.
     """
-    hoy = date.today()
+    hoy = today_bolivia()
     dia_idx = fecha.weekday()
     dia_nombre = DIAS_ES[dia_idx]
     es_domingo = (dia_idx == 6)

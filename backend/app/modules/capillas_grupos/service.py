@@ -11,6 +11,7 @@ from sqlalchemy.orm import selectinload
 from sqlalchemy import update
 from fastapi import HTTPException, status
 
+from app.core.timezone import now_bolivia, today_bolivia, time_bolivia
 from app.modules.personas.models import Persona, Inscripcion, EtapaFormacion, TipoSacramento
 from app.modules.capillas_grupos.models import Capilla, HorarioAsistencia, Grupo, DiaSemana
 from app.modules.asistencias.models import EstadoAsistencia
@@ -485,7 +486,7 @@ async def get_fase_actual_capilla(
     if not capilla:
         raise HTTPException(status_code=404, detail="Capilla no encontrada.")
 
-    ahora = datetime.now()
+    ahora = now_bolivia()
     dia_actual = DIAS_MAP[ahora.weekday()]
 
     if hora_custom:
@@ -537,7 +538,7 @@ async def get_fase_actual_capilla(
 def _calcular_edad_date(fecha_nac: Optional[date]) -> Optional[int]:
     if not fecha_nac:
         return None
-    hoy = date.today()
+    hoy = today_bolivia()
     edad = hoy.year - fecha_nac.year
     if (hoy.month, hoy.day) < (fecha_nac.month, fecha_nac.day):
         edad -= 1

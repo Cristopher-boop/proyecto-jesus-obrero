@@ -8,6 +8,7 @@ from sqlalchemy import Column, Integer, String, Date, Time, DateTime, Enum, Fore
 from sqlalchemy.orm import relationship
 
 from app.core.database import Base
+from app.core.timezone import today_bolivia, time_bolivia
 from app.modules.personas.models import Persona, Inscripcion, Usuario
 
 
@@ -26,8 +27,8 @@ class Asistencia(Base):
 
     id                  = Column(Integer, primary_key=True, index=True)
     inscripcion_id      = Column(Integer, ForeignKey('inscripciones.id', ondelete='CASCADE'), nullable=False)
-    fecha               = Column(Date, nullable=False, default=date.today, index=True)
-    hora                = Column(Time, nullable=False, default=lambda: datetime.now().time())
+    fecha               = Column(Date, nullable=False, default=today_bolivia, index=True)
+    hora                = Column(Time, nullable=False, default=time_bolivia)
     estado              = Column(Enum(EstadoAsistencia), nullable=False, default=EstadoAsistencia.PRESENTE)
     registrado_por_id  = Column(Integer, ForeignKey('usuarios.id', ondelete='SET NULL'), nullable=True)
     observacion         = Column(Text, nullable=True)
