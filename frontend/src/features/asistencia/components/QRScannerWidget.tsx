@@ -4,8 +4,8 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Html5QrcodeScanner } from 'html5-qrcode';
-import { Camera, Church, RefreshCw, X } from 'lucide-react';
+import { Html5Qrcode } from 'html5-qrcode';
+import { Camera, Church, RefreshCw, X, AlertCircle } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import Select from '@/components/ui/Select';
@@ -29,8 +29,9 @@ export const QRScannerWidget: React.FC<Props> = ({
   onClose,
 }) => {
   const [cameraActive, setCameraActive] = useState(false);
+  const [cameraError, setCameraError] = useState<string | null>(null);
   const [lastScannedToken, setLastScannedToken] = useState<string | null>(null);
-  const scannerRef = useRef<Html5QrcodeScanner | null>(null);
+  const scannerRef = useRef<Html5Qrcode | null>(null);
 
   const { data: capillasData } = useCapillas();
   const { fase: faseActual } = useFaseActual(selectedCapillaId);
@@ -39,51 +40,91 @@ export const QRScannerWidget: React.FC<Props> = ({
 
   // Iniciar / Limpiar escáner de cámara
   useEffect(() => {
-    if (!cameraActive || !isOpen) {
-      if (scannerRef.current) {
-        scannerRef.current.clear().catch(() => {});
-        scannerRef.current = null;
-      }
-      return;
-    }
+    let isMounted = true;
+    let html5Qr: Html5Qrcode | null = null;
 
-    // Inicializar lector óptico
-    const scanner = new Html5QrcodeScanner(
-      'qr-camera-reader',
-      {
-        fps: 10,
-        qrbox: { width: 250, height: 250 },
-        aspectRatio: 1.0,
-        showTorchButtonIfSupported: true,
-      },
-      false
-    );
+    if (cameraActive && isOpen) {
+      setCameraError(null);
 
-    scanner.render(
-      (decodedText) => {
-        if (decodedText !== lastScannedToken) {
-          setLastScannedToken(decodedText);
-          onScan(decodedText, undefined, undefined, selectedCapillaId);
+      // Tiempo prudencial para asegurar que el nodo #qr-camera-reader exista en el DOM
+      const timer = setTimeout(async () => {
+        const element = document.getElementById('qr-camera-reader');
+        if (!element || !isMounted) return;
 
-          // Pausar relectura durante 3 segundos para el mismo token
-          setTimeout(() => {
-            setLastScannedToken(null);
-          }, 3500);
+        try {
+          html5Qr = new Html5Qrcode('qr-camera-reader');
+          scannerRef.current = html5Qr;
+
+          await html5Qr.start(
+            { facingMode: 'environment' },
+            {
+              fps: 10,
+              qrbox: { width: 250, height: 250 },
+              aspectRatio: 1.0,
+            },
+            (decodedText) => {
+              if (decodedText !== lastScannedToken) {
+                setLastScannedToken(decodedText);
+                onScan(decodedText, undefined, undefined, selectedCapillaId);
+
+                // Pausar relectura durante 3.5 segundos para el mismo token
+                setTimeout(() => {
+                  if (isMounted) setLastScannedToken(null);
+                }, 3500);
+              }
+            },
+            (_err) => {
+              // Ignorar frames continuos sin QR
+            }
+          );
+        } catch (err: any) {
+          if (!isMounted) return;
+          console.error('Error al iniciar cámara:', err);
+          let msg = 'No se pudo acceder a la cámara del dispositivo.';
+          const errStr = (err?.name || err?.message || String(err)).toLowerCase();
+
+          if (errStr.includes('notallowed') || errStr.includes('permission')) {
+            msg = 'Permiso denegado: Por favor permite el acceso a la cámara en tu navegador (ícono del candado o cámara en la barra de direcciones).';
+          } else if (errStr.includes('notfound') || errStr.includes('devicesnotfound')) {
+            msg = 'No se detectó ninguna cámara disponible en tu dispositivo.';
+          } else if (errStr.includes('insecure') || (typeof window !== 'undefined' && window.location.protocol !== 'https:' && window.location.hostname !== 'localhost')) {
+            msg = 'El navegador requiere conexión segura HTTPS para activar la cámara.';
+          }
+
+          setCameraError(msg);
+          setCameraActive(false);
+
+          if (scannerRef.current) {
+            try {
+              scannerRef.current.clear();
+            } catch {}
+            scannerRef.current = null;
+          }
         }
-      },
-      (_error) => {
-        // Ignorar errores de frames continuos sin QR
-      }
-    );
+      }, 50);
 
-    scannerRef.current = scanner;
-
-    return () => {
+      return () => {
+        isMounted = false;
+        clearTimeout(timer);
+        if (html5Qr) {
+          if (html5Qr.isScanning) {
+            html5Qr.stop().then(() => html5Qr?.clear()).catch(() => {});
+          } else {
+            try { html5Qr.clear(); } catch {}
+          }
+        }
+        scannerRef.current = null;
+      };
+    } else {
       if (scannerRef.current) {
-        scannerRef.current.clear().catch(() => {});
+        if (scannerRef.current.isScanning) {
+          scannerRef.current.stop().then(() => scannerRef.current?.clear()).catch(() => {});
+        } else {
+          try { scannerRef.current.clear(); } catch {}
+        }
         scannerRef.current = null;
       }
-    };
+    }
   }, [cameraActive, isOpen, onScan, selectedCapillaId, lastScannedToken]);
 
   if (!isOpen) return null;
@@ -153,6 +194,18 @@ export const QRScannerWidget: React.FC<Props> = ({
 
       {/* Contenedor del visor óptico */}
       <div className="p-6 flex flex-col items-center justify-center space-y-4">
+        {cameraError && (
+          <div className="w-full max-w-md p-3.5 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 rounded-xl flex items-start gap-3 text-red-700 dark:text-red-300 text-xs">
+            <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-red-500" />
+            <div className="flex-1">
+              <p className="font-semibold">{cameraError}</p>
+              <p className="text-[11px] text-red-600/80 dark:text-red-400/80 mt-1">
+                Toca el ícono del candado o cámara 🔒 en la barra de tu navegador para dar permiso y vuelve a intentar.
+              </p>
+            </div>
+          </div>
+        )}
+
         {!cameraActive ? (
           <div className="py-8 px-4 text-center max-w-md mx-auto space-y-3">
             <div className="w-14 h-14 rounded-2xl bg-lit-surface border border-lit-border mx-auto flex items-center justify-center shadow-xs text-lit-primary">

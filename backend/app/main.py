@@ -45,6 +45,24 @@ async def lifespan(app: FastAPI):
     # Inicializar datos iniciales (roles y superadmin)
     async with AsyncSessionLocal() as db:
         await create_superadmin_if_not_exists(db)
+
+        # 1. Verificar si existen capillas inicializadas; si no, inicializarlas
+        try:
+            from app.modules.capillas_grupos.models import Capilla
+            from sqlalchemy.future import select
+            res_cap = await db.execute(select(Capilla))
+            if not res_cap.scalars().first():
+                from scripts.seed_capillas_horarios import seed as seed_capillas
+                await seed_capillas()
+        except Exception as e:
+            print(f"[Lifespan Seed] Error al inicializar capillas/horarios: {e}")
+
+        # 2. Inicializar los 9 catequistas como catecúmenos de Primera Comunión
+        try:
+            from scripts.seed_catequistas_comunion import seed_catequistas_comunion
+            await seed_catequistas_comunion()
+        except Exception as e:
+            print(f"[Lifespan Seed] Error al inicializar catequistas como catecúmenos: {e}")
         
     yield
 
