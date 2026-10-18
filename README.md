@@ -145,6 +145,17 @@ npm run dev
 
 ---
 
+### 4. Sembrado de Capillas, Horarios y Nómina de Grupos
+
+Para inicializar o sincronizar en la base de datos las 6 capillas de la comunidad, sus 12 horarios de asistencia dominical reales (diferenciando Primera Comunión y Confirmación, así como los flujos donde el Encuentro es antes o después de la Santa Misa) y conformar los 26 grupos pastorales con sus respectivos catequistas:
+
+```bash
+# Desde la carpeta backend con el entorno virtual activado:
+python scripts/seed_capillas_horarios.py
+```
+
+---
+
 ## 🔑 Credenciales Iniciales de Prueba
 
 El sistema cuenta con un inicializador automático que crea las tablas en PostgreSQL e inserta el superusuario inicial al arrancar el backend por primera vez:

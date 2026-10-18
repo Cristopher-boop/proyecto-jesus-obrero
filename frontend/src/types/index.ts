@@ -273,6 +273,8 @@ export interface HorarioAsistencia {
   id:                     number;
   capilla_id:             number;
   dia_semana:             DiaSemana;
+  tipo_sacramento:        TipoSacramento;
+  encuentro_antes_de_misa: boolean;
   hora_inicio_puntual:    string;
   hora_fin_puntual:       string;
   hora_inicio_misa:       string;
@@ -286,6 +288,8 @@ export interface HorarioAsistencia {
 
 export interface HorarioAsistenciaCreate {
   dia_semana:             DiaSemana;
+  tipo_sacramento:        TipoSacramento;
+  encuentro_antes_de_misa?: boolean;
   hora_inicio_puntual:    string;
   hora_fin_puntual:       string;
   hora_inicio_misa:       string;
@@ -299,6 +303,8 @@ export interface HorarioAsistenciaCreate {
 
 export interface HorarioAsistenciaUpdate {
   dia_semana?:             DiaSemana;
+  tipo_sacramento?:        TipoSacramento;
+  encuentro_antes_de_misa?: boolean;
   hora_inicio_puntual?:    string;
   hora_fin_puntual?:       string;
   hora_inicio_misa?:       string;
@@ -337,7 +343,9 @@ export interface CapillaListItem {
   activo:            boolean;
   descripcion?:      string;
   total_horarios:    number;
+  total_grupos?:     number;
   horarios:          HorarioAsistencia[];
+  grupos?:           GrupoResponse[];
 }
 
 export interface CapillaListResponse {
@@ -374,6 +382,7 @@ export interface GrupoResponse {
   tipo_sacramento:    TipoSacramento;
   edad_minima?:       number;
   edad_maxima?:       number;
+  descripcion?:       string;
   color_identificador?: string;
   activo:             boolean;
   total_catecumenos:  number;
@@ -394,6 +403,7 @@ export interface GrupoCreate {
   tipo_sacramento?:    TipoSacramento;
   edad_minima?:        number;
   edad_maxima?:        number;
+  descripcion?:        string;
   color_identificador?: string;
 }
 
@@ -406,6 +416,7 @@ export interface GrupoUpdate {
   tipo_sacramento?:    TipoSacramento;
   edad_minima?:        number;
   edad_maxima?:        number;
+  descripcion?:        string;
   color_identificador?: string;
   activo?:             boolean;
 }

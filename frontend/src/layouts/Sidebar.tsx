@@ -38,7 +38,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const navigation = [
     { id: 'dashboard',    name: 'Panel Principal',      icon: LayoutDashboard },
-    { id: 'asistencia',   name: 'Asistencia QR',        icon: QrCode, badge: 'En Vivo' },
+    { id: 'asistencia',   name: 'Asistencia',           icon: QrCode, badge: 'En Vivo' },
     { id: 'catecumenos',  name: 'Catecúmenos',          icon: Users },
     { id: 'feligreses',   name: 'Feligreses',           icon: UserCheck },
     { id: 'calendario',   name: 'Calendario Litúrgico', icon: Calendar, badge: '2026' },
@@ -151,13 +151,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </nav>
 
           {/* Pie del Sidebar */}
-          <div className="p-4 border-t border-app-border/70 bg-app-bg/50">
-            <div className="flex items-center gap-2.5">
+          <div className="p-4 border-t border-app-border/70 bg-app-bg/50 space-y-3">
+            <button
+              onClick={() => handleItemClick('landing')}
+              className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs text-app-muted hover:text-lit-primary hover:bg-lit-surface border border-transparent hover:border-lit-border transition-all cursor-pointer"
+              title="Previsualizar el sitio web público"
+            >
+              <span>🌐</span>
+              <span className="font-medium">Ver Página Web Pública</span>
+            </button>
+
+            <div className="flex items-center gap-2.5 pt-1 border-t border-app-border/50">
               <div className="w-8 h-8 rounded-xl bg-lit-primary text-white flex items-center justify-center text-xs font-bold shadow-xs">
                 JO
               </div>
               <div className="overflow-hidden">
-                <p className="text-xs font-semibold text-app-text truncate">Sede Central</p>
+                <p className="text-xs font-semibold text-app-text truncate">Jesús Obrero</p>
                 <p className="text-[10px] text-app-muted truncate">Diócesis de El Alto</p>
               </div>
             </div>

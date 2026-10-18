@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { X, Church, ShieldCheck, MapPin } from 'lucide-react';
+import { X, Church, MapPin } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Alert from '@/components/ui/Alert';
@@ -198,40 +198,23 @@ export const CapillaModal: React.FC<CapillaModalProps> = ({
             />
           </div>
 
-          {/* Configuración de Sede Principal y Estado */}
-          <div className="p-3.5 rounded-xl bg-app-bg border border-app-border space-y-3">
-            <label className="flex items-start gap-3 cursor-pointer">
+          {/* Estado Operativo */}
+          <div className="p-3.5 rounded-xl bg-app-bg border border-app-border flex items-center justify-between">
+            <div>
+              <span className="text-xs font-bold text-app-text">Estado Operativo</span>
+              <span className="text-[10px] text-app-muted block">Habilitar para marcaciones y actividades</span>
+            </div>
+            <label className="flex items-center gap-2 cursor-pointer text-xs">
               <input
                 type="checkbox"
-                checked={esSedePrincipal}
-                onChange={(e) => setEsSedePrincipal(e.target.checked)}
-                className="rounded mt-0.5 text-lit-primary focus:ring-lit-primary w-4 h-4"
+                checked={activo}
+                onChange={(e) => setActivo(e.target.checked)}
+                className="rounded text-lit-primary focus:ring-lit-primary w-4 h-4"
               />
-              <div>
-                <span className="text-xs font-bold text-app-text flex items-center gap-1.5">
-                  <ShieldCheck className="w-3.5 h-3.5 text-lit-accent" />
-                  Marcar como Sede Central / Parroquial
-                </span>
-                <span className="text-[10px] text-app-muted block mt-0.5 leading-tight">
-                  Al marcar esta capilla, se convertirá en la sede principal y se desmarcará la anterior.
-                </span>
-              </div>
+              <span className={activo ? 'text-semantic-success font-bold' : 'text-app-muted font-medium'}>
+                {activo ? 'Activa' : 'Inactiva'}
+              </span>
             </label>
-
-            <div className="pt-2 border-t border-app-border/70 flex items-center justify-between">
-              <span className="text-xs font-bold text-app-text">Estado Operativo</span>
-              <label className="flex items-center gap-2 cursor-pointer text-xs">
-                <input
-                  type="checkbox"
-                  checked={activo}
-                  onChange={(e) => setActivo(e.target.checked)}
-                  className="rounded text-lit-primary focus:ring-lit-primary w-4 h-4"
-                />
-                <span className={activo ? 'text-semantic-success font-bold' : 'text-app-muted font-medium'}>
-                  {activo ? 'Activa' : 'Inactiva'}
-                </span>
-              </label>
-            </div>
           </div>
 
           {/* Botones de Acción */}

@@ -49,18 +49,21 @@ class Capilla(Base):
 
 class HorarioAsistencia(Base):
     """
-    Configuración horaria de asistencia para una capilla.
-    Define las franjas de Puntual, Durante Misa, Durante Catequesis (Atraso) y Falta.
+    Configuración horaria de asistencia para una capilla y sacramento.
+    Define las franjas de Puntual, Durante Misa, Durante Catequesis (Atraso) y Falta,
+    así como el orden de actividades (Misa antes de encuentro o Encuentro antes de misa).
     """
     __tablename__ = 'horarios_asistencia'
 
     id                      = Column(Integer, primary_key=True, index=True)
     capilla_id              = Column(Integer, ForeignKey('capillas.id', ondelete='CASCADE'), nullable=False)
     dia_semana              = Column(Enum(DiaSemana), nullable=False, default=DiaSemana.DOMINGO)
+    tipo_sacramento         = Column(Enum(TipoSacramento), nullable=False, default=TipoSacramento.PRIMERA_COMUNION)
+    encuentro_antes_de_misa = Column(Boolean, default=False, nullable=False)
     
-    # 1. Rango Puntual (Antes de la misa) -> PRESENTE
-    hora_inicio_puntual     = Column(Time, nullable=False)   # Ej: 09:20
-    hora_fin_puntual        = Column(Time, nullable=False)   # Ej: 10:10
+    # 1. Rango Puntual
+    hora_inicio_puntual     = Column(Time, nullable=False)   # Ej: 09:20 o 15:40
+    hora_fin_puntual        = Column(Time, nullable=False)   # Ej: 10:10 o 16:10
     
     # 2. Rango Durante la Misa -> PRESENTE (Durante Misa)
     hora_inicio_misa        = Column(Time, nullable=False)   # Ej: 10:11

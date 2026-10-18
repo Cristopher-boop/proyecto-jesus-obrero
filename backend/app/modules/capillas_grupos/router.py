@@ -49,9 +49,11 @@ async def delete_capilla(capilla_id: int, db: AsyncSession = Depends(get_db)):
 async def get_fase_actual(
     capilla_id: int,
     hora: Optional[str] = Query(None, description="Hora en formato HH:MM para simulación"),
+    tipo_sacramento: Optional[str] = Query(None, description="Filtrar por sacramento"),
     db: AsyncSession = Depends(get_db)
 ):
-    return await service.get_fase_actual_capilla(db, capilla_id, hora)
+    sacramento_enum = service.TipoSacramento(tipo_sacramento) if tipo_sacramento else None
+    return await service.get_fase_actual_capilla(db, capilla_id, hora, sacramento_enum)
 
 
 # ─── Horarios de Asistencia ───────────────────────────────────────────────────
