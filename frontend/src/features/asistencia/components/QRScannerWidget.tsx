@@ -97,14 +97,11 @@ export const QRScannerWidget: React.FC<Props> = ({
             <Camera className="w-5 h-5 text-lit-primary" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-app-text flex items-center gap-2 font-serif">
-              <span>Escáner Óptico de Cámara Web</span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-lit-surface text-lit-primary font-bold">
-                100% Cámara
-              </span>
+            <h3 className="text-sm font-bold text-app-text font-serif">
+              Escáner QR
             </h3>
             <p className="text-xs text-app-muted mt-0.5">
-              Acerca el gafete QR del catecúmeno frente a la cámara de la laptop o dispositivo móvil.
+              Enfoca el gafete QR frente a la cámara.
             </p>
           </div>
         </div>
@@ -120,7 +117,7 @@ export const QRScannerWidget: React.FC<Props> = ({
               onChange={(val) => onCapillaChange(val)}
               options={capillasData?.items.map(c => ({
                 value: c.id,
-                label: `${c.nombre} ${c.es_sede_principal ? '★ (Central)' : ''}`,
+                label: c.nombre,
               })) ?? []}
             />
           </div>
@@ -128,7 +125,7 @@ export const QRScannerWidget: React.FC<Props> = ({
           {/* Indicador de Fase */}
           {faseActual && (
             <div className="flex items-center gap-2 bg-app-card border border-app-border px-3 py-1.5 rounded-xl shadow-2xs">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-lit-primary animate-pulse" />
               <span className="text-[11px] text-app-muted hidden sm:inline">Fase:</span>
               <span className="text-[11px] font-bold text-lit-primary truncate max-w-[120px]">
                 {faseActual.fase}
@@ -146,7 +143,7 @@ export const QRScannerWidget: React.FC<Props> = ({
             <button
               onClick={onClose}
               className="p-1.5 rounded-lg text-app-muted hover:text-app-text hover:bg-lit-surface transition-colors"
-              title="Cerrar panel de cámara"
+              title="Cerrar escáner"
             >
               <X className="w-4 h-4" />
             </button>
@@ -157,14 +154,14 @@ export const QRScannerWidget: React.FC<Props> = ({
       {/* Contenedor del visor óptico */}
       <div className="p-6 flex flex-col items-center justify-center space-y-4">
         {!cameraActive ? (
-          <div className="py-10 px-4 text-center max-w-md mx-auto space-y-4">
-            <div className="w-16 h-16 rounded-2xl bg-lit-surface border border-lit-border mx-auto flex items-center justify-center text-3xl shadow-sm text-lit-primary">
-              <Camera className="w-8 h-8" />
+          <div className="py-8 px-4 text-center max-w-md mx-auto space-y-3">
+            <div className="w-14 h-14 rounded-2xl bg-lit-surface border border-lit-border mx-auto flex items-center justify-center shadow-xs text-lit-primary">
+              <Camera className="w-7 h-7" />
             </div>
             <div>
-              <h4 className="text-base font-bold text-app-text">Cámara Web en Pausa</h4>
-              <p className="text-xs text-app-muted mt-1 leading-relaxed">
-                Para iniciar la lectura óptica en vivo de gafetes QR en <strong className="text-app-text">{selectedCapilla?.nombre}</strong>, activa el visor con el botón inferior.
+              <h4 className="text-base font-bold text-app-text">Cámara en Pausa</h4>
+              <p className="text-xs text-app-muted mt-1">
+                Activa la cámara para escanear en <strong className="text-app-text">{selectedCapilla?.nombre}</strong>.
               </p>
             </div>
             <Button
@@ -174,7 +171,7 @@ export const QRScannerWidget: React.FC<Props> = ({
               onClick={() => setCameraActive(true)}
               className="shadow-sm"
             >
-              Activar Cámara Web
+              Activar Cámara
             </Button>
           </div>
         ) : (

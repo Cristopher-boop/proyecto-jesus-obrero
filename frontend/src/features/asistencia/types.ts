@@ -1,6 +1,6 @@
 /**
  * Tipos e interfaces para el Módulo de Asistencia.
- * Incluye modelos para el Heatmap anual estilo GitHub, detalle nominal de fechas y escaneo QR.
+ * Incluye modelos para el Heatmap anual, detalle nominal de fechas y escaneo QR.
  */
 
 export interface AsistenciaScanResponse {

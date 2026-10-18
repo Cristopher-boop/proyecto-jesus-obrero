@@ -11,7 +11,11 @@ import { ThemeModeToggle } from '@/components/ui/ThemeModeToggle';
 
 const ACTIVE_BG_IMAGE: string | null = '/fondo_login_5.webp';
 
-export const LoginPage: React.FC = () => {
+interface LoginPageProps {
+  onBackToLanding?: () => void;
+}
+
+export const LoginPage: React.FC<LoginPageProps> = ({ onBackToLanding }) => {
   const { login } = useAuth();
   const { season, seasonInfo, setSeason } = useLiturgicalTheme();
 
@@ -123,7 +127,7 @@ export const LoginPage: React.FC = () => {
             </div>
             <div className="flex items-center gap-1.5">
               <Church className="w-4 h-4 text-lit-accent" />
-              <span>4 Capillas Filiales</span>
+              <span>6 Capillas en Distrito 3</span>
             </div>
           </div>
         </div>
@@ -162,7 +166,18 @@ export const LoginPage: React.FC = () => {
           LADO DERECHO: Formulario de Inicio de Sesión
           ────────────────────────────────────────────────────────────────── */}
       <div className="lg:w-1/2 xl:w-5/12 flex items-center justify-center p-6 sm:p-12 lg:p-16 relative">
-        {/* Conmutador de tema en la esquina del login */}
+        {/* Controles superiores: Volver a Landing y Conmutador de tema */}
+        <div className="absolute top-4 left-4 sm:top-6 sm:left-6 z-20">
+          {onBackToLanding && (
+            <button
+              onClick={onBackToLanding}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-app-muted hover:text-lit-primary hover:bg-lit-surface border border-transparent hover:border-lit-border transition-all"
+            >
+              ← Volver al inicio
+            </button>
+          )}
+        </div>
+
         <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-20">
           <ThemeModeToggle size="sm" />
         </div>

@@ -1,8 +1,8 @@
 /**
  * AsistenciaPage — Página principal de Control de Asistencia Pastoral.
  * Integra:
- *  1. Matriz visual anual estilo GitHub commits (por días y por meses para Jesús Obrero).
- *  2. Escáner óptico 100% Cámara Web en vivo (sin simuladores).
+ *  1. Matriz visual anual de asistencia (por días y por meses para Jesús Obrero).
+ *  2. Escáner óptico de Cámara Web en vivo.
  *  3. Detalle nominal exacto por domingo con hora registrada (HH:MM:SS) y cómputo automático de faltas.
  *  4. Paginación y filtros reactivos según buenas prácticas y tokens de tema.
  */
@@ -29,7 +29,7 @@ import type { AsistenciaScanResponse } from '../types';
 type FiltroEstado = 'TODOS' | 'PRESENTE' | 'ATRASO' | 'FALTA';
 
 export const AsistenciaPage: React.FC = () => {
-  // Capilla activa (Por defecto: 1 = Sede Central Jesús Obrero)
+  // Capilla activa (Por defecto: 1 = Parroquia Jesús Obrero)
   const [selectedCapillaId, setSelectedCapillaId] = useState<number>(1);
   const [showCamera, setShowCamera] = useState(false);
 
@@ -136,13 +136,11 @@ export const AsistenciaPage: React.FC = () => {
             </span>
             <div>
               <h2 className="text-xl font-bold text-app-text font-serif">
-                Control de Asistencia Pastoral
+                Asistencia
               </h2>
               <p className="text-xs text-app-muted mt-0.5 flex items-center gap-1.5 flex-wrap">
                 <Calendar className="w-3.5 h-3.5" />
                 <span>Gestión 2026 · Parroquia Jesús Obrero</span>
-                <span>·</span>
-                <span>Hoy: {new Date().toLocaleDateString('es-BO', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })}</span>
               </p>
             </div>
           </div>
@@ -167,7 +165,7 @@ export const AsistenciaPage: React.FC = () => {
             leftIcon={<Camera className="w-4 h-4" />}
             onClick={() => setShowCamera(!showCamera)}
           >
-            {showCamera ? 'Ocultar Cámara' : 'Escanear con Cámara Web'}
+            {showCamera ? 'Cerrar Escáner' : 'Escanear QR'}
           </Button>
         </div>
       </div>
@@ -234,7 +232,7 @@ export const AsistenciaPage: React.FC = () => {
         />
       )}
 
-      {/* ── Matriz Visual Heatmap (GitHub Commits Style) ────────────────────── */}
+      {/* ── Matriz Visual Heatmap Anual ────────────────────── */}
       {errorHeatmap ? (
         <Alert variant="error" title="Error en Matriz de Asistencia">
           {errorHeatmap}
@@ -270,25 +268,22 @@ export const AsistenciaPage: React.FC = () => {
                 </span>
               )}
             </div>
-            <p className="text-xs text-app-muted mt-1">
-              Registro nominal con hora exacta de llegada y asignación automática de falta para inasistencias en Jesús Obrero.
-            </p>
           </div>
 
           {/* Métricas del día */}
           {detalleFecha && (
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-semantic-success-bg text-semantic-success-text border border-semantic-success-border">
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 {detalleFecha.presentes} Presentes
               </span>
 
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-semantic-warning-bg text-semantic-warning-text border border-semantic-warning-border">
                 <Clock className="w-3.5 h-3.5" />
                 {detalleFecha.atrasos} Atrasos
               </span>
 
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200 dark:border-rose-800">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-semantic-error-bg text-semantic-error-text border border-semantic-error-border">
                 <AlertCircle className="w-3.5 h-3.5" />
                 {detalleFecha.faltas} Faltas
               </span>
@@ -368,7 +363,7 @@ export const AsistenciaPage: React.FC = () => {
                 <table className="w-full min-w-[700px]">
                   <thead className="bg-app-bg border-b border-app-border">
                     <tr>
-                      {['Catecúmeno & Subgrupo', 'Sacramento', 'Hora Exacta', 'Estado', 'Tipo de Marcación / Observación'].map(h => (
+                      {['Catecúmeno & Subgrupo', 'Sacramento', 'Hora', 'Estado', 'Observación'].map(h => (
                         <th key={h} className="px-4 py-3 text-left text-[10px] font-bold text-app-muted uppercase tracking-wider">
                           {h}
                         </th>
@@ -385,7 +380,7 @@ export const AsistenciaPage: React.FC = () => {
                         <tr
                           key={item.inscripcion_id}
                           className={`hover:bg-lit-surface/40 transition-colors ${
-                            isFalta ? 'bg-rose-50/20 dark:bg-rose-950/10' : ''
+                            isFalta ? 'bg-semantic-error-bg/30' : ''
                           }`}
                         >
                           {/* Catecúmeno & Grupo */}
@@ -435,24 +430,17 @@ export const AsistenciaPage: React.FC = () => {
                             </Badge>
                           </td>
 
-                          {/* Observación / Detalle de Falta */}
+                          {/* Observación */}
                           <td className="px-4 py-3">
-                            <div className="flex flex-col gap-0.5">
-                              <span className={`text-xs ${
-                                isFalta
-                                  ? 'text-rose-600 dark:text-rose-400 font-semibold'
-                                  : isAtraso
-                                  ? 'text-amber-600 dark:text-amber-400 font-medium'
-                                  : 'text-app-text'
-                              }`}>
-                                {item.observacion || (isPresente ? 'Puntual (Antes de la Misa)' : 'Registrado')}
-                              </span>
-                              {item.es_falta_automatica && (
-                                <span className="text-[10px] text-app-muted italic">
-                                  Inasistencia dominical computada automáticamente
-                                </span>
-                              )}
-                            </div>
+                            <span className={`text-xs ${
+                              isFalta
+                                ? 'text-semantic-error-text font-semibold'
+                                : isAtraso
+                                ? 'text-semantic-warning-text font-medium'
+                                : 'text-app-text'
+                            }`}>
+                              {item.observacion || (isPresente ? 'Puntual' : 'Registrado')}
+                            </span>
                           </td>
                         </tr>
                       );

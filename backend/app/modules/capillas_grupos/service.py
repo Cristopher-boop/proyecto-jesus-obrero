@@ -34,28 +34,69 @@ DIAS_MAP = {
 
 
 async def list_capillas(db: AsyncSession) -> CapillaListResponse:
-    """Lista todas las capillas con sus horarios asociados."""
+    """Lista todas las capillas con sus horarios y subgrupos asociados."""
     result = await db.execute(
         select(Capilla)
-        .options(selectinload(Capilla.horarios))
+        .options(
+            selectinload(Capilla.horarios),
+            selectinload(Capilla.grupos).selectinload(Grupo.inscripciones).selectinload(Inscripcion.persona)
+        )
         .order_by(Capilla.es_sede_principal.desc(), Capilla.nombre.asc())
     )
     capillas = result.scalars().all()
 
-    items = [
-        CapillaListItem(
-            id=c.id,
-            nombre=c.nombre,
-            codigo=c.codigo,
-            direccion=c.direccion,
-            es_sede_principal=c.es_sede_principal,
-            activo=c.activo,
-            descripcion=c.descripcion,
-            total_horarios=len(c.horarios),
-            horarios=[HorarioAsistenciaResponse.model_validate(h) for h in c.horarios if h.activo],
+    items = []
+    for c in capillas:
+        grupos_resp = []
+        for g in c.grupos:
+            if not g.activo:
+                continue
+            cat_list = []
+            for ins in g.inscripciones:
+                if ins.estado.value == 'ACTIVO' and ins.persona:
+                    p = ins.persona
+                    cat_list.append(GrupoCatecumenoSimple(
+                        inscripcion_id=ins.id,
+                        persona_id=p.id,
+                        nombre_completo=f"{p.nombres} {p.primer_apellido} {p.segundo_apellido or ''}".strip(),
+                        fecha_nacimiento=p.fecha_nacimiento,
+                        edad=_calcular_edad_date(p.fecha_nacimiento),
+                        genero=p.genero.value if p.genero else None,
+                    ))
+            cat_list.sort(key=lambda x: x.fecha_nacimiento or date.min)
+            grupos_resp.append(GrupoResponse(
+                id=g.id,
+                capilla_id=g.capilla_id,
+                nombre=g.nombre,
+                nombre_santo=g.nombre_santo,
+                codigo=g.codigo,
+                gestion=g.gestion,
+                etapa=g.etapa,
+                tipo_sacramento=g.tipo_sacramento,
+                edad_minima=g.edad_minima,
+                edad_maxima=g.edad_maxima,
+                descripcion=g.descripcion,
+                activo=g.activo,
+                total_catecumenos=len(cat_list),
+                catecumenos=cat_list,
+                created_at=g.created_at,
+            ))
+
+        items.append(
+            CapillaListItem(
+                id=c.id,
+                nombre=c.nombre,
+                codigo=c.codigo,
+                direccion=c.direccion,
+                es_sede_principal=c.es_sede_principal,
+                activo=c.activo,
+                descripcion=c.descripcion,
+                total_horarios=len([h for h in c.horarios if h.activo]),
+                total_grupos=len(grupos_resp),
+                horarios=[HorarioAsistenciaResponse.model_validate(h) for h in c.horarios if h.activo],
+                grupos=grupos_resp,
+            )
         )
-        for c in capillas
-    ]
     return CapillaListResponse(total=len(items), items=items)
 
 
@@ -182,18 +223,32 @@ async def delete_capilla(db: AsyncSession, capilla_id: int) -> dict:
 def _validar_franjas_horario(
     h_ini_p: time, h_fin_p: time,
     h_ini_m: time, h_fin_m: time,
-    h_ini_c: time, h_fin_c: time
+    h_ini_c: time, h_fin_c: time,
+    encuentro_antes_de_misa: bool = False
 ):
     if not (h_ini_p < h_fin_p):
         raise HTTPException(status_code=422, detail="La hora de inicio puntual debe ser anterior al fin puntual.")
-    if not (h_fin_p <= h_ini_m):
-        raise HTTPException(status_code=422, detail="El fin del periodo puntual no puede ser posterior al inicio de la misa.")
-    if not (h_ini_m < h_fin_m):
-        raise HTTPException(status_code=422, detail="El inicio de la misa debe ser anterior al fin de la misa.")
-    if not (h_fin_m <= h_ini_c):
-        raise HTTPException(status_code=422, detail="El fin de la misa no puede ser posterior al inicio de la catequesis.")
-    if not (h_ini_c < h_fin_c):
-        raise HTTPException(status_code=422, detail="El inicio de la catequesis debe ser anterior al fin de la catequesis.")
+
+    if encuentro_antes_de_misa:
+        # Secuencia: Puntual -> Catequesis/Encuentro -> Misa
+        if not (h_fin_p <= h_ini_c):
+            raise HTTPException(status_code=422, detail="El fin del periodo puntual no puede ser posterior al inicio del encuentro.")
+        if not (h_ini_c < h_fin_c):
+            raise HTTPException(status_code=422, detail="El inicio del encuentro debe ser anterior al fin del encuentro.")
+        if not (h_fin_c <= h_ini_m):
+            raise HTTPException(status_code=422, detail="El fin del encuentro no puede ser posterior al inicio de la misa.")
+        if not (h_ini_m < h_fin_m):
+            raise HTTPException(status_code=422, detail="El inicio de la misa debe ser anterior al fin de la misa.")
+    else:
+        # Secuencia: Puntual -> Misa -> Catequesis/Encuentro
+        if not (h_fin_p <= h_ini_m):
+            raise HTTPException(status_code=422, detail="El fin del periodo puntual no puede ser posterior al inicio de la misa.")
+        if not (h_ini_m < h_fin_m):
+            raise HTTPException(status_code=422, detail="El inicio de la misa debe ser anterior al fin de la misa.")
+        if not (h_fin_m <= h_ini_c):
+            raise HTTPException(status_code=422, detail="El fin de la misa no puede ser posterior al inicio de la catequesis.")
+        if not (h_ini_c < h_fin_c):
+            raise HTTPException(status_code=422, detail="El inicio de la catequesis debe ser anterior al fin de la catequesis.")
 
 
 async def create_horario(db: AsyncSession, capilla_id: int, data: HorarioAsistenciaCreate) -> HorarioAsistenciaResponse:
@@ -206,12 +261,15 @@ async def create_horario(db: AsyncSession, capilla_id: int, data: HorarioAsisten
     _validar_franjas_horario(
         data.hora_inicio_puntual, data.hora_fin_puntual,
         data.hora_inicio_misa, data.hora_fin_misa,
-        data.hora_inicio_catequesis, data.hora_fin_catequesis
+        data.hora_inicio_catequesis, data.hora_fin_catequesis,
+        encuentro_antes_de_misa=data.encuentro_antes_de_misa
     )
 
     horario = HorarioAsistencia(
         capilla_id=capilla_id,
         dia_semana=data.dia_semana,
+        tipo_sacramento=data.tipo_sacramento,
+        encuentro_antes_de_misa=data.encuentro_antes_de_misa,
         hora_inicio_puntual=data.hora_inicio_puntual,
         hora_fin_puntual=data.hora_fin_puntual,
         hora_inicio_misa=data.hora_inicio_misa,
@@ -245,6 +303,12 @@ async def update_horario(
     if not horario:
         raise HTTPException(status_code=404, detail="Horario de asistencia no encontrado para esta capilla.")
 
+    encuentro_antes = (
+        data.encuentro_antes_de_misa
+        if data.encuentro_antes_de_misa is not None
+        else horario.encuentro_antes_de_misa
+    )
+
     h_ini_p = data.hora_inicio_puntual or horario.hora_inicio_puntual
     h_fin_p = data.hora_fin_puntual or horario.hora_fin_puntual
     h_ini_m = data.hora_inicio_misa or horario.hora_inicio_misa
@@ -252,10 +316,15 @@ async def update_horario(
     h_ini_c = data.hora_inicio_catequesis or horario.hora_inicio_catequesis
     h_fin_c = data.hora_fin_catequesis or horario.hora_fin_catequesis
 
-    _validar_franjas_horario(h_ini_p, h_fin_p, h_ini_m, h_fin_m, h_ini_c, h_fin_c)
+    _validar_franjas_horario(h_ini_p, h_fin_p, h_ini_m, h_fin_m, h_ini_c, h_fin_c, encuentro_antes_de_misa=encuentro_antes)
 
     if data.dia_semana is not None:
         horario.dia_semana = data.dia_semana
+    if data.tipo_sacramento is not None:
+        horario.tipo_sacramento = data.tipo_sacramento
+    if data.encuentro_antes_de_misa is not None:
+        horario.encuentro_antes_de_misa = data.encuentro_antes_de_misa
+
     horario.hora_inicio_puntual = h_ini_p
     horario.hora_fin_puntual = h_fin_p
     horario.hora_inicio_misa = h_ini_m
@@ -298,10 +367,14 @@ async def evaluar_horario_marcado(
     db: AsyncSession,
     capilla_id: Optional[int],
     hora_marcada: time,
-    dia_fecha: date
+    dia_fecha: date,
+    tipo_sacramento: Optional[TipoSacramento] = None
 ) -> Tuple[EstadoAsistencia, str, str]:
     """
-    Evalúa la hora y fecha de marcación contra el horario configurado de la capilla.
+    Evalúa la hora y fecha de marcación contra el horario configurado de la capilla y sacramento.
+    Soporta los dos flujos:
+      1. Misa antes del encuentro: Puntual -> Misa (Presente) -> Encuentro (Atraso).
+      2. Encuentro antes de misa: Puntual -> Encuentro (Presente) -> Misa (Atraso).
     Retorna: (EstadoAsistencia, observacion_momento, mensaje_explicativo)
     """
     query = select(Capilla).options(selectinload(Capilla.horarios))
@@ -319,49 +392,89 @@ async def evaluar_horario_marcado(
 
     if not capilla or not capilla.horarios:
         if time(9, 20) <= hora_marcada <= time(10, 10):
-            return EstadoAsistencia.PRESENTE, "Puntual (Antes de la Misa)", "Marcación Puntual antes del inicio de la celebración."
+            return EstadoAsistencia.PRESENTE, "Puntual", "Marcación puntual antes del inicio de la celebración."
         elif time(10, 11) <= hora_marcada <= time(12, 0):
-            return EstadoAsistencia.PRESENTE, "Durante la Misa", "Marcación durante la celebración litúrgica."
+            return EstadoAsistencia.PRESENTE, "En Misa", "Marcación durante la celebración litúrgica."
         elif time(12, 1) <= hora_marcada <= time(13, 0):
-            return EstadoAsistencia.ATRASO, "Durante la Catequesis (Atraso)", "Marcación tardía durante el encuentro de catequesis."
+            return EstadoAsistencia.ATRASO, "En Catequesis (Atraso)", "Marcación tardía durante el encuentro de catequesis."
         else:
             return EstadoAsistencia.FALTA, "Fuera de Horario (Falta)", "Marcación registrada fuera del rango horario establecido."
 
     dia_semana_actual = DIAS_MAP[dia_fecha.weekday()]
-    horario_dia = next((h for h in capilla.horarios if h.activo and h.dia_semana == dia_semana_actual), None)
+
+    # 1. Buscar horario activo que coincida con sacramento y día
+    horario_dia = None
+    if tipo_sacramento:
+        horario_dia = next(
+            (h for h in capilla.horarios if h.activo and h.dia_semana == dia_semana_actual and h.tipo_sacramento == tipo_sacramento),
+            None
+        )
+    # 2. Si no encontró por sacramento, buscar por día
+    if not horario_dia:
+        horario_dia = next((h for h in capilla.horarios if h.activo and h.dia_semana == dia_semana_actual), None)
+    # 3. Fallback al primer horario activo
     if not horario_dia:
         horario_dia = next((h for h in capilla.horarios if h.activo), capilla.horarios[0])
 
-    if horario_dia.hora_inicio_puntual <= hora_marcada <= horario_dia.hora_fin_puntual:
-        return (
-            EstadoAsistencia.PRESENTE,
-            "Puntual (Antes de la Misa)",
-            f"Marcación puntual en {capilla.nombre} ({horario_dia.hora_inicio_puntual.strftime('%H:%M')} - {horario_dia.hora_fin_puntual.strftime('%H:%M')})."
-        )
-    elif horario_dia.hora_inicio_misa <= hora_marcada <= horario_dia.hora_fin_misa:
-        return (
-            EstadoAsistencia.PRESENTE,
-            "Durante la Misa",
-            f"Marcación durante la misa en {capilla.nombre} ({horario_dia.hora_inicio_misa.strftime('%H:%M')} - {horario_dia.hora_fin_misa.strftime('%H:%M')})."
-        )
-    elif horario_dia.hora_inicio_catequesis <= hora_marcada <= horario_dia.hora_fin_catequesis:
-        return (
-            EstadoAsistencia.ATRASO,
-            "Durante la Catequesis (Atraso)",
-            f"Atraso registrado durante catequesis en {capilla.nombre} ({horario_dia.hora_inicio_catequesis.strftime('%H:%M')} - {horario_dia.hora_fin_catequesis.strftime('%H:%M')})."
-        )
+    if horario_dia.encuentro_antes_de_misa:
+        # Flujo: Encuentro antes de misa (Ej: Confirmación JO, María Magdalena)
+        if horario_dia.hora_inicio_puntual <= hora_marcada <= horario_dia.hora_fin_puntual:
+            return (
+                EstadoAsistencia.PRESENTE,
+                "Puntual (Antes del Encuentro)",
+                f"Marcación puntual antes del encuentro en {capilla.nombre} ({horario_dia.hora_inicio_puntual.strftime('%H:%M')} - {horario_dia.hora_fin_puntual.strftime('%H:%M')})."
+            )
+        elif horario_dia.hora_inicio_catequesis <= hora_marcada <= horario_dia.hora_fin_catequesis:
+            return (
+                EstadoAsistencia.PRESENTE,
+                "Durante el Encuentro",
+                f"Marcación durante el encuentro en {capilla.nombre} ({horario_dia.hora_inicio_catequesis.strftime('%H:%M')} - {horario_dia.hora_fin_catequesis.strftime('%H:%M')})."
+            )
+        elif horario_dia.hora_inicio_misa <= hora_marcada <= horario_dia.hora_fin_misa:
+            return (
+                EstadoAsistencia.ATRASO,
+                "Durante la Misa (Atraso)",
+                f"Atraso registrado durante la misa en {capilla.nombre} ({horario_dia.hora_inicio_misa.strftime('%H:%M')} - {horario_dia.hora_fin_misa.strftime('%H:%M')})."
+            )
+        else:
+            return (
+                EstadoAsistencia.FALTA,
+                "Fuera de Horario (Falta)",
+                f"Marcación fuera del horario autorizado en {capilla.nombre}."
+            )
     else:
-        return (
-            EstadoAsistencia.FALTA,
-            "Fuera de Horario (Falta)",
-            f"Marcación fuera del horario autorizado en {capilla.nombre}."
-        )
+        # Flujo: Misa antes del encuentro (Ej: Sta Teresa, Sta Cruz, San Pablo, San Martín, Comunión JO)
+        if horario_dia.hora_inicio_puntual <= hora_marcada <= horario_dia.hora_fin_puntual:
+            return (
+                EstadoAsistencia.PRESENTE,
+                "Puntual (Antes de la Misa)",
+                f"Marcación puntual en {capilla.nombre} ({horario_dia.hora_inicio_puntual.strftime('%H:%M')} - {horario_dia.hora_fin_puntual.strftime('%H:%M')})."
+            )
+        elif horario_dia.hora_inicio_misa <= hora_marcada <= horario_dia.hora_fin_misa:
+            return (
+                EstadoAsistencia.PRESENTE,
+                "Durante la Misa",
+                f"Marcación durante la misa en {capilla.nombre} ({horario_dia.hora_inicio_misa.strftime('%H:%M')} - {horario_dia.hora_fin_misa.strftime('%H:%M')})."
+            )
+        elif horario_dia.hora_inicio_catequesis <= hora_marcada <= horario_dia.hora_fin_catequesis:
+            return (
+                EstadoAsistencia.ATRASO,
+                "Durante el Encuentro (Atraso)",
+                f"Atraso registrado durante el encuentro en {capilla.nombre} ({horario_dia.hora_inicio_catequesis.strftime('%H:%M')} - {horario_dia.hora_fin_catequesis.strftime('%H:%M')})."
+            )
+        else:
+            return (
+                EstadoAsistencia.FALTA,
+                "Fuera de Horario (Falta)",
+                f"Marcación fuera del horario autorizado en {capilla.nombre}."
+            )
 
 
 async def get_fase_actual_capilla(
     db: AsyncSession,
     capilla_id: int,
-    hora_custom: Optional[str] = None
+    hora_custom: Optional[str] = None,
+    tipo_sacramento: Optional[TipoSacramento] = None
 ) -> FaseHorarioActual:
     result = await db.execute(
         select(Capilla)
@@ -381,7 +494,11 @@ async def get_fase_actual_capilla(
     else:
         hora_eval = ahora.time()
 
-    horario = next((h for h in capilla.horarios if h.activo and h.dia_semana == dia_actual), None)
+    horario = None
+    if tipo_sacramento:
+        horario = next((h for h in capilla.horarios if h.activo and h.dia_semana == dia_actual and h.tipo_sacramento == tipo_sacramento), None)
+    if not horario:
+        horario = next((h for h in capilla.horarios if h.activo and h.dia_semana == dia_actual), None)
     if not horario and capilla.horarios:
         horario = capilla.horarios[0]
 
@@ -395,15 +512,15 @@ async def get_fase_actual_capilla(
             horario=None
         )
 
-    estado, momento, msg = await evaluar_horario_marcado(db, capilla_id, hora_eval, ahora.date())
+    estado, momento, msg = await evaluar_horario_marcado(db, capilla_id, hora_eval, ahora.date(), tipo_sacramento=tipo_sacramento)
 
     fase = "CERRADO"
     if "Puntual" in momento:
         fase = "PUNTUAL"
     elif "Misa" in momento:
         fase = "MISA"
-    elif "Catequesis" in momento:
-        fase = "CATEQUESIS"
+    elif "Encuentro" in momento or "Catequesis" in momento:
+        fase = "ENCUENTRO"
 
     return FaseHorarioActual(
         fase=fase,

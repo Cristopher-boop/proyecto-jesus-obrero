@@ -106,7 +106,7 @@ async def registrar_asistencia_qr(
     target_capilla_id = capilla_id or inscripcion.capilla_id
     if not estado or not observacion:
         estado_auto, obs_auto, msg_auto = await evaluar_horario_marcado(
-            db, target_capilla_id, ahora_hora, hoy
+            db, target_capilla_id, ahora_hora, hoy, tipo_sacramento=inscripcion.tipo_sacramento
         )
         estado_final = estado or estado_auto
         obs_final = observacion or obs_auto
@@ -196,7 +196,7 @@ async def get_asistencias_heatmap(
     capilla_id: int = 1
 ) -> AsistenciaHeatmapResponse:
     """
-    Construye la matriz anual estilo GitHub commits para todas las semanas/domingos
+    Construye la matriz visual anual para todas las semanas/domingos
     del año formativo pastoral, computando asistencias, atrasos y asignando
     automáticamente FALTA para catecúmenos que no hayan registrado asistencia en domingos pasados.
     """
@@ -205,7 +205,7 @@ async def get_asistencias_heatmap(
     # 1. Obtener Capilla
     capilla_res = await db.execute(select(Capilla).where(Capilla.id == capilla_id))
     capilla = capilla_res.scalar_one_or_none()
-    capilla_nombre = capilla.nombre if capilla else "Jesús Obrero (Sede Central)"
+    capilla_nombre = capilla.nombre if capilla else "Parroquia Jesús Obrero"
 
     # 2. Obtener inscripciones activas para la capilla y gestión
     insc_query = select(Inscripcion).where(
@@ -392,7 +392,7 @@ async def get_asistencias_detalle_fecha(
     # 1. Capilla
     capilla_res = await db.execute(select(Capilla).where(Capilla.id == capilla_id))
     capilla = capilla_res.scalar_one_or_none()
-    capilla_nombre = capilla.nombre if capilla else "Jesús Obrero (Sede Central)"
+    capilla_nombre = capilla.nombre if capilla else "Parroquia Jesús Obrero"
 
     # 2. Inscripciones activas de la capilla
     insc_query = (

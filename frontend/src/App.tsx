@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { AuthProvider, useAuth } from './core/context/AuthContext';
 import { LiturgicalThemeProvider } from './core/context/ThemeContext';
+import LandingPage from './features/landing/pages/LandingPage';
 import LoginPage from './features/auth/pages/LoginPage';
 import AdminLayout from './layouts/AdminLayout';
 import DashboardPage     from './features/dashboard/pages/DashboardPage';
@@ -14,6 +15,7 @@ import CapillasPage       from './features/capillas/pages/CapillasPage';
 function MainContent() {
   const { isAuthenticated, isLoading, user } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [publicView, setPublicView] = useState<'landing' | 'login'>('landing');
 
   if (isLoading) {
     return (
@@ -27,12 +29,20 @@ function MainContent() {
   }
 
   if (!isAuthenticated) {
-    return <LoginPage />;
+    if (publicView === 'login') {
+      return <LoginPage onBackToLanding={() => setPublicView('landing')} />;
+    }
+    return <LandingPage onGoToLogin={() => setPublicView('login')} />;
   }
 
   // Si el usuario tiene rol TUTOR (feligrés), mostrar su portal exclusivo de padre de familia
   if (user?.rol === 'TUTOR') {
     return <FeligresPortalPage />;
+  }
+
+  // Si el usuario autenticado quiere ver la página pública
+  if (activeTab === 'landing') {
+    return <LandingPage onGoToLogin={() => setActiveTab('dashboard')} />;
   }
 
   return (

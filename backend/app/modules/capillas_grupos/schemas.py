@@ -12,30 +12,45 @@ from app.modules.personas.models import EtapaFormacion, TipoSacramento
 # ─── Horarios de Asistencia ───────────────────────────────────────────────────
 
 class HorarioAsistenciaBase(BaseModel):
-    dia_semana:             DiaSemana
-    hora_inicio_puntual:    time
-    hora_fin_puntual:       time
-    hora_inicio_misa:       time
-    hora_fin_misa:          time
-    hora_inicio_catequesis: time
-    hora_fin_catequesis:    time
-    descripcion_misa:       Optional[str] = "Misa Comunitaria"
-    descripcion_catequesis: Optional[str] = "Encuentro de Catequesis"
-    activo:                 bool = True
+    dia_semana:              DiaSemana
+    tipo_sacramento:         TipoSacramento = TipoSacramento.PRIMERA_COMUNION
+    encuentro_antes_de_misa: bool = False
+    hora_inicio_puntual:     time
+    hora_fin_puntual:        time
+    hora_inicio_misa:        time
+    hora_fin_misa:           time
+    hora_inicio_catequesis:  time
+    hora_fin_catequesis:     time
+    descripcion_misa:        Optional[str] = "Misa Comunitaria"
+    descripcion_catequesis:  Optional[str] = "Encuentro de Catequesis"
+    activo:                  bool = True
 
     @model_validator(mode='after')
     def validar_secuencia_horaria(self):
-        """Valida que los rangos sigan una secuencia cronológica coherente."""
+        """Valida que los rangos sigan una secuencia cronológica coherente según el orden."""
         if not (self.hora_inicio_puntual < self.hora_fin_puntual):
             raise ValueError("La hora de inicio puntual debe ser anterior al fin puntual.")
-        if not (self.hora_fin_puntual <= self.hora_inicio_misa):
-            raise ValueError("El fin del periodo puntual no puede ser posterior al inicio de la misa.")
-        if not (self.hora_inicio_misa < self.hora_fin_misa):
-            raise ValueError("El inicio de la misa debe ser anterior al fin de la misa.")
-        if not (self.hora_fin_misa <= self.hora_inicio_catequesis):
-            raise ValueError("El fin de la misa no puede ser posterior al inicio de la catequesis.")
-        if not (self.hora_inicio_catequesis < self.hora_fin_catequesis):
-            raise ValueError("El inicio de la catequesis debe ser anterior al fin de la catequesis.")
+
+        if self.encuentro_antes_de_misa:
+            # Secuencia: Puntual -> Catequesis/Encuentro -> Misa
+            if not (self.hora_fin_puntual <= self.hora_inicio_catequesis):
+                raise ValueError("El fin del periodo puntual no puede ser posterior al inicio del encuentro.")
+            if not (self.hora_inicio_catequesis < self.hora_fin_catequesis):
+                raise ValueError("El inicio del encuentro debe ser anterior al fin del encuentro.")
+            if not (self.hora_fin_catequesis <= self.hora_inicio_misa):
+                raise ValueError("El fin del encuentro no puede ser posterior al inicio de la misa.")
+            if not (self.hora_inicio_misa < self.hora_fin_misa):
+                raise ValueError("El inicio de la misa debe ser anterior al fin de la misa.")
+        else:
+            # Secuencia: Puntual -> Misa -> Catequesis/Encuentro
+            if not (self.hora_fin_puntual <= self.hora_inicio_misa):
+                raise ValueError("El fin del periodo puntual no puede ser posterior al inicio de la misa.")
+            if not (self.hora_inicio_misa < self.hora_fin_misa):
+                raise ValueError("El inicio de la misa debe ser anterior al fin de la misa.")
+            if not (self.hora_fin_misa <= self.hora_inicio_catequesis):
+                raise ValueError("El fin de la misa no puede ser posterior al inicio de la catequesis.")
+            if not (self.hora_inicio_catequesis < self.hora_fin_catequesis):
+                raise ValueError("El inicio de la catequesis debe ser anterior al fin de la catequesis.")
         return self
 
 
@@ -44,16 +59,18 @@ class HorarioAsistenciaCreate(HorarioAsistenciaBase):
 
 
 class HorarioAsistenciaUpdate(BaseModel):
-    dia_semana:             Optional[DiaSemana] = None
-    hora_inicio_puntual:    Optional[time] = None
-    hora_fin_puntual:       Optional[time] = None
-    hora_inicio_misa:       Optional[time] = None
-    hora_fin_misa:          Optional[time] = None
-    hora_inicio_catequesis: Optional[time] = None
-    hora_fin_catequesis:    Optional[time] = None
-    descripcion_misa:       Optional[str] = None
-    descripcion_catequesis: Optional[str] = None
-    activo:                 Optional[bool] = None
+    dia_semana:              Optional[DiaSemana] = None
+    tipo_sacramento:         Optional[TipoSacramento] = None
+    encuentro_antes_de_misa: Optional[bool] = None
+    hora_inicio_puntual:     Optional[time] = None
+    hora_fin_puntual:        Optional[time] = None
+    hora_inicio_misa:        Optional[time] = None
+    hora_fin_misa:           Optional[time] = None
+    hora_inicio_catequesis:  Optional[time] = None
+    hora_fin_catequesis:     Optional[time] = None
+    descripcion_misa:        Optional[str] = None
+    descripcion_catequesis:  Optional[str] = None
+    activo:                  Optional[bool] = None
 
 
 class HorarioAsistenciaResponse(HorarioAsistenciaBase):
@@ -184,6 +201,7 @@ class CapillaListItem(BaseModel):
     total_horarios:    int = 0
     total_grupos:      int = 0
     horarios:          List[HorarioAsistenciaResponse] = []
+    grupos:            List[GrupoResponse] = []
 
     class Config:
         from_attributes = True
